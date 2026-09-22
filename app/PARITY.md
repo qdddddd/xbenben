@@ -31,7 +31,7 @@ All nine screens and all three import stages were captured in a real browser. Sc
 | 3. Bad XML | Passed: invalid XML, no cash sessions and unreadable dates retain step one and the specified messages. |
 | 4. Live session | Passed: start, re-buy, simulated elapsed time, reload, close/reopen, currency change, cash/tips entry and booking; original timestamp and buy-ins survive. |
 | 5. Visual parity | Passed with the documented deliberate differences. Reference screenshots, app screenshots and diff images were inspected locally. |
-| 6. Clean build | Production build and the documented automated test command pass locally. Clean-checkout verification is recorded after the final source commit. |
+| 6. Clean build | Passed from a fresh local clone of source commit `06a2681`: `npm ci`, all 9 unit and 18 Chrome tests, `test:pages`, production build and privacy audit. No ignored fixtures or existing dependencies were needed. |
 | 7. Backup round trip | Passed in Chrome: two currencies, a live session with re-buy, theme, venues/stakes, preview without mutation, cancelled restore and exact confirmed replacement. Corrupt, unrelated and unsupported-version files are rejected. |
 | 8. Publishing | Pages workflow prepared; subdirectory/offline checks and history/site privacy checks passed. GitHub authentication is verified; live deployment awaits the user-confirmed repository name and visibility. |
 | 9. Physical iPhone | Not run on this machine. Installation, native share sheet, iCloud Drive/AirDrop and airplane-mode checks are specified in README. |
