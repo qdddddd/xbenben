@@ -1,0 +1,1153 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics><link rel="stylesheet" href="_ds/industry-3309bdcc-3d1d-444d-b606-aea82f920485/styles.css"><script src="_ds/industry-3309bdcc-3d1d-444d-b606-aea82f920485/_ds_bundle.js"></script><style>@keyframes lg-blink{50%{opacity:.25}}@keyframes lg-up{from{transform:translateY(100%)}to{transform:translateY(0)}}@keyframes lg-fade{from{opacity:0}to{opacity:1}}body{margin:0;background:var(--color-bg)}a{color:var(--color-accent-700)}a:hover{color:var(--color-accent)}</style></helmet>
+<div style="min-height:100vh;display:flex;flex-wrap:wrap;gap:44px;justify-content:center;align-items:flex-start;padding:40px 32px 64px;font-family:var(--font-body)">
+
+<aside style="width:320px;max-width:100%;display:flex;flex-direction:column;gap:22px">
+<div>
+<div style="font-family:var(--font-heading);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--color-accent-700)">Industry / mobile · sheet 01</div>
+<h1 style="font-size:46px;margin:6px 0 0;letter-spacing:.01em">LEDGER</h1>
+<div style="font-size:13px;color:var(--color-neutral-700);margin-top:2px">Poker profit tracking for professionals.</div>
+</div>
+
+<div class="blueprint" style="padding:16px 16px 14px"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+<div style="font-family:var(--font-heading);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--color-accent-700);margin-bottom:8px">Brief</div>
+<div style="font-size:13px;line-height:1.5">Standalone app, built on the session model from <b>Stacked</b> (sessions, buy-ins, tips, cash-out, bankroll curve) and drawn in the Industry system: square hairline objects, registration marks, Barlow Condensed figures.</div>
+</div>
+
+<div class="blueprint" style="padding:16px"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+<div style="font-family:var(--font-heading);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--color-accent-700);margin-bottom:10px">Assumptions</div>
+<ol style="margin:0;padding-left:18px;font-size:13px;line-height:1.55;display:flex;flex-direction:column;gap:7px">
+<li><b>Ten seconds at the table.</b> New session opens on the numpad with the last setup pre-loaded; a preset chip starts a session in one tap.</li>
+<li><b>Money is the hero.</b> Figures are set in condensed type at plate scale, tabular, always signed.</li>
+<li><b>Mono by default.</b> The system allows one accent, so wins read steel and losses read ink, separated by sign and arrow. The <i>Signal</i> tweak switches to red/green if you want it.</li>
+<li>Cash games only. Each session keeps the currency it was booked in, and the ledger sums one currency at a time — imports from another app in another currency can either switch the ledger or convert on the way in. Tournaments are out of scope here.</li>
+</ol>
+</div>
+
+<div class="blueprint" style="padding:16px"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+<div style="font-family:var(--font-heading);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--color-accent-700);margin-bottom:10px">Screens</div>
+<div style="display:flex;flex-direction:column;gap:1px">
+<sc-for list="{{ index }}" as="s" hint-placeholder-count="8">
+<button onClick="{{ s.onClick }}" style="display:flex;gap:10px;align-items:baseline;text-align:left;background:transparent;border:0;border-bottom:1px solid var(--color-divider);padding:8px 2px;cursor:pointer;font-family:var(--font-body);font-size:13px;color:var(--color-text)" style-hover="background:color-mix(in srgb, var(--color-accent) 10%, transparent)">
+<span style="font-family:var(--font-heading);font-size:11px;letter-spacing:.1em;color:var(--color-accent-700);width:22px;flex:none">{{ s.n }}</span>
+<span style="flex:1">{{ s.label }}</span>
+<span style="font-size:11px;color:var(--color-neutral-600)">{{ s.note }}</span>
+</button>
+</sc-for>
+</div>
+</div>
+
+<div style="font-size:12px;line-height:1.5;color:var(--color-neutral-700)">Everything in the frame is live: tabs, filters, pickers, the running timer, re-buys and cash-out all work, and the bankroll recomputes from the log.</div>
+</aside>
+
+<x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" hint-size="402px,874px">
+<div style="height:100%;display:flex;flex-direction:column;overflow:hidden;background:var(--color-bg);font-family:var(--font-body);color:var(--color-text)">
+
+<sc-if value="{{ isHome }}" hint-placeholder-val="{{ true }}">
+<div style="flex:1;overflow-y:auto;padding:58px 20px 12px">
+<div style="display:flex;align-items:flex-start;justify-content:space-between">
+<div>
+<div style="font-family:var(--font-heading);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--color-accent-700)">{{ dateLine }}</div>
+<div style="font-family:var(--font-heading);font-size:26px;letter-spacing:.02em;margin-top:1px">LEDGER</div>
+</div>
+<div style="text-align:right;font-size:11px;color:var(--color-neutral-600);font-family:var(--font-heading);letter-spacing:.1em;text-transform:uppercase;padding-top:4px">{{ sessionCount }} sessions<br>{{ hoursText }} h logged</div>
+</div>
+
+<div class="blueprint" style="margin-top:20px;padding:16px 16px 0"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+<div style="display:flex;align-items:baseline;justify-content:space-between">
+<div style="font-family:var(--font-heading);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--color-accent-700)">Bankroll · {{ currency }}</div>
+<div style="font-size:11px;font-family:var(--font-heading);letter-spacing:.1em;text-transform:uppercase;color:{{ monthColor }}">{{ monthText }} this month</div>
+</div>
+<div style="font-family:var(--font-heading);font-size:58px;line-height:1;letter-spacing:-.01em;font-variant-numeric:tabular-nums;margin-top:6px">{{ bankrollText }}</div>
+<div style="margin:12px -16px 0;border-top:1px solid var(--color-divider)">
+<svg viewBox="0 0 370 72" width="100%" height="72" style="display:block" preserveAspectRatio="none">
+<polygon points="{{ sparkArea }}" fill="var(--color-accent)" opacity="0.14"></polygon>
+<polyline points="{{ sparkLine }}" fill="none" stroke="var(--color-accent)" stroke-width="1.5"></polyline>
+<line x1="0" x2="370" y1="{{ sparkZero }}" y2="{{ sparkZero }}" stroke="var(--color-text)" stroke-opacity=".25" stroke-width="1" stroke-dasharray="3 4"></line>
+</svg>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;border-top:1px solid var(--color-divider)">
+<div style="padding:10px 0 12px">
+<div style="font-family:var(--font-heading);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--color-neutral-600)">Per hour</div>
+<div style="font-family:var(--font-heading);font-size:22px;font-variant-numeric:tabular-nums;color:{{ hourlyColor }}">{{ hourlyText }}</div>
+</div>
+<div style="padding:10px 0 12px 14px;border-left:1px solid var(--color-divider)">
+<div style="font-family:var(--font-heading);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--color-neutral-600)">Win rate</div>
+<div style="font-family:var(--font-heading);font-size:22px;font-variant-numeric:tabular-nums">{{ winRateText }}</div>
+</div>
+<div style="padding:10px 0 12px 14px;border-left:1px solid var(--color-divider)">
+<div style="font-family:var(--font-heading);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--color-neutral-600)">Avg / sess</div>
+<div style="font-family:var(--font-heading);font-size:22px;font-variant-numeric:tabular-nums;color:{{ avgColor }}">{{ avgText }}</div>
+</div>
+</div>
+</div>
+
+<sc-if value="{{ hasActive }}" hint-placeholder-val="{{ false }}">
+<button onClick="{{ goActive }}" class="blueprint" style="width:100%;margin-top:26px;padding:13px 14px;background:var(--color-accent);color:var(--color-bg);border-color:var(--color-accent);display:flex;align-items:center;gap:10px;cursor:pointer;font-family:var(--font-heading);font-size:15px;letter-spacing:.12em;text-transform:uppercase"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+<span style="width:8px;height:8px;background:var(--color-bg);animation:lg-blink 1.2s infinite"></span>
+<span style="flex:1;text-align:left">Session running · {{ timerText }}</span>
+<span style="font-size:13px">RESUME →</span>
+</button>
+</sc-if>
+<sc-if value="{{ noActive }}" hint-placeholder-val="{{ true }}">
+<button onClick="{{ goNew }}" class="blueprint" style="width:100%;margin-top:26px;padding:15px 14px;background:var(--color-accent);color:var(--color-bg);border-color:var(--color-accent);display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;font-family:var(--font-heading);font-size:16px;letter-spacing:.14em;text-transform:uppercase" style-hover="background:var(--color-accent-600)"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 5v14M5 12h14"></path></svg>
+Start session
+</button>
+</sc-if>
+
+<div style="display:flex;align-items:baseline;justify-content:space-between;margin-top:28px">
+<div style="font-family:var(--font-heading);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--color-accent-700)">Recent</div>
+<button onClick="{{ goLog }}" style="background:transparent;border:0;cursor:pointer;font-family:var(--font-heading);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-neutral-700);padding:0">All {{ sessionCount }} →</button>
+</div>
+<sc-if value="{{ noSessions }}" hint-placeholder-val="{{ false }}">
+<div class="blueprint" style="margin-top:12px;padding:22px 16px;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v14H4zM4 10h16M9 5V3M15 5V3"></path></svg>
+<div style="font-family:var(--font-heading);font-size:16px;letter-spacing:.08em;text-transform:uppercase">Nothing logged in {{ currency }}</div>
+<div style="font-size:12px;line-height:1.45;color:var(--color-neutral-700);max-width:238px">{{ emptyLine }}</div>
+<button onClick="{{ openImport }}" class="btn btn-secondary" style="margin-top:4px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;padding:9px 14px">Import from analytics7</button>
+</div>
+</sc-if>
+<div style="margin-top:6px;border-top:1px solid var(--color-divider)">
+<sc-for list="{{ recent }}" as="r" hint-placeholder-count="4">
+<button onClick="{{ r.onClick }}" style="width:100%;display:flex;align-items:center;gap:12px;text-align:left;background:transparent;border:0;border-bottom:1px solid var(--color-divider);padding:11px 2px;cursor:pointer;font-family:var(--font-body)" style-hover="background:color-mix(in srgb, var(--color-accent) 8%, transparent)">
+<span style="width:40px;height:40px;flex:none;border:1px solid var(--color-divider);display:grid;place-items:center;font-family:var(--font-heading);font-size:13px;letter-spacing:.02em;color:var(--color-accent-700)">{{ r.stakes }}</span>
+<span style="flex:1;min-width:0">
+<span style="display:block;font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.venue }}</span>
+<span style="display:block;font-size:11px;color:var(--color-neutral-600);font-family:var(--font-heading);letter-spacing:.08em;text-transform:uppercase;margin-top:1px">{{ r.meta }}</span>
+</span>
+<span style="text-align:right">
+<span style="display:block;font-family:var(--font-heading);font-size:19px;font-variant-numeric:tabular-nums;color:{{ r.color }}">{{ r.pnl }}</span>
+<span style="display:block;font-size:10px;font-family:var(--font-heading);letter-spacing:.08em;text-transform:uppercase;color:var(--color-neutral-600)">{{ r.rate }}/h</span>
+</span>
+</button>
+</sc-for>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isLog }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;overflow-y:auto;padding:58px 20px 12px">
+<div style="font-family:var(--font-heading);font-size:26px;letter-spacing:.02em">SESSIONS</div>
+<div style="display:flex;margin-top:14px;border:1px solid var(--color-divider)">
+<sc-for list="{{ filters }}" as="f" hint-placeholder-count="3">
+<button onClick="{{ f.onClick }}" style="flex:1;padding:9px 0;background:{{ f.bg }};color:{{ f.fg }};border:0;border-left:1px solid var(--color-divider);cursor:pointer;font-family:var(--font-heading);font-size:12px;letter-spacing:.14em;text-transform:uppercase">{{ f.label }}</button>
+</sc-for>
+</div>
+<div class="blueprint" style="margin-top:16px;display:grid;grid-template-columns:1fr 1fr 1fr"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+<div style="padding:10px 12px">
+<div style="font-family:var(--font-heading);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--color-neutral-600)">Shown</div>
+<div style="font-family:var(--font-heading);font-size:20px;font-variant-numeric:tabular-nums">{{ logCount }}</div>
+</div>
+<div style="padding:10px 12px;border-left:1px solid var(--color-divider)">
+<div style="font-family:var(--font-heading);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--color-neutral-600)">Net</div>
+<div style="font-family:var(--font-heading);font-size:20px;font-variant-numeric:tabular-nums;color:{{ logNetColor }}">{{ logNet }}</div>
+</div>
+<div style="padding:10px 12px;border-left:1px solid var(--color-divider)">
+<div style="font-family:var(--font-heading);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--color-neutral-600)">Hours</div>
+<div style="font-family:var(--font-heading);font-size:20px;font-variant-numeric:tabular-nums">{{ logHours }}</div>
+</div>
+</div>
+<sc-if value="{{ noLogRows }}" hint-placeholder-val="{{ false }}">
+<div class="blueprint" style="margin-top:16px;padding:22px 16px;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+<div style="font-family:var(--font-heading);font-size:16px;letter-spacing:.08em;text-transform:uppercase">{{ logEmptyTitle }}</div>
+<div style="font-size:12px;line-height:1.45;color:var(--color-neutral-700);max-width:238px">{{ logEmptyLine }}</div>
+</div>
+</sc-if>
+<div style="margin-top:18px;border-top:1px solid var(--color-divider)">
+<sc-for list="{{ logRows }}" as="r" hint-placeholder-count="6">
+<button onClick="{{ r.onClick }}" style="width:100%;display:flex;align-items:center;gap:12px;text-align:left;background:transparent;border:0;border-bottom:1px solid var(--color-divider);padding:11px 2px;cursor:pointer;font-family:var(--font-body)" style-hover="background:color-mix(in srgb, var(--color-accent) 8%, transparent)">
+<span style="width:40px;height:40px;flex:none;border:1px solid var(--color-divider);display:grid;place-items:center;font-family:var(--font-heading);font-size:13px;color:var(--color-accent-700)">{{ r.stakes }}</span>
+<span style="flex:1;min-width:0">
+<span style="display:block;font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.venue }}</span>
+<span style="display:block;font-size:11px;color:var(--color-neutral-600);font-family:var(--font-heading);letter-spacing:.08em;text-transform:uppercase;margin-top:1px">{{ r.meta }}</span>
+</span>
+<span style="text-align:right">
+<span style="display:block;font-family:var(--font-heading);font-size:19px;font-variant-numeric:tabular-nums;color:{{ r.color }}">{{ r.pnl }}</span>
+<span style="display:block;font-size:10px;font-family:var(--font-heading);letter-spacing:.08em;text-transform:uppercase;color:var(--color-neutral-600)">{{ r.rate }}/h</span>
+</span>
+</button>
+</sc-for>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isStats }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;overflow-y:auto;padding:58px 20px 12px">
+<div style="font-family:var(--font-heading);font-size:26px;letter-spacing:.02em">STATS</div>
+<sc-if value="{{ noSessions }}" hint-placeholder-val="{{ false }}">
+<div class="blueprint" style="margin-top:16px;padding:24px 16px;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16M7 17V9M12 17V5M17 17v-6"></path></svg>
+<div style="font-family:var(--font-heading);font-size:16px;letter-spacing:.08em;text-transform:uppercase">No {{ currency }} data yet</div>
+<div style="font-size:12px;line-height:1.45;color:var(--color-neutral-700);max-width:238px">{{ emptyLine }}</div>
+<button onClick="{{ openImport }}" class="btn btn-secondary" style="margin-top:4px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;padding:9px 14px">Import from analytics7</button>
+</div>
+</sc-if>
+<sc-if value="{{ hasSessions }}" hint-placeholder-val="{{ true }}">
+<div class="blueprint" style="margin-top:16px;padding:14px 14px 0"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+<div style="display:flex;align-items:baseline;justify-content:space-between">
+<div style="font-family:var(--font-heading);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--color-accent-700)">Lifetime curve</div>
+<div style="font-size:11px;font-family:var(--font-heading);letter-spacing:.1em;text-transform:uppercase;color:var(--color-neutral-600)">{{ curveSpan }}</div>
+</div>
+<div style="font-family:var(--font-heading);font-size:40px;line-height:1.1;font-variant-numeric:tabular-nums;color:{{ monthColor }}">{{ bankrollText }}</div>
+<div style="margin:6px -14px 0">
+<svg viewBox="0 0 342 150" width="100%" height="150" style="display:block" preserveAspectRatio="none">
+<line x1="0" x2="342" y1="37.5" y2="37.5" stroke="var(--color-text)" stroke-opacity=".08"></line>
+<line x1="0" x2="342" y1="112.5" y2="112.5" stroke="var(--color-text)" stroke-opacity=".08"></line>
+<polygon points="{{ curveArea }}" fill="var(--color-accent)" opacity="0.14"></polygon>
+<polyline points="{{ curveLine }}" fill="none" stroke="var(--color-accent)" stroke-width="1.5"></polyline>
+<line x1="0" x2="342" y1="{{ curveZero }}" y2="{{ curveZero }}" stroke="var(--color-text)" stroke-opacity=".3" stroke-dasharray="3 4"></line>
+</svg>
+</div>
+<div style="display:flex;justify-content:space-between;border-top:1px solid var(--color-divider);padding:7px 0 9px;font-family:var(--font-heading);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--color-neutral-600)">
+<span>{{ curveFirst }}</span><span>{{ curvePeak }} peak</span><span>{{ curveLast }}</span>
+</div>
+</div>
+
+<div style="font-family:var(--font-heading);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--color-accent-700);margin-top:24px">By stake</div>
+<table class="table" style="margin-top:4px">
+<thead><tr><th>Stake</th><th style="text-align:right">Sess</th><th style="text-align:right">Hours</th><th style="text-align:right">Net</th><th style="text-align:right">Per hour</th></tr></thead>
+<tbody>
+<sc-for list="{{ byStake }}" as="b" hint-placeholder-count="4">
+<tr>
+<td style="font-family:var(--font-heading);font-size:15px">{{ b.label }}</td>
+<td style="text-align:right;font-variant-numeric:tabular-nums">{{ b.n }}</td>
+<td style="text-align:right;font-variant-numeric:tabular-nums">{{ b.hours }}</td>
+<td style="text-align:right;font-variant-numeric:tabular-nums;color:{{ b.color }}">{{ b.net }}</td>
+<td style="text-align:right;font-variant-numeric:tabular-nums;color:{{ b.color }}">{{ b.rate }}</td>
+</tr>
+</sc-for>
+</tbody>
+</table>
+
+<div style="font-family:var(--font-heading);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--color-accent-700);margin-top:24px">Superlatives</div>
+<div style="margin-top:6px;border-top:1px solid var(--color-divider)">
+<sc-for list="{{ supers }}" as="s" hint-placeholder-count="4">
+<div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding:10px 2px;border-bottom:1px solid var(--color-divider)">
+<span style="font-family:var(--font-heading);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--color-neutral-700);flex:none">{{ s.label }}</span>
+<span style="flex:1;text-align:right;font-size:13px">{{ s.value }}</span>
+<span style="font-family:var(--font-heading);font-size:16px;font-variant-numeric:tabular-nums;flex:none;color:{{ s.color }}">{{ s.figure }}</span>
+</div>
+</sc-for>
+</div>
+</sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ isSettings }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;overflow-y:auto;padding:58px 20px 12px">
+<div style="font-family:var(--font-heading);font-size:26px;letter-spacing:.02em">SETTINGS</div>
+<div style="font-family:var(--font-heading);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--color-accent-700);margin-top:22px">Defaults</div>
+<div style="margin-top:6px;border-top:1px solid var(--color-divider)">
+<sc-for list="{{ setRows }}" as="s" hint-placeholder-count="5">
+<button onClick="{{ s.onClick }}" style="width:100%;display:flex;align-items:center;gap:10px;text-align:left;background:transparent;border:0;border-bottom:1px solid var(--color-divider);padding:13px 2px;cursor:pointer;font-family:var(--font-body);font-size:14px;color:var(--color-text)" style-hover="background:color-mix(in srgb, var(--color-accent) 8%, transparent)">
+<span style="flex:1">{{ s.label }}</span>
+<span style="font-family:var(--font-heading);font-size:15px;color:var(--color-accent-700)">{{ s.value }}</span>
+<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-neutral-500)" stroke-width="1.5"><path d="M9 6l6 6-6 6"></path></svg>
+</button>
+</sc-for>
+</div>
+<sc-if value="{{ hasParked }}" hint-placeholder-val="{{ false }}">
+<div style="margin-top:10px;border-left:2px solid var(--color-accent);padding:7px 11px;font-size:12px;line-height:1.45;background:var(--color-accent-100)">{{ parkedNote }}</div>
+</sc-if>
+<div style="font-family:var(--font-heading);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--color-accent-700);margin-top:24px">Transfer</div>
+<button onClick="{{ openImport }}" class="blueprint" style="width:100%;margin-top:8px;padding:12px 14px;display:flex;align-items:center;gap:12px;text-align:left;background:transparent;cursor:pointer;font-family:var(--font-body)" style-hover="background:color-mix(in srgb, var(--color-accent) 10%, transparent)"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent-700)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"></path></svg>
+<span style="flex:1">
+<span style="display:block;font-family:var(--font-heading);font-size:15px;letter-spacing:.04em">Import from analytics7</span>
+<span style="display:block;font-size:11px;color:var(--color-neutral-700)">Model .xml export · cash sessions</span>
+</span>
+<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-neutral-500)" stroke-width="1.5"><path d="M9 6l6 6-6 6"></path></svg>
+</button>
+<div style="font-family:var(--font-heading);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--color-accent-700);margin-top:24px">Data</div>
+<div style="margin-top:8px;display:flex;flex-direction:column;gap:8px">
+<button onClick="{{ onExport }}" class="btn btn-secondary btn-block" style="font-size:13px;letter-spacing:.12em;text-transform:uppercase;padding:12px">Export CSV</button>
+<button onClick="{{ onSeed }}" class="btn btn-secondary btn-block" style="font-size:13px;letter-spacing:.12em;text-transform:uppercase;padding:12px">Restore sample log</button>
+<button onClick="{{ onReset }}" class="btn btn-secondary btn-block" style="font-size:13px;letter-spacing:.12em;text-transform:uppercase;padding:12px;color:var(--color-neutral-900)">Erase all sessions</button>
+</div>
+<div style="font-size:11px;color:var(--color-neutral-600);margin-top:14px;font-family:var(--font-heading);letter-spacing:.1em;text-transform:uppercase">Ledger 1.0 · sheet 01 · {{ sessionCount }} records</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isDetail }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;overflow-y:auto;padding:52px 20px 20px">
+<button onClick="{{ goBack }}" style="display:flex;align-items:center;gap:5px;background:transparent;border:0;padding:6px 0;cursor:pointer;color:var(--color-accent-700);font-family:var(--font-heading);font-size:12px;letter-spacing:.14em;text-transform:uppercase">
+<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M15 6l-6 6 6 6"></path></svg>Back</button>
+<div style="font-family:var(--font-heading);font-size:28px;letter-spacing:.01em;margin-top:8px">{{ d.venue }}</div>
+<div style="font-family:var(--font-heading);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--color-neutral-600)">{{ d.when }} · {{ d.game }} {{ d.stakes }} · {{ d.seats }}-max</div>
+
+<div class="blueprint" style="margin-top:18px;padding:14px 16px"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+<div style="font-family:var(--font-heading);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--color-accent-700)">Result</div>
+<div style="font-family:var(--font-heading);font-size:52px;line-height:1;font-variant-numeric:tabular-nums;color:{{ d.color }};margin-top:4px">{{ d.pnl }}</div>
+<div style="font-family:var(--font-heading);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-neutral-700);margin-top:4px">{{ d.rate }} / hour · {{ d.bbRate }} bb/h</div>
+</div>
+
+<div style="font-family:var(--font-heading);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--color-accent-700);margin-top:22px">Breakdown</div>
+<div style="margin-top:6px;border-top:1px solid var(--color-divider)">
+<sc-for list="{{ d.lines }}" as="l" hint-placeholder-count="5">
+<div style="display:flex;justify-content:space-between;align-items:baseline;padding:9px 2px;border-bottom:1px solid var(--color-divider)">
+<span style="font-size:13px;color:var(--color-neutral-800)">{{ l.label }}</span>
+<span style="font-family:var(--font-heading);font-size:17px;font-variant-numeric:tabular-nums;color:{{ l.color }}">{{ l.value }}</span>
+</div>
+</sc-for>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px">
+<sc-for list="{{ d.tiles }}" as="t" hint-placeholder-count="4">
+<div class="blueprint" style="padding:10px 12px"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+<div style="font-family:var(--font-heading);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--color-neutral-600)">{{ t.label }}</div>
+<div style="font-family:var(--font-heading);font-size:21px;font-variant-numeric:tabular-nums">{{ t.value }}</div>
+</div>
+</sc-for>
+</div>
+
+<sc-if value="{{ d.hasNotes }}" hint-placeholder-val="{{ false }}">
+<div class="blueprint" style="margin-top:18px;padding:12px 14px"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+<div style="font-family:var(--font-heading);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--color-accent-700)">Notes</div>
+<div style="font-size:13px;line-height:1.5;margin-top:3px">{{ d.notes }}</div>
+</div>
+</sc-if>
+
+<button onClick="{{ onDelete }}" class="btn btn-secondary btn-block" style="margin-top:20px;font-size:12px;letter-spacing:.14em;text-transform:uppercase;padding:12px">Delete session</button>
+</div>
+</sc-if>
+
+<sc-if value="{{ isNew }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;display:flex;flex-direction:column;min-height:0">
+<div style="padding:52px 20px 0;display:flex;align-items:center;justify-content:space-between">
+<button onClick="{{ onCancelNew }}" style="background:transparent;border:0;padding:6px 0;cursor:pointer;color:var(--color-accent-700);font-family:var(--font-heading);font-size:12px;letter-spacing:.14em;text-transform:uppercase">Cancel</button>
+<div style="font-family:var(--font-heading);font-size:12px;letter-spacing:.18em;text-transform:uppercase">New session</div>
+<div style="width:48px"></div>
+</div>
+<div style="flex:1;overflow-y:auto;padding:0 20px">
+<sc-if value="{{ showQuick }}" hint-placeholder-val="{{ true }}">
+<div style="font-family:var(--font-heading);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--color-accent-700);margin-top:12px">One tap · starts immediately</div>
+<div style="display:flex;gap:8px;margin-top:6px">
+<sc-for list="{{ presets }}" as="p" hint-placeholder-count="2">
+<button onClick="{{ p.onClick }}" class="blueprint" style="flex:1;padding:9px 10px;text-align:left;background:transparent;cursor:pointer;font-family:var(--font-body)" style-hover="background:color-mix(in srgb, var(--color-accent) 10%, transparent)"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+<span style="display:block;font-family:var(--font-heading);font-size:15px;color:var(--color-accent-700)">{{ p.label }}</span>
+<span style="display:block;font-size:11px;color:var(--color-neutral-700);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ p.sub }}</span>
+</button>
+</sc-for>
+</div>
+</sc-if>
+
+<div style="display:flex;align-items:flex-end;justify-content:space-between;margin-top:18px;border-bottom:1px solid var(--color-text);padding-bottom:6px">
+<div style="font-family:var(--font-heading);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--color-accent-700);padding-bottom:6px">Buy-in</div>
+<div style="font-family:var(--font-heading);font-size:52px;line-height:1;font-variant-numeric:tabular-nums">{{ buyInText }}</div>
+</div>
+<div style="border-top:1px solid var(--color-divider);margin-top:14px">
+<sc-for list="{{ draftRows }}" as="s" hint-placeholder-count="4">
+<button onClick="{{ s.onClick }}" style="width:100%;display:flex;align-items:center;gap:10px;text-align:left;background:transparent;border:0;border-bottom:1px solid var(--color-divider);padding:11px 2px;cursor:pointer;font-family:var(--font-body);font-size:14px;color:var(--color-text)" style-hover="background:color-mix(in srgb, var(--color-accent) 8%, transparent)">
+<span style="flex:1">{{ s.label }}</span>
+<span style="font-family:var(--font-heading);font-size:15px;color:var(--color-accent-700)">{{ s.value }}</span>
+<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-neutral-500)" stroke-width="1.5"><path d="M9 6l6 6-6 6"></path></svg>
+</button>
+</sc-for>
+</div>
+<button onClick="{{ onStart }}" disabled="{{ startDisabled }}" class="blueprint" style="width:100%;margin:16px 0 14px;padding:14px;background:var(--color-accent);color:var(--color-bg);border-color:var(--color-accent);cursor:pointer;font-family:var(--font-heading);font-size:16px;letter-spacing:.14em;text-transform:uppercase;opacity:{{ startOpacity }}"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>Start · clock runs</button>
+</div>
+<div style="background:var(--color-surface);border-top:1px solid var(--color-divider);padding:8px 6px 34px;flex:none">
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1px">
+<sc-for list="{{ padKeys }}" as="k" hint-placeholder-count="12">
+<button onClick="{{ k.onClick }}" style="height:48px;background:var(--color-bg);border:1px solid var(--color-divider);cursor:pointer;font-family:var(--font-heading);font-size:24px;color:var(--color-text)" style-hover="background:var(--color-accent-100)" style-active="background:var(--color-accent);color:var(--color-bg)">{{ k.label }}</button>
+</sc-for>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isActive }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;overflow-y:auto;padding:52px 20px 20px">
+<div style="display:flex;align-items:center;justify-content:space-between">
+<div style="display:flex;align-items:center;gap:7px">
+<span style="width:8px;height:8px;background:var(--color-accent);animation:lg-blink 1.2s infinite"></span>
+<span style="font-family:var(--font-heading);font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--color-accent-700)">Live</span>
+</div>
+<button onClick="{{ onAbandon }}" style="background:transparent;border:0;padding:6px 0;cursor:pointer;color:var(--color-neutral-700);font-family:var(--font-heading);font-size:11px;letter-spacing:.14em;text-transform:uppercase">Discard</button>
+</div>
+<div style="font-family:var(--font-heading);font-size:26px;letter-spacing:.01em;margin-top:10px">{{ a.venue }}</div>
+<div style="font-family:var(--font-heading);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--color-neutral-600)">{{ a.game }} {{ a.stakes }} · {{ a.seats }}-max · started {{ a.startedAt }}</div>
+
+<div class="blueprint" style="margin-top:18px;padding:16px;text-align:center"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+<div style="font-family:var(--font-heading);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--color-accent-700)">Elapsed</div>
+<div style="font-family:var(--font-heading);font-size:62px;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:.01em">{{ timerText }}</div>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px">
+<div class="blueprint" style="padding:10px 12px"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+<div style="font-family:var(--font-heading);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--color-neutral-600)">Invested</div>
+<div style="font-family:var(--font-heading);font-size:26px;font-variant-numeric:tabular-nums">{{ a.invested }}</div>
+</div>
+<div class="blueprint" style="padding:10px 12px"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+<div style="font-family:var(--font-heading);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--color-neutral-600)">In big blinds</div>
+<div style="font-family:var(--font-heading);font-size:26px;font-variant-numeric:tabular-nums">{{ a.bbs }} bb</div>
+</div>
+</div>
+
+<div style="font-family:var(--font-heading);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--color-accent-700);margin-top:22px">Buy-ins</div>
+<div style="margin-top:6px;border-top:1px solid var(--color-divider)">
+<sc-for list="{{ a.buyIns }}" as="b" hint-placeholder-count="1">
+<div style="display:flex;justify-content:space-between;align-items:baseline;padding:9px 2px;border-bottom:1px solid var(--color-divider)">
+<span style="font-family:var(--font-heading);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--color-neutral-700)">{{ b.label }} · {{ b.at }}</span>
+<span style="font-family:var(--font-heading);font-size:17px;font-variant-numeric:tabular-nums">{{ b.amount }}</span>
+</div>
+</sc-for>
+</div>
+<div style="display:flex;gap:10px;margin-top:18px">
+<button onClick="{{ onOpenRebuy }}" class="blueprint" style="flex:1;padding:14px;background:transparent;cursor:pointer;font-family:var(--font-heading);font-size:14px;letter-spacing:.12em;text-transform:uppercase;color:var(--color-text)" style-hover="background:color-mix(in srgb, var(--color-accent) 10%, transparent)"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>+ Re-buy</button>
+<button onClick="{{ goCashOut }}" class="blueprint" style="flex:1.2;padding:14px;background:var(--color-accent);color:var(--color-bg);border-color:var(--color-accent);cursor:pointer;font-family:var(--font-heading);font-size:14px;letter-spacing:.12em;text-transform:uppercase" style-hover="background:var(--color-accent-600)"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>Cash out</button>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isCashOut }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;display:flex;flex-direction:column;min-height:0">
+<div style="padding:52px 20px 0;display:flex;align-items:center;justify-content:space-between">
+<button onClick="{{ goActive }}" style="background:transparent;border:0;padding:6px 0;cursor:pointer;color:var(--color-accent-700);font-family:var(--font-heading);font-size:12px;letter-spacing:.14em;text-transform:uppercase">Back</button>
+<div style="font-family:var(--font-heading);font-size:12px;letter-spacing:.18em;text-transform:uppercase">Cash out</div>
+<div style="width:38px"></div>
+</div>
+<div style="flex:1;overflow-y:auto;padding:0 20px">
+<button onClick="{{ focusCash }}" style="width:100%;display:flex;align-items:flex-end;justify-content:space-between;background:transparent;border:0;border-bottom:2px solid {{ cashBorder }};padding:14px 0 6px;cursor:pointer;text-align:left">
+<span style="font-family:var(--font-heading);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--color-accent-700);padding-bottom:6px">Chips off table</span>
+<span style="font-family:var(--font-heading);font-size:46px;line-height:1;font-variant-numeric:tabular-nums">{{ cashText }}</span>
+</button>
+<button onClick="{{ focusTips }}" style="width:100%;display:flex;align-items:flex-end;justify-content:space-between;background:transparent;border:0;border-bottom:2px solid {{ tipsBorder }};padding:14px 0 6px;cursor:pointer;text-align:left">
+<span style="font-family:var(--font-heading);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--color-accent-700);padding-bottom:6px">Tips &amp; rake paid</span>
+<span style="font-family:var(--font-heading);font-size:32px;line-height:1;font-variant-numeric:tabular-nums">{{ tipsText }}</span>
+</button>
+<div class="blueprint" style="margin-top:18px;padding:12px 14px"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+<div style="display:flex;justify-content:space-between;align-items:baseline">
+<div style="font-family:var(--font-heading);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--color-accent-700)">Net result</div>
+<div style="font-family:var(--font-heading);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-neutral-600)">{{ outDur }} · {{ outRate }}/h</div>
+</div>
+<div style="font-family:var(--font-heading);font-size:46px;line-height:1.05;font-variant-numeric:tabular-nums;color:{{ outColor }}">{{ outNet }}</div>
+<div style="font-family:var(--font-heading);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-neutral-700);margin-top:2px">{{ outMath }}</div>
+</div>
+<button onClick="{{ onConfirm }}" class="blueprint" style="width:100%;margin:16px 0 14px;padding:14px;background:var(--color-accent);color:var(--color-bg);border-color:var(--color-accent);cursor:pointer;font-family:var(--font-heading);font-size:16px;letter-spacing:.14em;text-transform:uppercase;opacity:{{ confirmOpacity }}"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>Book session</button>
+</div>
+<div style="background:var(--color-surface);border-top:1px solid var(--color-divider);padding:8px 6px 34px;flex:none">
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1px">
+<sc-for list="{{ padKeys }}" as="k" hint-placeholder-count="12">
+<button onClick="{{ k.onClick }}" style="height:48px;background:var(--color-bg);border:1px solid var(--color-divider);cursor:pointer;font-family:var(--font-heading);font-size:24px;color:var(--color-text)" style-hover="background:var(--color-accent-100)" style-active="background:var(--color-accent);color:var(--color-bg)">{{ k.label }}</button>
+</sc-for>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ showTabs }}" hint-placeholder-val="{{ true }}">
+<div style="flex:none;display:flex;align-items:center;border-top:1px solid var(--color-divider);background:var(--color-bg);padding:7px 12px 30px">
+<sc-for list="{{ tabs }}" as="t" hint-placeholder-count="5">
+<button onClick="{{ t.onClick }}" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;background:transparent;border:0;padding:4px 0;cursor:pointer;color:{{ t.color }}">
+<svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="{{ t.path }}"></path></svg>
+<span style="font-family:var(--font-heading);font-size:9px;letter-spacing:.14em;text-transform:uppercase">{{ t.label }}</span>
+</button>
+</sc-for>
+<button onClick="{{ onPlus }}" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;background:transparent;border:0;padding:4px 0;cursor:pointer;color:var(--color-accent-700)">
+<span class="blueprint" style="width:40px;height:34px;display:grid;place-items:center;background:var(--color-accent);border-color:var(--color-accent);color:var(--color-bg)"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="{{ plusPath }}"></path></svg>
+</span>
+<span style="font-family:var(--font-heading);font-size:9px;letter-spacing:.14em;text-transform:uppercase">{{ plusLabel }}</span>
+</button>
+</div>
+</sc-if>
+
+<sc-if value="{{ isImport }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;display:flex;flex-direction:column;min-height:0">
+<div style="padding:52px 20px 0;display:flex;align-items:center;justify-content:space-between">
+<button onClick="{{ impCancel }}" style="background:transparent;border:0;padding:6px 0;cursor:pointer;color:var(--color-accent-700);font-family:var(--font-heading);font-size:12px;letter-spacing:.14em;text-transform:uppercase">Cancel</button>
+<div style="font-family:var(--font-heading);font-size:12px;letter-spacing:.18em;text-transform:uppercase">Import · step {{ impStep }}/3</div>
+<div style="width:48px"></div>
+</div>
+<div style="flex:1;overflow-y:auto;padding:0 20px 24px">
+
+<sc-if value="{{ impPick }}" hint-placeholder-val="{{ false }}">
+<div style="font-family:var(--font-heading);font-size:30px;letter-spacing:.01em;margin-top:14px">ANALYTICS7</div>
+<div style="font-size:13px;line-height:1.5;color:var(--color-neutral-800);margin-top:2px">Export the model file from analytics7, then pick it here. Cash sessions, venues, buy-ins, chip counts and tips come across; hand histories are ignored.</div>
+<label class="blueprint" style="display:flex;flex-direction:column;align-items:center;gap:8px;margin-top:20px;padding:30px 20px;cursor:pointer;text-align:center" style-hover="background:color-mix(in srgb, var(--color-accent) 8%, transparent)"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"></path></svg>
+<span style="font-family:var(--font-heading);font-size:16px;letter-spacing:.1em;text-transform:uppercase">Choose .xml file</span>
+<span style="font-size:11px;color:var(--color-neutral-700);font-family:var(--font-heading);letter-spacing:.1em;text-transform:uppercase">Files · iCloud · AirDrop</span>
+<input type="file" accept=".xml,text/xml,application/xml" onChange="{{ onPickFile }}" style="display:none">
+</label>
+<sc-if value="{{ impHasError }}" hint-placeholder-val="{{ false }}">
+<div style="margin-top:12px;border-left:2px solid var(--color-neutral-900);padding:8px 12px;font-size:13px;background:var(--color-neutral-200)">{{ impError }}</div>
+</sc-if>
+<button onClick="{{ onUseSample }}" class="btn btn-secondary btn-block" style="margin-top:14px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;padding:12px">Use the sample export</button>
+<div style="font-family:var(--font-heading);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--color-accent-700);margin-top:26px">What is read</div>
+<div style="margin-top:6px;border-top:1px solid var(--color-divider)">
+<sc-for list="{{ impMapRows }}" as="m" hint-placeholder-count="8">
+<div style="display:flex;align-items:baseline;gap:8px;padding:7px 2px;border-bottom:1px solid var(--color-divider)">
+<span style="flex:1;font-size:12px;font-family:ui-monospace,Menlo,monospace;color:var(--color-neutral-800)">{{ m.from }}</span>
+<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--color-neutral-500)" stroke-width="1.5" style="flex:none"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>
+<span style="flex:1;text-align:right;font-family:var(--font-heading);font-size:14px;letter-spacing:.04em;color:{{ m.color }}">{{ m.to }}</span>
+</div>
+</sc-for>
+</div>
+</sc-if>
+
+<sc-if value="{{ impMap }}" hint-placeholder-val="{{ false }}">
+<div class="blueprint" style="margin-top:16px;padding:14px 16px"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+<div style="font-family:var(--font-heading);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--color-accent-700)">File read</div>
+<div style="font-family:var(--font-heading);font-size:44px;line-height:1;font-variant-numeric:tabular-nums;margin-top:4px">{{ impCount }}</div>
+<div style="font-family:var(--font-heading);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-neutral-700)">cash sessions · {{ impSpan }}</div>
+<div style="font-size:12px;font-family:ui-monospace,Menlo,monospace;color:var(--color-neutral-700);margin-top:8px;word-break:break-all">{{ impName }}</div>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px">
+<div class="blueprint" style="padding:10px 12px"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+<div style="font-family:var(--font-heading);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--color-neutral-600)">Bankroll</div>
+<div style="font-family:var(--font-heading);font-size:19px">{{ impBank }}</div>
+</div>
+<div class="blueprint" style="padding:10px 12px"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+<div style="font-family:var(--font-heading);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--color-neutral-600)">Venues</div>
+<div style="font-family:var(--font-heading);font-size:19px">{{ impVenues }}</div>
+</div>
+</div>
+<div style="font-family:var(--font-heading);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--color-accent-700);margin-top:22px">Amounts arrive in {{ impCode }}</div>
+<div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">
+<sc-for list="{{ impModes }}" as="m" hint-placeholder-count="2">
+<button onClick="{{ m.onClick }}" class="blueprint" style="width:100%;padding:11px 13px;display:flex;align-items:center;gap:11px;text-align:left;cursor:pointer;background:{{ m.bg }};font-family:var(--font-body)"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+<span style="width:13px;height:13px;flex:none;border:1px solid var(--color-accent);background:{{ m.dot }}"></span>
+<span style="flex:1">
+<span style="display:block;font-family:var(--font-heading);font-size:15px;letter-spacing:.04em">{{ m.label }}</span>
+<span style="display:block;font-size:11px;color:var(--color-neutral-700)">{{ m.sub }}</span>
+</span>
+</button>
+</sc-for>
+</div>
+<div style="font-family:var(--font-heading);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--color-accent-700);margin-top:22px">Duplicates</div>
+<div style="margin-top:6px;border-top:1px solid var(--color-divider);display:flex;align-items:center;gap:10px;padding:11px 2px;border-bottom:1px solid var(--color-divider)">
+<span style="flex:1;font-size:13px">{{ impDupeLine }}</span>
+<button onClick="{{ impToggleSkip }}" style="background:{{ skipBg }};color:{{ skipFg }};border:1px solid var(--color-accent);padding:5px 10px;cursor:pointer;font-family:var(--font-heading);font-size:11px;letter-spacing:.12em;text-transform:uppercase">{{ skipLabel }}</button>
+</div>
+<button onClick="{{ impToReview }}" class="blueprint" style="width:100%;margin-top:18px;padding:14px;background:var(--color-accent);color:var(--color-bg);border-color:var(--color-accent);cursor:pointer;font-family:var(--font-heading);font-size:16px;letter-spacing:.14em;text-transform:uppercase" style-hover="background:var(--color-accent-600)"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>Review {{ impCount }} rows</button>
+</sc-if>
+
+<sc-if value="{{ impReview }}" hint-placeholder-val="{{ false }}">
+<div class="blueprint" style="margin-top:16px;padding:14px 16px"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+<div style="display:flex;align-items:baseline;justify-content:space-between">
+<div style="font-family:var(--font-heading);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--color-accent-700)">Net of the import</div>
+<div style="font-family:var(--font-heading);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-neutral-600)">{{ impHours }} h</div>
+</div>
+<div style="font-family:var(--font-heading);font-size:44px;line-height:1;font-variant-numeric:tabular-nums;color:{{ impNetColor }};margin-top:2px">{{ impNet }}</div>
+<div style="font-family:var(--font-heading);font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-neutral-700);margin-top:3px">{{ impAddLine }}</div>
+</div>
+<div style="margin-top:18px;border-top:1px solid var(--color-divider)">
+<sc-for list="{{ impRows }}" as="r" hint-placeholder-count="8">
+<div style="display:flex;align-items:center;gap:10px;padding:9px 2px;border-bottom:1px solid var(--color-divider);opacity:{{ r.opacity }}">
+<span style="width:38px;height:34px;flex:none;border:1px solid var(--color-divider);display:grid;place-items:center;font-family:var(--font-heading);font-size:12px;color:var(--color-accent-700)">{{ r.stakes }}</span>
+<span style="flex:1;min-width:0">
+<span style="display:block;font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.venue }}</span>
+<span style="display:block;font-size:10px;color:var(--color-neutral-600);font-family:var(--font-heading);letter-spacing:.1em;text-transform:uppercase">{{ r.meta }}</span>
+</span>
+<span style="font-family:var(--font-heading);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:{{ r.tagColor }};flex:none">{{ r.tag }}</span>
+<span style="font-family:var(--font-heading);font-size:17px;font-variant-numeric:tabular-nums;color:{{ r.color }};flex:none;min-width:74px;text-align:right">{{ r.net }}</span>
+</div>
+</sc-for>
+</div>
+<button onClick="{{ impCommit }}" class="blueprint" style="width:100%;margin-top:18px;padding:14px;background:var(--color-accent);color:var(--color-bg);border-color:var(--color-accent);cursor:pointer;font-family:var(--font-heading);font-size:16px;letter-spacing:.14em;text-transform:uppercase" style-hover="background:var(--color-accent-600)"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>{{ impCommitLabel }}</button>
+<button onClick="{{ impBack }}" class="btn btn-secondary btn-block" style="margin-top:8px;font-size:12px;letter-spacing:.12em;text-transform:uppercase;padding:12px">Back to mapping</button>
+</sc-if>
+
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ sheetOpen }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ closeSheet }}" style="position:absolute;inset:0;z-index:80;display:flex;flex-direction:column;justify-content:flex-end;background:color-mix(in srgb, var(--color-neutral-900) 45%, transparent);animation:lg-fade .15s ease-out">
+<div onClick="{{ stop }}" style="background:var(--color-bg);border-top:1px solid var(--color-text);padding:14px 20px 34px;max-height:78%;display:flex;flex-direction:column;animation:lg-up .2s cubic-bezier(.2,.7,.2,1)">
+<div style="display:flex;align-items:baseline;justify-content:space-between;padding-bottom:10px;border-bottom:1px solid var(--color-divider)">
+<span style="font-family:var(--font-heading);font-size:12px;letter-spacing:.18em;text-transform:uppercase">{{ sheetTitle }}</span>
+<button onClick="{{ closeSheet }}" style="background:transparent;border:0;cursor:pointer;color:var(--color-accent-700);font-family:var(--font-heading);font-size:12px;letter-spacing:.14em;text-transform:uppercase;padding:0">Close</button>
+</div>
+<div style="overflow-y:auto">
+<sc-for list="{{ sheetItems }}" as="it" hint-placeholder-count="6">
+<button onClick="{{ it.onClick }}" style="width:100%;display:flex;align-items:center;gap:10px;text-align:left;background:{{ it.bg }};border:0;border-bottom:1px solid var(--color-divider);padding:13px 8px;cursor:pointer;font-family:var(--font-body);color:{{ it.fg }}" style-hover="background:color-mix(in srgb, var(--color-accent) 10%, transparent)">
+<span style="flex:1;font-size:15px;font-family:var(--font-heading);letter-spacing:.04em">{{ it.label }}</span>
+<span style="font-size:11px;color:var(--color-neutral-600);font-family:var(--font-heading);letter-spacing:.1em;text-transform:uppercase">{{ it.sub }}</span>
+</button>
+</sc-for>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ toastOpen }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;left:20px;right:20px;bottom:104px;z-index:90;background:var(--color-accent-900);color:var(--color-bg);padding:11px 14px;font-family:var(--font-heading);font-size:12px;letter-spacing:.12em;text-transform:uppercase;animation:lg-fade .15s ease-out">{{ toast }}</div>
+</sc-if>
+
+</div>
+</x-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:&quot;1060&quot;,&quot;height&quot;:&quot;1000&quot;},&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#5980a6&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;options&quot;:[&quot;#5980a6&quot;,&quot;#7a6a55&quot;,&quot;#4f6b58&quot;,&quot;#6b5a7a&quot;],&quot;section&quot;:&quot;Theme&quot;},&quot;pnlColor&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Mono&quot;,&quot;options&quot;:[&quot;Mono&quot;,&quot;Signal&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Theme&quot;},&quot;showQuickStart&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Behavior&quot;}}">
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    const N = Date.now(), D = 86400000, H = 3600000;
+    this.state = {
+      tab: 'home', flow: null, detailId: null, sheet: null, filter: 'All',
+      now: N, padTarget: 'buyIn', toast: null,
+      draft: { venue: 'Bellagio', city: 'Las Vegas', sb: 2, bb: 5, game: 'NLHE', seats: 9, buyIn: '' },
+      out: { cash: '', tips: '' },
+      active: null,
+      settings: { currency: 'USD', game: 'NLHE', stakes: '2/5', seats: 9 },
+      sessions: this.seed(N, D, H),
+    };
+  }
+
+  rate(from, to) {
+    const usd = { USD: 1, HKD: 0.128, EUR: 1.08, GBP: 1.27, CAD: 0.74, AUD: 0.66 };
+    if (!usd[from] || !usd[to] || from === to) return 1;
+    return Math.round((usd[from] / usd[to]) * 1000) / 1000;
+  }
+  seed(N, D, H) {
+    return this.tagUSD([
+      { id: 's1', startedAt: N - 1 * D - 5 * H, endedAt: N - 1 * D, venue: 'Bellagio', city: 'Las Vegas', sb: 2, bb: 5, game: 'NLHE', seats: 9, buyIns: [{ amount: 500, at: N - 1 * D - 5 * H }, { amount: 500, at: N - 1 * D - 3.5 * H }], cashOut: 1980, tips: 20, notes: 'Table broke twice; ran good in the last hour.' },
+      { id: 's2', startedAt: N - 2 * D - 3 * H, endedAt: N - 2 * D, venue: 'Wynn', city: 'Las Vegas', sb: 1, bb: 3, game: 'NLHE', seats: 8, buyIns: [{ amount: 300, at: N - 2 * D - 3 * H }], cashOut: 130, tips: 10, notes: 'Tough table. Two regs on my left.' },
+      { id: 's3', startedAt: N - 4 * D - 6 * H, endedAt: N - 4 * D, venue: 'Aria', city: 'Las Vegas', sb: 5, bb: 10, game: 'NLHE', seats: 9, buyIns: [{ amount: 1000, at: N - 4 * D - 6 * H }, { amount: 1000, at: N - 4 * D - 4 * H }], cashOut: 4120, tips: 30, notes: 'Hero called river with second pair.' },
+      { id: 's4', startedAt: N - 6 * D - 4.2 * H, endedAt: N - 6 * D, venue: 'Encore', city: 'Las Vegas', sb: 2, bb: 5, game: 'NLHE', seats: 9, buyIns: [{ amount: 500, at: N - 6 * D - 4.2 * H }], cashOut: 980, tips: 15, notes: '' },
+      { id: 's5', startedAt: N - 8 * D - 5.5 * H, endedAt: N - 8 * D, venue: "Mike's home game", city: 'Henderson', sb: 1, bb: 2, game: 'NLHE', seats: 6, buyIns: [{ amount: 200, at: N - 8 * D - 5.5 * H }], cashOut: 540, tips: 0, notes: '' },
+      { id: 's6', startedAt: N - 11 * D - 7 * H, endedAt: N - 11 * D, venue: 'Aria', city: 'Las Vegas', sb: 5, bb: 10, game: 'NLHE', seats: 9, buyIns: [{ amount: 1000, at: N - 11 * D - 7 * H }, { amount: 1000, at: N - 11 * D - 5 * H }, { amount: 1000, at: N - 11 * D - 2 * H }], cashOut: 2450, tips: 40, notes: 'Three bullets. Stop-loss ignored — do not repeat.' },
+    ]);
+  }
+  tagUSD(list) { return list.map((s) => Object.assign({ cur: 'USD' }, s)); }
+
+  componentDidMount() {
+    this.tick = setInterval(() => { if (this.state.active) this.setState({ now: Date.now() }); }, 1000);
+    this.applyAccent();
+  }
+  componentDidUpdate(prev) { if (prev.accent !== this.props.accent) this.applyAccent(); }
+  componentWillUnmount() { clearInterval(this.tick); if (this.toastT) clearTimeout(this.toastT); }
+  applyAccent() {
+    const a = this.props.accent;
+    if (a) document.documentElement.style.setProperty('--color-accent', a);
+  }
+
+  // ── money + time ────────────────────────────────────────────
+  symOf(code) { return { USD: '$', EUR: '\u20ac', GBP: '\u00a3', CAD: 'C$', AUD: 'A$', HKD: 'HK$' }[code] || '$'; }
+  sym() { return this.symOf(this.state.settings.currency); }
+  moneyIn(n, code, sign) {
+    const abs = Math.round(Math.abs(n)).toLocaleString('en-US');
+    if (n < 0) return '\u2212' + this.symOf(code) + abs;
+    return (sign ? '+' : '') + this.symOf(code) + abs;
+  }
+
+  // ── analytics7 model (.xml) import ──────────────────────────
+  a7Date(s) {
+    const m = /^(\d{1,2})\/(\d{1,2})\/(\d{2}) (\d{1,2}):(\d{2}):(\d{2})$/.exec((s || '').trim());
+    if (!m) return null;
+    return new Date(2000 + Number(m[3]), Number(m[1]) - 1, Number(m[2]), Number(m[4]), Number(m[5]), Number(m[6])).getTime();
+  }
+  parseA7(text, name) {
+    let doc;
+    try { doc = new DOMParser().parseFromString(text, 'application/xml'); } catch (e) { return { error: 'That file could not be read.' }; }
+    if (!doc || doc.getElementsByTagName('parsererror').length) return { error: 'That file is not valid XML.' };
+    const cash = Array.prototype.slice.call(doc.getElementsByTagName('cash'));
+    if (!cash.length) return { error: 'No cash sessions found in that file. Tournaments and hand histories are not imported.' };
+    const cur = doc.getElementsByTagName('currency')[0];
+    const bank = doc.getElementsByTagName('bankroll')[0];
+    const code = (cur && cur.getAttribute('currencyCode')) || 'USD';
+    const bankName = (bank && bank.getAttribute('name')) || '\u2014';
+    const rows = cash.map((c, i) => {
+      const res = c.getElementsByTagName('result')[0];
+      const at = (el, k) => (el ? el.getAttribute(k) : null);
+      const blinds = (c.getAttribute('blinds') || '').split('/');
+      const start = this.a7Date(c.getAttribute('startdate'));
+      const bis = res ? Array.prototype.slice.call(res.getElementsByTagName('buyin')) : [];
+      const buyIns = bis.length
+        ? bis.map((b) => ({ amount: Number(b.getAttribute('amount')) || 0, at: this.a7Date(b.getAttribute('date')) || start }))
+        : [{ amount: Number(at(res, 'buyin')) || 0, at: start }];
+      const variant = (c.getAttribute('variant') || '').split('|')[0];
+      return {
+        id: 'a7-' + (c.getAttribute('id') || i),
+        startedAt: start, endedAt: this.a7Date(c.getAttribute('enddate')) || start,
+        venue: c.getAttribute('location') || 'Unknown', city: bankName,
+        sb: Number(blinds[0]) || 0, bb: Number(blinds[1]) || 0,
+        game: (c.getAttribute('limit') === '0' ? 'NL' : 'L') + (/hold/i.test(variant) ? 'HE' : 'O'),
+        seats: Number(c.getAttribute('tablesize')) || 9,
+        buyIns, cashOut: Number(at(res, 'chipcount')) || 0, tips: Number(at(res, 'tips')) || 0,
+        notes: c.getAttribute('comments') || '', src: 'analytics7', cur: code,
+      };
+    }).filter((r) => r.startedAt && r.buyIns.length);
+    if (!rows.length) return { error: 'Sessions were found but none had readable dates.' };
+    return { step: 'map', name: name, code: code, bank: bankName, rows: rows, mode: 'keep', skip: true };
+  }
+  isDupe(r) {
+    return this.state.sessions.some((s) => s.venue === r.venue && Math.abs(s.startedAt - r.startedAt) < 120000);
+  }
+  scale(r, k) {
+    if (k === 1) return r;
+    const m = (n) => Math.round(n * k);
+    return Object.assign({}, r, {
+      buyIns: r.buyIns.map((b) => ({ amount: m(b.amount), at: b.at })),
+      cashOut: m(r.cashOut), tips: m(r.tips),
+      sb: Math.round(r.sb * k * 10) / 10, bb: Math.round(r.bb * k * 10) / 10,
+    });
+  }
+  loadA7(text, name) {
+    const res = this.parseA7(text, name);
+    if (res.error) this.setState({ imp: { step: 'pick', error: res.error } });
+    else this.setState({ imp: res });
+  }
+  commitA7() {
+    const imp = this.state.imp; if (!imp || !imp.rows) return;
+    const S = this.state.settings;
+    const keep = imp.mode !== 'convert' || imp.code === S.currency;
+    const k = keep ? 1 : this.rate(imp.code, S.currency);
+    const add = imp.rows.filter((r) => !(imp.skip && this.isDupe(r)))
+      .map((r) => Object.assign(this.scale(r, k), { cur: keep ? imp.code : S.currency }));
+    this.setState({
+      sessions: add.concat(this.state.sessions),
+      settings: keep ? Object.assign({}, S, { currency: imp.code }) : S,
+      imp: null, flow: null, detailId: null, tab: 'home',
+    });
+    this.say(add.length + ' sessions imported from analytics7');
+  }
+  money(n, sign) {
+    const s = this.sym();
+    const abs = Math.round(Math.abs(n)).toLocaleString('en-US');
+    if (n < 0) return '\u2212' + s + abs;
+    return (sign ? '+' : '') + s + abs;
+  }
+  buyIn(s) { return (s.buyIns || []).reduce((n, b) => n + b.amount, 0); }
+  pnl(s) { return (s.cashOut || 0) - this.buyIn(s) - (s.tips || 0); }
+  hours(s) { return Math.max(0, ((s.endedAt || Date.now()) - s.startedAt) / 3600000); }
+  clock(ms) {
+    const t = Math.max(0, Math.floor(ms / 1000));
+    return Math.floor(t / 3600) + ':' + String(Math.floor((t % 3600) / 60)).padStart(2, '0') + ':' + String(t % 60).padStart(2, '0');
+  }
+  shortDur(ms) {
+    const t = Math.max(0, Math.floor(ms / 60000));
+    return Math.floor(t / 60) + 'h ' + String(t % 60).padStart(2, '0') + 'm';
+  }
+  when(ts) {
+    const d = new Date(ts), days = Math.round((Date.now() - ts) / 86400000);
+    if (days <= 0) return 'Today';
+    if (days === 1) return 'Yesterday';
+    if (days < 7) return days + ' days ago';
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  }
+  hm(ts) { return new Date(ts).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }).replace(/\s/, ''); }
+  pos() { return this.props.pnlColor === 'Signal' ? '#1c7a4f' : 'var(--color-accent-700)'; }
+  neg() { return this.props.pnlColor === 'Signal' ? '#a8323f' : 'var(--color-neutral-900)'; }
+  col(n) { return n < 0 ? this.neg() : this.pos(); }
+  stakeLabel(s) { return s.sb + '/' + s.bb; }
+
+  // ── actions ─────────────────────────────────────────────────
+  say(msg) {
+    this.setState({ toast: msg });
+    if (this.toastT) clearTimeout(this.toastT);
+    this.toastT = setTimeout(() => this.setState({ toast: null }), 2200);
+  }
+  go(tab) { this.setState({ tab, flow: null, detailId: null, sheet: null }); }
+  openDetail(id) { this.setState({ detailId: id, flow: null, sheet: null }); }
+  pad(key) {
+    const t = this.state.padTarget;
+    const get = () => t === 'buyIn' ? this.state.draft.buyIn : this.state.out[t === 'cash' ? 'cash' : 'tips'];
+    let v = get();
+    if (key === 'del') v = v.slice(0, -1);
+    else if (key === '00') v = v === '' ? '' : (v.length > 7 ? v : v + '00');
+    else v = v === '0' ? key : (v.length > 8 ? v : v + key);
+    if (t === 'buyIn') this.setState({ draft: Object.assign({}, this.state.draft, { buyIn: v }) });
+    else this.setState({ out: Object.assign({}, this.state.out, t === 'cash' ? { cash: v } : { tips: v }) });
+  }
+  startSession(over) {
+    const d = Object.assign({}, this.state.draft, over || {});
+    const amt = Number(d.buyIn) || 0;
+    if (!amt) return;
+    const at = Date.now();
+    this.setState({
+      active: { id: 'live', cur: this.state.settings.currency, startedAt: at, endedAt: null, venue: d.venue, city: d.city, sb: d.sb, bb: d.bb, game: d.game, seats: d.seats, buyIns: [{ amount: amt, at }], cashOut: 0, tips: 0, notes: '' },
+      draft: Object.assign({}, d, { buyIn: '' }), flow: 'active', tab: 'home', sheet: null, now: at,
+    });
+  }
+  rebuy(amount) {
+    const a = this.state.active; if (!a) return;
+    this.setState({ active: Object.assign({}, a, { buyIns: a.buyIns.concat([{ amount, at: Date.now() }]) }), sheet: null });
+    this.say('Re-buy ' + this.money(amount) + ' logged');
+  }
+  book() {
+    const a = this.state.active; if (!a) return;
+    const cash = Number(this.state.out.cash) || 0;
+    const done = Object.assign({}, a, { id: 's' + Date.now(), endedAt: Date.now(), cashOut: cash, tips: Number(this.state.out.tips) || 0 });
+    this.setState({ sessions: [done].concat(this.state.sessions), active: null, out: { cash: '', tips: '' }, flow: null, tab: 'home' });
+    this.say('Session booked \u00b7 ' + this.money(this.pnl(done), true));
+  }
+
+  // ── curve helper ────────────────────────────────────────────
+  curve(list, w, h) {
+    const pts = [];
+    let run = 0;
+    list.slice().sort((a, b) => a.startedAt - b.startedAt).forEach((s) => { run += this.pnl(s); pts.push(run); });
+    if (pts.length < 2) return { line: '', area: '', zero: h / 2, peak: 0, last: run };
+    const all = pts.concat([0]);
+    const min = Math.min.apply(null, all), max = Math.max.apply(null, all);
+    const range = (max - min) || 1;
+    const y = (v) => (h - 6) - ((v - min) / range) * (h - 12) + 6;
+    const step = w / (pts.length - 1);
+    const line = pts.map((v, i) => (i * step).toFixed(1) + ',' + y(v).toFixed(1)).join(' ');
+    return { line, area: '0,' + y(min) + ' ' + line + ' ' + w + ',' + y(min), zero: y(0).toFixed(1), peak: max, last: run };
+  }
+
+  renderVals() {
+    const st = this.state, S = st.settings;
+    const sessions = st.sessions.filter((s) => (s.cur || S.currency) === S.currency);
+    const parked = st.sessions.length - sessions.length;
+    const flow = st.flow, det = st.detailId;
+    const onTab = !flow && !det;
+    const net = sessions.reduce((n, s) => n + this.pnl(s), 0);
+    const hrs = sessions.reduce((n, s) => n + this.hours(s), 0);
+    const wins = sessions.filter((s) => this.pnl(s) > 0).length;
+    const m0 = new Date(); m0.setDate(1); m0.setHours(0, 0, 0, 0);
+    const monthNet = sessions.filter((s) => s.startedAt >= m0.getTime()).reduce((n, s) => n + this.pnl(s), 0);
+
+    const row = (s) => ({
+      id: s.id, stakes: this.stakeLabel(s), venue: s.venue,
+      meta: this.when(s.startedAt) + ' \u00b7 ' + this.shortDur((s.endedAt || Date.now()) - s.startedAt) + ' \u00b7 ' + s.seats + '-max',
+      pnl: this.money(this.pnl(s), true), color: this.col(this.pnl(s)),
+      rate: this.money(this.hours(s) > 0 ? this.pnl(s) / this.hours(s) : 0, true),
+      onClick: () => this.openDetail(s.id),
+    });
+    const sorted = sessions.slice().sort((a, b) => b.startedAt - a.startedAt);
+    const filtered = sorted.filter((s) => st.filter === 'All' || (st.filter === 'Wins' ? this.pnl(s) > 0 : this.pnl(s) <= 0));
+    const fNet = filtered.reduce((n, s) => n + this.pnl(s), 0);
+
+    const spark = this.curve(sessions, 370, 72);
+    const big = this.curve(sessions, 342, 150);
+
+    // by stake
+    const groups = {};
+    sessions.forEach((s) => {
+      const k = this.stakeLabel(s);
+      groups[k] = groups[k] || { label: k, n: 0, h: 0, net: 0, bb: s.bb };
+      groups[k].n++; groups[k].h += this.hours(s); groups[k].net += this.pnl(s);
+    });
+    const byStake = Object.keys(groups).map((k) => groups[k]).sort((a, b) => b.bb - a.bb).map((g) => ({
+      label: g.label, n: g.n, hours: g.h.toFixed(1), net: this.money(g.net, true),
+      rate: this.money(g.h > 0 ? g.net / g.h : 0, true), color: this.col(g.net),
+    }));
+
+    const best = sorted.slice().sort((a, b) => this.pnl(b) - this.pnl(a))[0];
+    const worst = sorted.slice().sort((a, b) => this.pnl(a) - this.pnl(b))[0];
+    const longest = sorted.slice().sort((a, b) => this.hours(b) - this.hours(a))[0];
+    const venues = {};
+    sessions.forEach((s) => { venues[s.venue] = (venues[s.venue] || 0) + this.pnl(s); });
+    const topVenue = Object.keys(venues).sort((a, b) => venues[b] - venues[a])[0];
+    const supers = best ? [
+      { label: 'Best session', value: best.venue + ' \u00b7 ' + this.when(best.startedAt), figure: this.money(this.pnl(best), true), color: this.col(this.pnl(best)) },
+      { label: 'Worst session', value: worst.venue + ' \u00b7 ' + this.when(worst.startedAt), figure: this.money(this.pnl(worst), true), color: this.col(this.pnl(worst)) },
+      { label: 'Longest', value: longest.venue + ' \u00b7 ' + this.stakeLabel(longest), figure: this.shortDur(longest.endedAt - longest.startedAt), color: 'var(--color-text)' },
+      { label: 'Top venue', value: topVenue, figure: this.money(venues[topVenue], true), color: this.col(venues[topVenue]) },
+    ] : [];
+
+    // detail
+    const ds = sessions.filter((s) => s.id === det)[0];
+    let d = null;
+    if (ds) {
+      const p = this.pnl(ds), h = this.hours(ds);
+      const lines = ds.buyIns.map((b, i) => ({ label: (i === 0 ? 'Buy-in' : 'Re-buy ' + i) + ' \u00b7 ' + this.hm(b.at), value: '\u2212' + this.money(b.amount), color: 'var(--color-text)' }));
+      lines.push({ label: 'Tips & rake', value: '\u2212' + this.money(ds.tips), color: 'var(--color-text)' });
+      lines.push({ label: 'Chips off table', value: this.money(ds.cashOut), color: 'var(--color-text)' });
+      lines.push({ label: 'Net', value: this.money(p, true), color: this.col(p) });
+      d = {
+        venue: ds.venue, when: this.when(ds.startedAt), game: ds.game, stakes: this.stakeLabel(ds), seats: ds.seats,
+        pnl: this.money(p, true), color: this.col(p),
+        rate: this.money(h > 0 ? p / h : 0, true), bbRate: (h > 0 ? (p / h) / ds.bb : 0).toFixed(1),
+        lines,
+        tiles: [
+          { label: 'Duration', value: this.shortDur(ds.endedAt - ds.startedAt) },
+          { label: 'Invested', value: this.money(this.buyIn(ds)) },
+          { label: 'Bullets', value: ds.buyIns.length },
+          { label: 'City', value: ds.city },
+        ],
+        hasNotes: !!ds.notes, notes: ds.notes,
+      };
+    }
+
+    // active
+    const A = st.active;
+    let a = null;
+    if (A) {
+      const inv = this.buyIn(A);
+      a = {
+        venue: A.venue, game: A.game, stakes: this.stakeLabel(A), seats: A.seats, startedAt: this.hm(A.startedAt),
+        invested: this.money(inv), bbs: Math.round(inv / A.bb),
+        buyIns: A.buyIns.map((b, i) => ({ label: i === 0 ? 'Buy-in' : 'Re-buy ' + i, at: this.hm(b.at), amount: this.money(b.amount) })),
+      };
+    }
+    const elapsed = A ? st.now - A.startedAt : 0;
+    const cashN = Number(st.out.cash) || 0, tipsN = Number(st.out.tips) || 0;
+    const outNet = A ? cashN - this.buyIn(A) - tipsN : 0;
+    const outH = A ? Math.max(elapsed / 3600000, 0.01) : 1;
+
+    const pk = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '00', '0', 'del'];
+    const padKeys = pk.map((k) => ({ label: k === 'del' ? '\u232b' : k, onClick: () => this.pad(k) }));
+
+    const sheetItems = (items, cur, apply) => items.map((it) => ({
+      label: it.label, sub: it.sub || '',
+      bg: it.value === cur ? 'color-mix(in srgb, var(--color-accent) 14%, transparent)' : 'transparent',
+      fg: 'var(--color-text)',
+      onClick: () => apply(it.value),
+    }));
+    const setDraft = (patch) => this.setState({ draft: Object.assign({}, st.draft, patch), sheet: null });
+    const venueItems = [
+      { label: 'Bellagio', sub: 'Las Vegas' }, { label: 'Aria', sub: 'Las Vegas' }, { label: 'Wynn', sub: 'Las Vegas' },
+      { label: 'Encore', sub: 'Las Vegas' }, { label: 'Resorts World', sub: 'Las Vegas' }, { label: "Mike's home game", sub: 'Henderson' },
+    ].map((v) => ({ label: v.label, sub: v.sub, value: v.label }));
+    const stakeItems = ['1/2', '1/3', '2/5', '5/10', '10/20', '25/50'].map((s) => ({ label: s, value: s }));
+    const gameItems = ['NLHE', 'PLO', 'PLO5', 'Mixed', 'LHE'].map((g) => ({ label: g, value: g }));
+    const seatItems = [6, 8, 9].map((n) => ({ label: n + '-max', value: n }));
+    const curItems = [
+      { label: 'USD', sub: 'US Dollar', value: 'USD' }, { label: 'EUR', sub: 'Euro', value: 'EUR' },
+      { label: 'GBP', sub: 'Pound', value: 'GBP' }, { label: 'CAD', sub: 'Canadian', value: 'CAD' },
+      { label: 'AUD', sub: 'Australian', value: 'AUD' }, { label: 'HKD', sub: 'Hong Kong', value: 'HKD' },
+    ];
+
+    const sheets = {
+      venue: { title: 'Venue', items: sheetItems(venueItems, st.draft.venue, (v) => setDraft({ venue: v, city: (venueItems.filter((x) => x.value === v)[0] || {}).sub })) },
+      stakes: { title: 'Stakes', items: sheetItems(stakeItems, this.stakeLabel(st.draft), (v) => setDraft({ sb: Number(v.split('/')[0]), bb: Number(v.split('/')[1]) })) },
+      game: { title: 'Game', items: sheetItems(gameItems, st.draft.game, (v) => setDraft({ game: v })) },
+      seats: { title: 'Table size', items: sheetItems(seatItems, st.draft.seats, (v) => setDraft({ seats: v })) },
+      rebuy: { title: 'Re-buy amount', items: (A ? [A.buyIns[0].amount, A.bb * 100, A.bb * 200, A.bb * 400] : []).filter((v, i, arr) => arr.indexOf(v) === i).map((v) => ({ label: this.money(v), sub: Math.round(v / (A ? A.bb : 1)) + ' bb', bg: 'transparent', fg: 'var(--color-text)', onClick: () => this.rebuy(v) })) },
+      currency: { title: 'Currency', items: sheetItems(curItems, S.currency, (v) => this.setState({ settings: Object.assign({}, S, { currency: v }), sheet: null })) },
+      defGame: { title: 'Default game', items: sheetItems(gameItems, S.game, (v) => this.setState({ settings: Object.assign({}, S, { game: v }), sheet: null })) },
+      defStakes: { title: 'Default stakes', items: sheetItems(stakeItems, S.stakes, (v) => this.setState({ settings: Object.assign({}, S, { stakes: v }), sheet: null })) },
+      defSeats: { title: 'Default table', items: sheetItems(seatItems, S.seats, (v) => this.setState({ settings: Object.assign({}, S, { seats: v }), sheet: null })) },
+    };
+    const sheet = st.sheet ? sheets[st.sheet] : null;
+
+    const last = sorted[0];
+    const presets = [];
+    if (last) presets.push({
+      label: this.money(this.buyIn(last) / last.buyIns.length) + ' \u00b7 ' + this.stakeLabel(last),
+      sub: 'Repeat ' + last.venue,
+      onClick: () => this.startSession({ venue: last.venue, city: last.city, sb: last.sb, bb: last.bb, game: last.game, seats: last.seats, buyIn: String(Math.round(this.buyIn(last) / last.buyIns.length)) }),
+    });
+    const dsb = Number(S.stakes.split('/')[0]), dbb = Number(S.stakes.split('/')[1]);
+    presets.push({
+      label: this.money(dbb * 100) + ' \u00b7 ' + S.stakes, sub: 'Default ' + S.game + ' ' + S.seats + '-max',
+      onClick: () => this.startSession({ sb: dsb, bb: dbb, game: S.game, seats: S.seats, buyIn: String(dbb * 100) }),
+    });
+
+    // import state
+    const imp = st.imp;
+    const impRows = (imp && imp.rows) || [];
+    const impSameCur = !!imp && imp.code === S.currency;
+    const impConvert = !!imp && imp.mode === 'convert' && !impSameCur;
+    const impRate = imp ? this.rate(imp.code, S.currency) : 1;
+    const impK = impConvert ? impRate : 1;
+    const impCurCode = impConvert ? S.currency : (imp ? imp.code : S.currency);
+    const dupeFlags = impRows.map((r) => this.isDupe(r));
+    const impDupes = dupeFlags.filter(Boolean).length;
+    const included = impRows.filter((r, i) => !(imp && imp.skip && dupeFlags[i]));
+    const impAdd = included.length;
+    const impNet = included.reduce((n, r) => n + this.pnl(this.scale(r, impK)), 0);
+    const impHours = included.reduce((n, r) => n + this.hours(r), 0);
+    const fmtD = (t) => new Date(t).toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
+    const impTimes = impRows.map((r) => r.startedAt);
+    const impSpan = impRows.length ? fmtD(Math.min.apply(null, impTimes)) + ' \u2013 ' + fmtD(Math.max.apply(null, impTimes)) : '';
+    const impVenues = impRows.reduce((acc, r) => (acc.indexOf(r.venue) < 0 ? acc.concat([r.venue]) : acc), []).length;
+    const impList = impRows.map((r, i) => {
+      const sc = this.scale(r, impK), p = this.pnl(sc);
+      const dupe = dupeFlags[i], skipped = dupe && imp && imp.skip;
+      return {
+        stakes: sc.sb + '/' + sc.bb, venue: r.venue,
+        meta: new Date(r.startedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ' \u00b7 ' + this.shortDur(r.endedAt - r.startedAt) + ' \u00b7 ' + sc.buyIns.length + (sc.buyIns.length > 1 ? ' bullets' : ' bullet'),
+        net: this.moneyIn(p, impCurCode, true), color: this.col(p),
+        tag: skipped ? 'Skip' : dupe ? 'Dupe' : 'New',
+        tagColor: dupe ? 'var(--color-neutral-600)' : 'var(--color-accent-700)',
+        opacity: skipped ? 0.42 : 1,
+      };
+    });
+
+    const tabDef = [
+      { key: 'home', label: 'Home', path: 'M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z' },
+      { key: 'log', label: 'Log', path: 'M4 6h16M4 12h16M4 18h10' },
+    ];
+    const tabDef2 = [
+      { key: 'stats', label: 'Stats', path: 'M4 20h16M7 17V9M12 17V5M17 17v-6' },
+      { key: 'settings', label: 'Set', path: 'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6M19 12a7 7 0 0 0-.1-1.2l2-1.5-2-3.4-2.3 1a7 7 0 0 0-2-1.2L14.2 3H9.8l-.4 2.7a7 7 0 0 0-2 1.2l-2.3-1-2 3.4 2 1.5A7 7 0 0 0 5 12c0 .4 0 .8.1 1.2l-2 1.5 2 3.4 2.3-1a7 7 0 0 0 2 1.2l.4 2.7h4.4l.4-2.7a7 7 0 0 0 2-1.2l2.3 1 2-3.4-2-1.5c.1-.4.1-.8.1-1.2z' },
+    ];
+    const mkTab = (t) => ({
+      label: t.label, path: t.path,
+      color: (onTab && st.tab === t.key) ? 'var(--color-accent)' : 'var(--color-neutral-600)',
+      onClick: () => this.go(t.key),
+    });
+
+    const index = [
+      { n: '01', label: 'Bankroll home', note: 'hero + curve', onClick: () => this.go('home') },
+      { n: '02', label: 'Session log', note: 'filters', onClick: () => this.go('log') },
+      { n: '03', label: 'Session detail', note: 'breakdown', onClick: () => this.openDetail(sorted[0] ? sorted[0].id : null) },
+      { n: '04', label: 'New session', note: 'numpad', onClick: () => this.setState({ flow: 'new', detailId: null, padTarget: 'buyIn' }) },
+      { n: '05', label: 'Live session', note: 'timer', onClick: () => { if (!st.active) this.startSession({ buyIn: '500' }); else this.setState({ flow: 'active', detailId: null }); } },
+      { n: '06', label: 'Cash out', note: 'net preview', onClick: () => { if (!st.active) this.startSession({ buyIn: '500' }); this.setState({ flow: 'cashout', detailId: null, padTarget: 'cash' }); } },
+      { n: '07', label: 'Stats', note: 'curve + stakes', onClick: () => this.go('stats') },
+      { n: '08', label: 'Settings', note: 'defaults', onClick: () => this.go('settings') },
+      { n: '09', label: 'Import analytics7', note: '.xml · 3 steps', onClick: () => this.setState({ flow: 'import', imp: { step: 'pick' }, detailId: null }) },
+    ];
+
+    return {
+      index,
+      isHome: onTab && st.tab === 'home', isLog: onTab && st.tab === 'log',
+      isStats: onTab && st.tab === 'stats', isSettings: onTab && st.tab === 'settings',
+      isDetail: !!d && !flow, isNew: flow === 'new', isActive: flow === 'active' && !!A, isCashOut: flow === 'cashout' && !!A,
+      showTabs: !flow,
+      tabs: tabDef.map(mkTab).concat(tabDef2.map(mkTab)),
+      plusPath: 'M12 5v14M5 12h14',
+      plusLabel: A ? 'Live' : 'New',
+      onPlus: () => this.setState({ flow: A ? 'active' : 'new', detailId: null, padTarget: 'buyIn' }),
+
+      dateLine: new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' }),
+      currency: S.currency, sessionCount: sessions.length,
+      bankrollText: this.money(net, true), monthText: this.money(monthNet, true), monthColor: this.col(monthNet),
+      hourlyText: this.money(hrs > 0 ? net / hrs : 0, true), hourlyColor: this.col(net),
+      hoursText: hrs.toFixed(1), winRateText: sessions.length ? Math.round((wins / sessions.length) * 100) + '%' : '—',
+      avgText: this.money(sessions.length ? net / sessions.length : 0, true), avgColor: this.col(net),
+      sparkLine: spark.line, sparkArea: spark.area, sparkZero: spark.zero,
+      hasActive: !!A, noActive: !A, timerText: this.clock(elapsed),
+      recent: sorted.slice(0, 4).map(row),
+      goNew: () => this.setState({ flow: 'new', padTarget: 'buyIn', detailId: null }),
+      goActive: () => this.setState({ flow: 'active', detailId: null }),
+      goLog: () => this.go('log'), goBack: () => this.setState({ detailId: null }),
+
+      filters: ['All', 'Wins', 'Losses'].map((f) => ({
+        label: f, bg: st.filter === f ? 'var(--color-accent)' : 'transparent',
+        fg: st.filter === f ? 'var(--color-bg)' : 'var(--color-text)',
+        onClick: () => this.setState({ filter: f }),
+      })),
+      logRows: filtered.map(row), logCount: filtered.length,
+      logNet: this.money(fNet, true), logNetColor: this.col(fNet),
+      logHours: filtered.reduce((n, s) => n + this.hours(s), 0).toFixed(1),
+
+      curveLine: big.line, curveArea: big.area, curveZero: big.zero,
+      curveSpan: sessions.length + ' sessions \u00b7 ' + hrs.toFixed(0) + 'h',
+      curveFirst: sorted.length ? this.when(sorted[sorted.length - 1].startedAt) : '—',
+      curvePeak: this.money(big.peak, true), curveLast: 'Now',
+      byStake, supers,
+
+      d, a, onDelete: () => { this.setState({ sessions: st.sessions.filter((s) => s.id !== det), detailId: null }); this.say('Session deleted'); },
+
+      showQuick: this.props.showQuickStart !== false,
+      presets,
+      buyInText: st.draft.buyIn ? this.sym() + Number(st.draft.buyIn).toLocaleString('en-US') : this.sym() + '0',
+      draftRows: [
+        { label: 'Venue', value: st.draft.venue, onClick: () => this.setState({ sheet: 'venue' }) },
+        { label: 'Stakes', value: this.stakeLabel(st.draft), onClick: () => this.setState({ sheet: 'stakes' }) },
+        { label: 'Game', value: st.draft.game, onClick: () => this.setState({ sheet: 'game' }) },
+        { label: 'Table', value: st.draft.seats + '-max', onClick: () => this.setState({ sheet: 'seats' }) },
+      ],
+      startDisabled: !Number(st.draft.buyIn), startOpacity: Number(st.draft.buyIn) ? 1 : 0.45,
+      onStart: () => this.startSession(), onCancelNew: () => this.setState({ flow: null }),
+      padKeys,
+
+      onOpenRebuy: () => this.setState({ sheet: 'rebuy' }),
+      goCashOut: () => this.setState({ flow: 'cashout', padTarget: 'cash' }),
+      onAbandon: () => { this.setState({ active: null, flow: null, tab: 'home' }); this.say('Live session discarded'); },
+
+      cashText: st.out.cash ? this.sym() + Number(st.out.cash).toLocaleString('en-US') : this.sym() + '0',
+      tipsText: st.out.tips ? this.sym() + Number(st.out.tips).toLocaleString('en-US') : this.sym() + '0',
+      cashBorder: st.padTarget === 'cash' ? 'var(--color-accent)' : 'var(--color-divider)',
+      tipsBorder: st.padTarget === 'tips' ? 'var(--color-accent)' : 'var(--color-divider)',
+      focusCash: () => this.setState({ padTarget: 'cash' }), focusTips: () => this.setState({ padTarget: 'tips' }),
+      outNet: this.money(outNet, true), outColor: this.col(outNet),
+      outDur: this.shortDur(elapsed), outRate: elapsed < 300000 ? '\u2014' : this.money(outNet / outH, true),
+      outMath: A ? this.money(cashN) + ' off table \u2212 ' + this.money(this.buyIn(A)) + ' in \u2212 ' + this.money(tipsN) + ' tips' : '',
+      confirmOpacity: cashN || tipsN ? 1 : 0.45,
+      onConfirm: () => this.book(),
+
+      setRows: [
+        { label: 'Currency', value: S.currency, onClick: () => this.setState({ sheet: 'currency' }) },
+        { label: 'Default game', value: S.game, onClick: () => this.setState({ sheet: 'defGame' }) },
+        { label: 'Default stakes', value: S.stakes, onClick: () => this.setState({ sheet: 'defStakes' }) },
+        { label: 'Default table', value: S.seats + '-max', onClick: () => this.setState({ sheet: 'defSeats' }) },
+        { label: 'Quick-start presets', value: this.props.showQuickStart === false ? 'Off' : 'On', onClick: () => this.say('Set in the Tweaks panel') },
+      ],
+      hasSessions: sessions.length > 0, noSessions: sessions.length === 0,
+      emptyLine: parked > 0
+        ? parked + ' session' + (parked === 1 ? '' : 's') + ' sit in another currency. Switch currency in Settings, start one at the table, or bring a log across.'
+        : 'Start one at the table, or bring your history across from analytics7.',
+      noLogRows: filtered.length === 0,
+      logEmptyTitle: sessions.length === 0 ? 'Nothing logged in ' + S.currency : 'No ' + st.filter.toLowerCase() + ' yet',
+      logEmptyLine: sessions.length === 0
+        ? 'The log follows the currency you are showing. Import or start a session to fill it.'
+        : 'Every ' + S.currency + ' session so far sits in one of the other two filters.',
+      hasParked: parked > 0,
+      parkedNote: parked + ' session' + (parked === 1 ? '' : 's') + ' in another currency are held aside. Bankroll, stats and the log only ever sum the currency shown above \u2014 switch currency to see them.',
+      onExport: () => this.say(sessions.length + ' rows exported'),
+      onSeed: () => { this.setState({ sessions: this.seed(Date.now(), 86400000, 3600000) }); this.say('Sample log restored'); },
+      onReset: () => { this.setState({ sessions: [], active: null, flow: null, detailId: null }); this.say('All sessions erased'); },
+
+      isImport: flow === 'import',
+      impStep: imp ? (imp.step === 'pick' ? 1 : imp.step === 'map' ? 2 : 3) : 1,
+      impPick: !!imp && imp.step === 'pick', impMap: !!imp && imp.step === 'map', impReview: !!imp && imp.step === 'review',
+      impHasError: !!(imp && imp.error), impError: (imp && imp.error) || '',
+      openImport: () => this.setState({ flow: 'import', imp: { step: 'pick' }, detailId: null }),
+      impCancel: () => this.setState({ flow: null, imp: null }),
+      impBack: () => this.setState({ imp: Object.assign({}, imp, { step: 'map' }) }),
+      impToReview: () => this.setState({ imp: Object.assign({}, imp, { step: 'review' }) }),
+      impToggleSkip: () => this.setState({ imp: Object.assign({}, imp, { skip: !imp.skip }) }),
+      impCommit: () => this.commitA7(),
+      onPickFile: (e) => {
+        const f = e.target.files && e.target.files[0];
+        if (!f) return;
+        const rd = new FileReader();
+        rd.onload = () => this.loadA7(String(rd.result), f.name);
+        rd.onerror = () => this.setState({ imp: { step: 'pick', error: 'That file could not be opened.' } });
+        rd.readAsText(f);
+      },
+      onUseSample: () => {
+        fetch('analytics7-model.xml').then((r) => r.text())
+          .then((t) => this.loadA7(t, 'Model__09-22-26-15h18.xml'))
+          .catch(() => this.setState({ imp: { step: 'pick', error: 'The sample export could not be loaded.' } }));
+      },
+      impMapRows: [
+        { from: 'cash @startdate / @enddate', to: 'Start / end', color: 'var(--color-text)' },
+        { from: 'cash @blinds', to: 'Stakes', color: 'var(--color-text)' },
+        { from: 'cash @location', to: 'Venue', color: 'var(--color-text)' },
+        { from: 'cash @tablesize', to: 'Table size', color: 'var(--color-text)' },
+        { from: 'cash @variant / @limit', to: 'Game', color: 'var(--color-text)' },
+        { from: 'result > buyin[]', to: 'Buy-ins & re-buys', color: 'var(--color-text)' },
+        { from: 'result @chipcount', to: 'Chips off table', color: 'var(--color-text)' },
+        { from: 'result @tips', to: 'Tips & rake', color: 'var(--color-text)' },
+        { from: 'cash @comments', to: 'Notes', color: 'var(--color-text)' },
+        { from: 'handHistories, notes', to: 'Not imported', color: 'var(--color-neutral-600)' },
+      ],
+      impName: imp ? imp.name : '', impCount: impRows.length,
+      impSpan: impSpan, impBank: imp ? imp.bank : '', impCode: imp ? imp.code : '',
+      impVenues: impVenues,
+      impModes: !imp ? [] : (impSameCur ? [
+        { label: 'Keep ' + imp.code, sub: 'Same currency as your ledger \u00b7 nothing to convert', bg: 'color-mix(in srgb, var(--color-accent) 12%, transparent)', dot: 'var(--color-accent)', onClick: () => this.setState({ imp: Object.assign({}, imp, { mode: 'keep' }) }) },
+      ] : [
+        { label: 'Keep ' + imp.code, sub: 'Ledger switches to ' + imp.code + ' \u00b7 your ' + st.sessions.length + ' ' + S.currency + ' sessions stay in the log, shown when you switch back', bg: !impConvert ? 'color-mix(in srgb, var(--color-accent) 12%, transparent)' : 'transparent', dot: !impConvert ? 'var(--color-accent)' : 'transparent', onClick: () => this.setState({ imp: Object.assign({}, imp, { mode: 'keep' }) }) },
+        { label: 'Convert to ' + S.currency, sub: 'At 1 ' + imp.code + ' = ' + impRate + ' ' + S.currency + ' \u00b7 amounts and stakes rescaled', bg: impConvert ? 'color-mix(in srgb, var(--color-accent) 12%, transparent)' : 'transparent', dot: impConvert ? 'var(--color-accent)' : 'transparent', onClick: () => this.setState({ imp: Object.assign({}, imp, { mode: 'convert' }) }) },
+      ]),
+      impDupeLine: impDupes + ' of ' + impRows.length + ' already in your log',
+      skipLabel: imp && imp.skip ? 'Skipping' : 'Importing',
+      skipBg: imp && imp.skip ? 'var(--color-accent)' : 'transparent',
+      skipFg: imp && imp.skip ? 'var(--color-bg)' : 'var(--color-accent-700)',
+      impRows: impList,
+      impNet: this.moneyIn(impNet, impCurCode, true), impNetColor: this.col(impNet),
+      impHours: impHours.toFixed(1),
+      impAddLine: impAdd + ' to add \u00b7 ' + (impRows.length - impAdd) + ' skipped',
+      impCommitLabel: 'Import ' + impAdd + ' sessions',
+
+      sheetOpen: !!sheet, sheetTitle: sheet ? sheet.title : '', sheetItems: sheet ? sheet.items : [],
+      closeSheet: () => this.setState({ sheet: null }), stop: (e) => e.stopPropagation(),
+      toastOpen: !!st.toast, toast: st.toast || '',
+    };
+  }
+}
+</script>
+</body>
+</html>
