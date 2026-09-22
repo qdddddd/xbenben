@@ -38,6 +38,8 @@ All nine screens and all three import stages were captured in a real browser. Sc
 
 The standard suite currently has 9 unit tests and 18 Chrome browser tests. It checks a real CSV/JSON download, offline fonts/sample/icons, storage-denial/corruption handling, keyboard focus, simulated share cancellation and a genuine service-worker script update. The update test verifies that a reload is offered and the stored ledger is retained. The share test mocks the OS API; it does not claim to verify iCloud delivery.
 
+A real Pages update from `bf85ef4` to `15bedf3` was also verified in a retained Chrome profile after [successful deployment](https://github.com/qdddddd/xbenben/actions/runs/35763684641). Nine synthetic sessions in two currencies, a running session with a re-buy, settings and backup metadata survived closing/reopening the browser, the visible update prompt, explicit reload into the new release and an offline restart. Every persisted field matched the original snapshot.
+
 ## Deliberate changes
 
 - User-requested rename: xbenben replaces Ledger in the app name, wordmark, install metadata, messages and download filenames; the blueprint icon now uses an X. The reference files, stored-data key and backup format remain compatible.
