@@ -1,5 +1,7 @@
 # xbenben
 
+[Open the live app](https://qdddddd.github.io/xbenben/) · [Source repository](https://github.com/qdddddd/xbenben)
+
 An installable, offline cash-game session log. The nine screens follow the supplied Ledger design and Industry system. React renders native components; the design runtime and iPhone bezel are not shipped.
 
 The app was renamed to **xbenben**. Existing saved sessions and backup files remain compatible: `ledger:data:v1` and the `ledger-backup` format are stable identifiers. New downloads use the `xbenben` filename prefix.
@@ -52,9 +54,9 @@ There is no background iCloud access, account or synchronization. The app reques
 
 ## Publish on GitHub Pages
 
-The repository name and visibility must be confirmed before creating it. Authenticate with `gh auth login -h github.com`. A public repository supports Pages on GitHub Free; private repositories require an eligible paid plan. The site itself is public in this deployment configuration. See [GitHub's Pages workflow documentation](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages).
+The app is published from the public `qdddddd/xbenben` repository using GitHub Actions. The repository name and public visibility were confirmed before creation. For another deployment, authenticate with `gh auth login -h github.com`; a public repository supports Pages on GitHub Free. See [GitHub's Pages workflow documentation](https://docs.github.com/en/pages/getting-started-with-github-pages/using-custom-workflows-with-github-pages).
 
-The prepared `.github/workflows/pages.yml` runs tests and privacy checks, builds the repository's correct base path, uploads only `app/dist`, and deploys through the `github-pages` environment. Enable **Settings → Pages → Build and deployment → GitHub Actions**, then push `main` or run the workflow manually.
+The `.github/workflows/pages.yml` workflow runs tests and privacy checks, builds the repository's correct base path, uploads only `app/dist`, and deploys through the `github-pages` environment. Pages is configured to use GitHub Actions. Push `main` or run the workflow manually to publish an update.
 
 For a local build at a project URL:
 
@@ -70,7 +72,7 @@ The private prompt, original analytics export, uploads, private tests and screen
 
 These steps require a real iPhone; desktop browser automation cannot verify the native share sheet or iCloud Drive.
 
-1. Open the final HTTPS Pages URL in Safari. Use **Share → Add to Home Screen**, keep the name **xbenben**, and open its icon. Check the status/home safe areas and keyboard layout.
+1. Open [xbenben](https://qdddddd.github.io/xbenben/) in Safari. Use **Share → Add to Home Screen**, keep the name **xbenben**, and open its icon. Check the status/home safe areas and keyboard layout.
 2. Load the fictional sample or import your own XML through **Settings → Import from analytics7 → Choose .xml file**. In Files, select iCloud Drive or the folder where AirDrop saved the export.
 3. Start a session, add a re-buy, close and reopen the installed app, and check the clock and invested amount.
 4. Make a complete backup. In the share sheet choose **Save to Files → iCloud Drive**, then verify the saved JSON file in Files. If file sharing is unavailable, download it and move/save it using Files.

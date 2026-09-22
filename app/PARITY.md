@@ -31,9 +31,9 @@ All nine screens and all three import stages were captured in a real browser. Sc
 | 3. Bad XML | Passed: invalid XML, no cash sessions and unreadable dates retain step one and the specified messages. |
 | 4. Live session | Passed: start, re-buy, simulated elapsed time, reload, close/reopen, currency change, cash/tips entry and booking; original timestamp and buy-ins survive. |
 | 5. Visual parity | Passed with the documented deliberate differences. Reference screenshots, app screenshots and diff images were inspected locally. |
-| 6. Clean build | Passed from a fresh local clone of source commit `06a2681`: `npm ci`, all 9 unit and 18 Chrome tests, `test:pages`, production build and privacy audit. No ignored fixtures or existing dependencies were needed. |
+| 6. Clean build | Passed from a fresh local clone of source commit `06a2681`; the renamed app also passed in a fresh GitHub Actions Ubuntu checkout at `bf85ef4`. Both installed dependencies, ran all 9 unit and 18 browser tests, built production assets and passed the privacy audit. The local `/xbenben/` subdirectory/offline check also passed. |
 | 7. Backup round trip | Passed in Chrome: two currencies, a live session with re-buy, theme, venues/stakes, preview without mutation, cancelled restore and exact confirmed replacement. Corrupt, unrelated and unsupported-version files are rejected. |
-| 8. Publishing | Pages workflow prepared; the renamed build passes all 27 tests and the `/xbenben/` subdirectory/offline check. The user authorized a public `qdddddd/xbenben` repository; deployment verification follows publication. |
+| 8. Publishing | Passed: [HTTPS app](https://qdddddd.github.io/xbenben/) and [public source](https://github.com/qdddddd/xbenben), with a successful Actions deployment. Live Chrome checks verified the name/icons, manifest scope, two-currency synthetic imports, backup download, offline reload with a running session and local fonts. Private-file URLs return 404; the Git history/site privacy audit passes. |
 | 9. Physical iPhone | Not run on this machine. Installation, native share sheet, iCloud Drive/AirDrop and airplane-mode checks are specified in README. |
 
 The standard suite currently has 9 unit tests and 18 Chrome browser tests. It checks a real CSV/JSON download, offline fonts/sample/icons, storage-denial/corruption handling, keyboard focus, simulated share cancellation and a genuine service-worker script update. The update test verifies that a reload is offered and the stored ledger is retained. The share test mocks the OS API; it does not claim to verify iCloud delivery.
@@ -73,4 +73,4 @@ The standard suite currently has 9 unit tests and 18 Chrome browser tests. It ch
 
 During development, browser checks found a button line-height mismatch and a modal Tab-focus escape; both were corrected. A test locator incorrectly searched Recent for an older venue and was corrected to use the full log. No unresolved functional failure is known in the passing standard suite.
 
-Native iPhone installation, Files/iCloud behavior and the OS share sheet remain manual checks. GitHub publishing is authorized; live verification follows deployment. There is no account, server sync, tournament support, hand-history import or live exchange-rate service.
+Native iPhone installation, Files/iCloud behavior and the OS share sheet remain manual checks. The published app passes desktop Chrome verification. There is no account, server sync, tournament support, hand-history import or live exchange-rate service.
