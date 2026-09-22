@@ -514,7 +514,7 @@ export default class Ledger extends React.Component {
       },
       onUseSample: () => {
         fetch(import.meta.env.BASE_URL + 'sample-analytics7.xml').then((r) => { if (!r.ok) throw new Error('Sample unavailable'); return r.text(); })
-          .then((t) => this.loadA7(t, 'ledger-demo.xml'))
+          .then((t) => this.loadA7(t, 'xbenben-demo.xml'))
           .catch(() => this.setState({ imp: { step: 'pick', error: 'The sample export could not be loaded.' } }));
       },
       impMapRows: [
@@ -535,7 +535,7 @@ export default class Ledger extends React.Component {
       impModes: !imp ? [] : (impSameCur ? [
         { label: 'Keep ' + imp.code, sub: 'Same currency as your ledger \u00b7 nothing to convert', bg: 'color-mix(in srgb, var(--color-accent) 12%, transparent)', dot: 'var(--color-accent)', onClick: () => this.setState({ imp: Object.assign({}, imp, { mode: 'keep' }) }) },
       ] : [
-        { label: 'Keep ' + imp.code, sub: 'Ledger switches to ' + imp.code + ' \u00b7 your ' + sessions.length + ' ' + S.currency + ' sessions stay in the log, shown when you switch back', bg: !impConvert ? 'color-mix(in srgb, var(--color-accent) 12%, transparent)' : 'transparent', dot: !impConvert ? 'var(--color-accent)' : 'transparent', onClick: () => this.setState({ imp: Object.assign({}, imp, { mode: 'keep' }) }) },
+        { label: 'Keep ' + imp.code, sub: 'xbenben switches to ' + imp.code + ' \u00b7 your ' + sessions.length + ' ' + S.currency + ' sessions stay in the log, shown when you switch back', bg: !impConvert ? 'color-mix(in srgb, var(--color-accent) 12%, transparent)' : 'transparent', dot: !impConvert ? 'var(--color-accent)' : 'transparent', onClick: () => this.setState({ imp: Object.assign({}, imp, { mode: 'keep' }) }) },
         { label: 'Convert to ' + S.currency, sub: 'At 1 ' + imp.code + ' = ' + impRate + ' ' + S.currency + ' \u00b7 amounts and stakes rescaled', bg: impConvert ? 'color-mix(in srgb, var(--color-accent) 12%, transparent)' : 'transparent', dot: impConvert ? 'var(--color-accent)' : 'transparent', onClick: () => this.setState({ imp: Object.assign({}, imp, { mode: 'convert' }) }) },
       ]),
       impCanConvert: !!impRate,
@@ -604,11 +604,11 @@ export default class Ledger extends React.Component {
   exportCsv() {
     const { currency } = this.state.settings;
     const list = this.state.sessions.filter(s => s.cur === currency).sort((a, b) => b.startedAt - a.startedAt);
-    domain.download(domain.csv(list), 'ledger-' + currency + '-' + new Date().toISOString().slice(0, 10) + '.csv', 'text/csv;charset=utf-8');
+    domain.download(domain.csv(list), 'xbenben-' + currency + '-' + new Date().toISOString().slice(0, 10) + '.csv', 'text/csv;charset=utf-8');
     this.say(list.length + ' rows exported');
   }
   recoveryDownload() {
-    domain.download(this.state.recoveryRaw || JSON.stringify(this.state, null, 2), 'ledger-recovery.json', 'application/json');
+    domain.download(this.state.recoveryRaw || JSON.stringify(this.state, null, 2), 'xbenben-recovery.json', 'application/json');
     this.setState({ recoveryDownloaded: true });
   }
   requestStorage() {
@@ -628,7 +628,7 @@ export default class Ledger extends React.Component {
       // An explicit second tap retains iOS share-sheet user activation.
       if (useShare) {
         const file = new File([backup.text], backup.name, { type: 'application/json' });
-        await navigator.share({ files: [file], title: 'Ledger backup' });
+        await navigator.share({ files: [file], title: 'xbenben backup' });
       } else domain.download(backup.text, backup.name, 'application/json');
       this.setState({ lastBackupAt: backup.envelope.createdAt, modal: null, preparedBackup: null });
       this.say('Backup file created');
@@ -654,7 +654,7 @@ export default class Ledger extends React.Component {
     catch { this.setState({ backupError: 'The backup could not be saved on this device. Free some storage and try again. Your current ledger is unchanged.' }); return; }
     this.setState({ ...restored, modal: null, restoreBackup: null, backupError: null, storageError: null, recoveryRaw: null,
       now: Date.now(), flow: restored.active ? 'active' : null, detailId: null, tab: 'home', sheet: null, imp: null });
-    this.say('Ledger restored from backup');
+    this.say('xbenben restored from backup');
   }
   render() {
     const v = this.renderVals();

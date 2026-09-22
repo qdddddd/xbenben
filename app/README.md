@@ -1,6 +1,8 @@
-# Ledger
+# xbenben
 
 An installable, offline cash-game session log. The nine screens follow the supplied Ledger design and Industry system. React renders native components; the design runtime and iPhone bezel are not shipped.
+
+The app was renamed to **xbenben**. Existing saved sessions and backup files remain compatible: `ledger:data:v1` and the `ledger-backup` format are stable identifiers. New downloads use the `xbenben` filename prefix.
 
 ## Run
 
@@ -57,10 +59,10 @@ The prepared `.github/workflows/pages.yml` runs tests and privacy checks, builds
 For a local build at a project URL:
 
 ```sh
-LEDGER_BASE=/your-repository/ npm run build
+XBENBEN_BASE=/xbenben/ npm run build
 ```
 
-For an account root site, use `/`. Keep the published origin and repository path stable across releases. The storage key remains `ledger:data:v1`; service-worker updates never erase it or automatically interrupt a running session. A visible reload action applies an available update.
+For an account root site, use `/`. The former `LEDGER_BASE` variable is also accepted. Keep the published origin and repository path stable across releases. The storage key remains `ledger:data:v1`; service-worker updates never erase it or automatically interrupt a running session. A visible reload action applies an available update.
 
 The private prompt, original analytics export, uploads, private tests and screenshot evidence are ignored and excluded from history. `check:privacy` enforces private-path exclusion, checks locally available private session identifiers, and verifies that the deployed sample is synthetic. No analytics, external fonts or user-data service is included.
 
@@ -68,12 +70,12 @@ The private prompt, original analytics export, uploads, private tests and screen
 
 These steps require a real iPhone; desktop browser automation cannot verify the native share sheet or iCloud Drive.
 
-1. Open the final HTTPS Pages URL in Safari. Use **Share → Add to Home Screen**, keep the name **Ledger**, and open its icon. Check the status/home safe areas and keyboard layout.
+1. Open the final HTTPS Pages URL in Safari. Use **Share → Add to Home Screen**, keep the name **xbenben**, and open its icon. Check the status/home safe areas and keyboard layout.
 2. Load the fictional sample or import your own XML through **Settings → Import from analytics7 → Choose .xml file**. In Files, select iCloud Drive or the folder where AirDrop saved the export.
 3. Start a session, add a re-buy, close and reopen the installed app, and check the clock and invested amount.
 4. Make a complete backup. In the share sheet choose **Save to Files → iCloud Drive**, then verify the saved JSON file in Files. If file sharing is unavailable, download it and move/save it using Files.
 5. With a verified backup available, erase the test ledger, choose **Restore backup**, select that file from iCloud Drive, inspect the preview, and confirm replacement. Check settings, both currencies, custom choices and the original live-session clock.
-6. After an online launch, enable airplane mode. Reopen Ledger, check the log and fonts, start or resume a session, add a re-buy and cash out. Reconnect before expecting a new file to sync to iCloud.
+6. After an online launch, enable airplane mode. Reopen xbenben, check the log and fonts, start or resume a session, add a re-buy and cash out. Reconnect before expecting a new file to sync to iCloud.
 7. After a new release, check that the saved log remains present and apply the update using its reload button. A fresh home-screen installation may have a separate browser storage context; restore a backup there if needed.
 
 ## Code map

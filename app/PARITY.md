@@ -1,6 +1,6 @@
-# Ledger parity and verification
+# xbenben parity and verification
 
-Verification date: 2026-09-22. Chrome, 402×874; primary tabs also checked at 320 pixels. Private financial figures are intentionally omitted from this public report.
+Initial verification: 2026-09-22. Rename verification: 2026-09-23. Chrome, 402×874; primary tabs also checked at 320 pixels. Private financial figures are intentionally omitted from this public report.
 
 ## Screens
 
@@ -8,11 +8,11 @@ The native React view is ported from the reference markup. The comparison uses i
 
 | Screen | Verification and result |
 | --- | --- |
-| 01 Bankroll home | Passed: sample figures, currency isolation, recent order, empty state and resume state. Matched reference screenshot after safe-area normalization. |
+| 01 Bankroll home | Passed: sample figures, currency isolation, recent order, empty state and resume state. Matched reference layout after safe-area normalization; the requested xbenben wordmark replaces LEDGER. |
 | 02 Session log | Passed: All / Wins / Losses, totals, hours, row order and navigation. Matched reference screenshot. |
 | 03 Session detail | Passed: signed result, hourly/big-blind rate, buy-ins, tips, duration, city and notes. Matched reference screenshot; delete now confirms. |
 | 04 New session | Passed: exact numpad/presets layout, repeat/default presets, saved defaults and dynamic pickers. Matched reference screenshot. |
-| 05 Live session | Passed: timer, invested sum, prescribed re-buy options, reload and close/reopen. Added a return-to-ledger control. |
+| 05 Live session | Passed: timer, invested sum, prescribed re-buy options, reload and close/reopen. Added a return-to-home control. |
 | 06 Cash out | Passed: cash/tips selection, keyboard, result equation, booking and currency. Valid zero-chip booking now looks enabled. |
 | 07 Stats | Passed: curve, stake groups and superlatives. Lifetime colour follows lifetime net; a one-session curve and peak now render correctly. |
 | 08 Settings | Passed: defaults, all three tweaks, CSV, safe sample controls, currency note, backup/restore and storage status. Added controls extend the scrollable screen. |
@@ -33,13 +33,14 @@ All nine screens and all three import stages were captured in a real browser. Sc
 | 5. Visual parity | Passed with the documented deliberate differences. Reference screenshots, app screenshots and diff images were inspected locally. |
 | 6. Clean build | Passed from a fresh local clone of source commit `06a2681`: `npm ci`, all 9 unit and 18 Chrome tests, `test:pages`, production build and privacy audit. No ignored fixtures or existing dependencies were needed. |
 | 7. Backup round trip | Passed in Chrome: two currencies, a live session with re-buy, theme, venues/stakes, preview without mutation, cancelled restore and exact confirmed replacement. Corrupt, unrelated and unsupported-version files are rejected. |
-| 8. Publishing | Pages workflow prepared; subdirectory/offline checks and history/site privacy checks passed. GitHub authentication is verified; live deployment awaits the user-confirmed repository name and visibility. |
+| 8. Publishing | Pages workflow prepared; the renamed build passes all 27 tests and the `/xbenben/` subdirectory/offline check. The user authorized a public `qdddddd/xbenben` repository; deployment verification follows publication. |
 | 9. Physical iPhone | Not run on this machine. Installation, native share sheet, iCloud Drive/AirDrop and airplane-mode checks are specified in README. |
 
 The standard suite currently has 9 unit tests and 18 Chrome browser tests. It checks a real CSV/JSON download, offline fonts/sample/icons, storage-denial/corruption handling, keyboard focus, simulated share cancellation and a genuine service-worker script update. The update test verifies that a reload is offered and the stored ledger is retained. The share test mocks the OS API; it does not claim to verify iCloud delivery.
 
 ## Deliberate changes
 
+- User-requested rename: xbenben replaces Ledger in the app name, wordmark, install metadata, messages and download filenames; the blueprint icon now uses an X. The reference files, stored-data key and backup format remain compatible.
 - Real safe areas replace the design sheet, bezel, status bar and home indicator. Desktop width is capped; small viewports scroll within screens.
 - First launch is empty. Sample restoration is confirmed, tagged and idempotent, preserves personal records, switches to USD and offers separate sample removal.
 - The shipped XML sample is entirely fictional. The user's export is accepted through the file picker but never included in public assets, tests or screenshots.
@@ -72,4 +73,4 @@ The standard suite currently has 9 unit tests and 18 Chrome browser tests. It ch
 
 During development, browser checks found a button line-height mismatch and a modal Tab-focus escape; both were corrected. A test locator incorrectly searched Recent for an older venue and was corrected to use the full log. No unresolved functional failure is known in the passing standard suite.
 
-Native iPhone installation, Files/iCloud behavior and the OS share sheet remain manual checks. GitHub authentication is verified; publishing waits for repository name and visibility approval. There is no account, server sync, tournament support, hand-history import or live exchange-rate service.
+Native iPhone installation, Files/iCloud behavior and the OS share sheet remain manual checks. GitHub publishing is authorized; live verification follows deployment. There is no account, server sync, tournament support, hand-history import or live exchange-rate service.

@@ -138,7 +138,7 @@ test('live clock and rebuy survive reload, closing a window, currency changes an
   await reopened.clock.install({ time: new Date(start.getTime() + 600000) });
   await reopened.goto('/');
   await expect(reopened.getByTestId('timer')).toHaveText('0:10:00');
-  await reopened.getByRole('button', { name: '← Back to ledger' }).click();
+  await reopened.getByRole('button', { name: '← Back to xbenben' }).click();
   await settings(reopened); await choose(reopened, /^Currency/, 'HKD Hong Kong');
   await reopened.getByRole('button', { name: 'Live', exact: true }).click();
   await reopened.getByRole('button', { name: 'Cash out', exact: true }).click();
@@ -216,7 +216,7 @@ test('CSV exports a real downloadable file for the displayed currency', async ({
   const pending = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Export CSV' }).click();
   const file = await pending, content = await fs.readFile(await file.path(), 'utf8');
-  expect(file.suggestedFilename()).toMatch(/^ledger-USD-.*\.csv$/);
+  expect(file.suggestedFilename()).toMatch(/^xbenben-USD-.*\.csv$/);
   expect(content).toContain('Bellagio'); expect(content).toContain('"960"');
   expect(content.trim().split('\r\n')).toHaveLength(7);
 });
@@ -337,7 +337,7 @@ test('backup preview and confirmed replacement round-trip two currencies, live c
   await page.getByRole('button', { name: /Repeat Demo Room A/ }).click();
   await page.getByRole('button', { name: '+ Re-buy', exact: true }).click();
   await page.getByRole('dialog').getByRole('button', { name: /HK\$4,000/ }).click();
-  await page.getByRole('button', { name: '← Back to ledger' }).click(); await settings(page);
+  await page.getByRole('button', { name: '← Back to xbenben' }).click(); await settings(page);
   await page.getByRole('button', { name: 'Back up to iCloud / file' }).click();
   const pending = page.waitForEvent('download');
   await page.getByRole('dialog').getByRole('button', { name: 'Download backup' }).click();
@@ -346,20 +346,20 @@ test('backup preview and confirmed replacement round-trip two currencies, live c
   await expect(screen(page, 'settings')).not.toContainText('Last backup: Never');
   await page.getByRole('button', { name: 'Erase all sessions', exact: true }).click();
   await page.getByRole('dialog').getByRole('button', { name: 'Erase all sessions', exact: true }).click();
-  const input = page.getByLabel('Restore Ledger backup');
-  await input.setInputFiles({ name: 'ledger.json', mimeType: 'application/json', buffer: Buffer.from(text) });
+  const input = page.getByLabel('Restore xbenben backup');
+  await input.setInputFiles({ name: 'xbenben.json', mimeType: 'application/json', buffer: Buffer.from(text) });
   await expect(page.getByRole('dialog')).toContainText('6 USD');
   await expect(page.getByRole('dialog')).toContainText('3 HKD');
   expect((await saved(page)).sessions).toHaveLength(0);
   await page.getByRole('dialog').getByRole('button', { name: 'Cancel', exact: true }).click();
   expect((await saved(page)).active).toBeNull();
-  await input.setInputFiles({ name: 'ledger.json', mimeType: 'application/json', buffer: Buffer.from(text) });
+  await input.setInputFiles({ name: 'xbenben.json', mimeType: 'application/json', buffer: Buffer.from(text) });
   await page.getByRole('button', { name: 'Replace ledger & restore' }).click();
   const restored = await saved(page);
   for (const field of ['sessions', 'active', 'settings', 'venues', 'stakes', 'draft', 'out', 'lastBackupAt']) expect(restored[field]).toEqual(original[field]);
   expect(restored.active.startedAt).toBe(envelope.ledger.active.startedAt);
   await expect(screen(page, 'active')).toBeVisible();
-  await page.getByRole('button', { name: '← Back to ledger' }).click();
+  await page.getByRole('button', { name: '← Back to xbenben' }).click();
   await expect(page.getByTestId('bankroll')).toHaveText('+HK$2,900');
   await settings(page);
   for (const contents of ['not json', '{"unrelated":true}', JSON.stringify({ ...envelope, checksum: 'broken' })]) {
@@ -382,7 +382,7 @@ test('share-sheet cancellation leaves last-backup unchanged and storage persiste
   expect(await page.evaluate(() => window.persistRequests)).toBeGreaterThan(0);
   expect((await page.evaluate(() => window.sharedBackup)).type).toBe('application/json');
   expect((await saved(page))?.lastBackupAt ?? null).toBeNull();
-  await expect(page.getByRole('dialog', { name: 'Back up ledger' })).toBeVisible();
+  await expect(page.getByRole('dialog', { name: 'Back up xbenben' })).toBeVisible();
 });
 
 test('a service-worker update waits for reload and keeps the saved ledger', async ({ page }) => {

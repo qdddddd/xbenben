@@ -2,7 +2,7 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 
-const base = process.env.LEDGER_BASE || '/';
+const base = process.env.XBENBEN_BASE || process.env.LEDGER_BASE || '/';
 
 export default defineConfig({
   base,
@@ -10,9 +10,9 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'prompt',
-      includeAssets: ['icons/*.png', 'icons/ledger.svg', 'sample-analytics7.xml'],
+      includeAssets: ['icons/*.png', 'icons/xbenben.svg', 'sample-analytics7.xml'],
       manifest: {
-        name: 'Ledger · Poker sessions', short_name: 'Ledger',
+        name: 'xbenben · Poker sessions', short_name: 'xbenben',
         description: 'A private cash-game session log.',
         id: base, start_url: base, scope: base, display: 'standalone',
         background_color: '#f2f2f3', theme_color: '#f2f2f3',

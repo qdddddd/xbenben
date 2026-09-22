@@ -10,7 +10,7 @@ return (<div className="ledger-app" style={{"height": "100%", "display": "flex",
 <div style={{"display": "flex", "alignItems": "flex-start", "justifyContent": "space-between"}}>
 <div>
 <div style={{"fontFamily": "var(--font-heading)", "fontSize": "var(--size-11)", "letterSpacing": ".16em", "textTransform": "uppercase", "color": "var(--color-accent-700)"}}>{v.dateLine}</div>
-<div style={{"fontFamily": "var(--font-heading)", "fontSize": "var(--size-26)", "letterSpacing": ".02em", "marginTop": "var(--size-1)"}}>{"LEDGER"}</div>
+<div style={{"fontFamily": "var(--font-heading)", "fontSize": "var(--size-26)", "letterSpacing": ".02em", "marginTop": "var(--size-1)"}}>{"xbenben"}</div>
 </div>
 <div style={{"textAlign": "right", "fontSize": "var(--size-11)", "color": "var(--color-neutral-600)", "fontFamily": "var(--font-heading)", "letterSpacing": ".1em", "textTransform": "uppercase", "paddingTop": "var(--size-4)"}}>{(v.sessionCount) + " sessions"}<br />{(v.hoursText) + " h logged"}</div>
 </div>
@@ -251,7 +251,7 @@ return (<div className="ledger-app" style={{"height": "100%", "display": "flex",
 <button type="button" onClick={v.onReset} style={{"fontSize": "var(--size-13)", "letterSpacing": ".12em", "textTransform": "uppercase", "padding": "var(--size-12)", "color": "var(--color-neutral-900)"}} className="btn btn-secondary btn-block">{"Erase all sessions"}</button>
 </div>
 <BackupControls controller={v.controller} />
-<div style={{"fontSize": "var(--size-11)", "color": "var(--color-neutral-600)", "marginTop": "var(--size-14)", "fontFamily": "var(--font-heading)", "letterSpacing": ".1em", "textTransform": "uppercase"}}>{"Ledger 1.0 · sheet 01 · " + (v.sessionCount) + " records"}</div>
+<div style={{"fontSize": "var(--size-11)", "color": "var(--color-neutral-600)", "marginTop": "var(--size-14)", "fontFamily": "var(--font-heading)", "letterSpacing": ".1em", "textTransform": "uppercase"}}>{"xbenben 1.0 · sheet 01 · " + (v.sessionCount) + " records"}</div>
 </div>
 
 </>}
@@ -394,7 +394,7 @@ return (<div className="ledger-app" style={{"height": "100%", "display": "flex",
 <button type="button" onClick={v.onOpenRebuy} style={{"flex": "1", "padding": "var(--size-14)", "background": "transparent", "cursor": "pointer", "fontFamily": "var(--font-heading)", "fontSize": "var(--size-14)", "letterSpacing": ".12em", "textTransform": "uppercase", "color": "var(--color-text)"}} className="blueprint interaction-9"><i aria-hidden="true" className="corner tl"></i><i aria-hidden="true" className="corner tr"></i><i aria-hidden="true" className="corner bl"></i><i aria-hidden="true" className="corner br"></i>{"+ Re-buy"}</button>
 <button type="button" onClick={v.goCashOut} style={{"flex": "1.2", "padding": "var(--size-14)", "background": "var(--color-accent)", "color": "var(--color-bg)", "borderColor": "var(--color-accent)", "cursor": "pointer", "fontFamily": "var(--font-heading)", "fontSize": "var(--size-14)", "letterSpacing": ".12em", "textTransform": "uppercase"}} className="blueprint interaction-10"><i aria-hidden="true" className="corner tl"></i><i aria-hidden="true" className="corner tr"></i><i aria-hidden="true" className="corner bl"></i><i aria-hidden="true" className="corner br"></i>{"Cash out"}</button>
 </div>
-<button className="btn btn-ghost ledger-return" onClick={v.backHome}>← Back to ledger</button>
+<button className="btn btn-ghost ledger-return" onClick={v.backHome}>← Back to xbenben</button>
 </div>
 
 </>}

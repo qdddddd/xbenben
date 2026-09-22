@@ -46,7 +46,7 @@ const confirmations = {
   erase: ['Erase all sessions?', 'This permanently removes every session in every currency, including the running session. Export any log you want to keep first.', 'Erase all sessions'],
   sample: ['Restore sample log?', 'Add or refresh six example USD sessions and switch the ledger to USD. Your personal sessions, imports and running session stay intact. Remove the examples separately when you are done.', 'Restore sample log'],
   removeSamples: ['Remove sample log?', 'Remove only the six example sessions. Your personal sessions and imports stay in your log.', 'Remove sample log'],
-  resetStorage: ['Reset local storage?', 'Start with an empty ledger after saving your recovery copy. This only resets Ledger’s data in this browser.', 'Reset storage'],
+  resetStorage: ['Reset local storage?', 'Start with an empty ledger after saving your recovery copy. This only resets xbenben’s data in this browser.', 'Reset storage'],
 };
 
 function PickerForm({ controller, kind }) {
@@ -117,7 +117,7 @@ export function BackupControls({ controller }) {
     <div className="section-label">Backup & restore</div>
     <button className="btn btn-secondary btn-block data-button" onClick={() => controller.prepareBackup()}>Back up to iCloud / file</button>
     <label className="btn btn-secondary btn-block data-button backup-picker">Restore backup
-      <input type="file" accept=".json,application/json" className="file-input" aria-label="Restore Ledger backup" onChange={e => controller.readBackup(e)} />
+      <input type="file" accept=".json,application/json" className="file-input" aria-label="Restore xbenben backup" onChange={e => controller.readBackup(e)} />
     </label>
     <p className="backup-meta">Last backup: {s.lastBackupAt ? new Date(s.lastBackupAt).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' }) : 'Never'}</p>
     <p className="backup-meta">{s.durableStorage || 'Browser-managed storage · keep regular backups'}</p>
@@ -133,7 +133,7 @@ function BackupDialog({ controller }) {
     try { canShare = navigator.canShare({ files: [new File([s.preparedBackup.text], s.preparedBackup.name, { type: 'application/json' })] }); } catch { /* Download remains available. */ }
   }
   const close = () => controller.setState({ modal: null, restoreBackup: null, preparedBackup: null, backupError: null });
-  return <Modal title={restore ? 'Review backup' : 'Back up ledger'} onClose={close}>
+  return <Modal title={restore ? 'Review backup' : 'Back up xbenben'} onClose={close}>
     {s.backupError && <p role="alert" className="confirm-copy">{s.backupError}</p>}
     {!backup && !s.backupError && <p role="status" className="confirm-copy">{restore ? 'Reading backup…' : 'Preparing backup…'}</p>}
     {summary && <>

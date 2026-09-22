@@ -47,7 +47,7 @@ try {
   await app.getByRole('button', { name: 'Start · clock runs' }).click(); await capture('05-live');
   await jump(6); await app.getByRole('button', { name: 'Cash out', exact: true }).click(); await capture('06-cashout');
   await app.getByRole('button', { name: 'Back', exact: true }).click();
-  await app.getByRole('button', { name: '← Back to ledger' }).click();
+  await app.getByRole('button', { name: '← Back to xbenben' }).click();
   await jump(7); await app.getByRole('button', { name: 'Stats', exact: true }).click(); await capture('07-stats');
   await jump(8); await app.getByRole('button', { name: 'Settings', exact: true }).click(); await capture('08-settings');
   await jump(9); await app.getByRole('button', { name: /Import from analytics7/ }).click(); await capture('09-import-pick');
@@ -62,6 +62,6 @@ try {
   await frame.getByRole('button', { name: 'Import ' + count + ' sessions', exact: true }).click();
   await app.getByRole('button', { name: 'Import ' + count + ' sessions', exact: true }).click(); await capture('imported-home');
   await fs.writeFile(new URL('parity-results.json', output), JSON.stringify({ viewport: [402, 874], frozenTime: date.toISOString(), safeAreas: [42, 34], results }, null, 2));
-  const html = `<!doctype html><meta charset="utf-8"><title>Ledger parity evidence</title><style>body{font:15px system-ui;background:#e9e9ea;margin:30px}section{margin:0 0 40px}img{width:402px;height:874px}figure{display:inline-block;margin:8px}figcaption{margin-bottom:8px}h2{margin-bottom:0}</style><h1>Ledger · visual parity</h1><p>402 × 874, identical data and time. Prototype hardware hidden; app safe areas set to 42 / 34 px for comparison. Differences include deliberate production changes. See PARITY.md.</p>` + results.map(r => `<section><h2>${r.screen} · ${r.percent}% changed pixels</h2>${['reference', 'app', 'diff'].map(v => `<figure><figcaption>${v}</figcaption><img src="${r.screen}-${v}.png"></figure>`).join('')}</section>`).join('');
+  const html = `<!doctype html><meta charset="utf-8"><title>xbenben parity evidence</title><style>body{font:15px system-ui;background:#e9e9ea;margin:30px}section{margin:0 0 40px}img{width:402px;height:874px}figure{display:inline-block;margin:8px}figcaption{margin-bottom:8px}h2{margin-bottom:0}</style><h1>xbenben · visual parity</h1><p>402 × 874, identical data and time. Prototype hardware hidden; app safe areas set to 42 / 34 px for comparison. Differences include deliberate production changes. See PARITY.md.</p>` + results.map(r => `<section><h2>${r.screen} · ${r.percent}% changed pixels</h2>${['reference', 'app', 'diff'].map(v => `<figure><figcaption>${v}</figcaption><img src="${r.screen}-${v}.png"></figure>`).join('')}</section>`).join('');
   await fs.writeFile(new URL('index.html', output), html);
 } finally { await browser.close(); }

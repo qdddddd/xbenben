@@ -16,6 +16,6 @@ test('damaged, unrelated and future-version backups are rejected', async () => {
   const broken = JSON.parse(file.text); broken.ledger.settings.currency = 'HKD';
   await assert.rejects(parseBackup(JSON.stringify(broken)), /damaged/);
   await assert.rejects(parseBackup('{'), /not a readable/);
-  await assert.rejects(parseBackup('{"rows":[]}'), /not a Ledger/);
+  await assert.rejects(parseBackup('{"rows":[]}'), /not an xbenben/);
   await assert.rejects(parseBackup(JSON.stringify({ ...JSON.parse(file.text), version: 99 })), /not supported/);
 });

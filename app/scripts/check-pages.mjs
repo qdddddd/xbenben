@@ -1,7 +1,7 @@
 import { execFileSync, spawn } from 'node:child_process';
 import { chromium, expect } from '@playwright/test';
 
-const base = '/ledger-pages-check/', env = { ...process.env, LEDGER_BASE: base };
+const base = '/xbenben/', env = { ...process.env, XBENBEN_BASE: base };
 execFileSync('npm', ['run', 'build'], { env, stdio: 'pipe' });
 const server = spawn(process.execPath, ['node_modules/vite/bin/vite.js', 'preview', '--host', '127.0.0.1', '--port', '4174', '--strictPort'], { env, stdio: 'ignore' });
 let browser;
