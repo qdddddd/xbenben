@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Entirely fictional demo data. No personal sessions are included. -->
+<model version="6.9">
+  <bankrolls><bankroll name="Demo City" initial="0"/></bankrolls>
+  <currencies><currency currencyCode="HKD" bankroll="Demo City" rate="1"/></currencies>
+  <sessions>
+    <cash id="demo-import-1" startdate="02/01/26 10:00:00" enddate="02/01/26 13:00:00" location="Demo Room A" bankroll="Demo City" blinds="10/20" variant="Hold’em|Hold’em" limit="0" tablesize="8" comments="Fictional example: two buy-ins.">
+      <results><result owner="1" chipcount="3800" tips="50"><buyin amount="2000" date="02/01/26 10:00:00"/><buyin amount="1000" date="02/01/26 11:00:00"/></result></results>
+    </cash>
+    <cash id="demo-import-2" startdate="02/02/26 18:00:00" enddate="02/02/26 22:00:00" location="Demo Room B" bankroll="Demo City" blinds="10/20" variant="Hold’em|Hold’em" limit="0" tablesize="9" comments="Fictional example: a losing session.">
+      <results><result owner="1" chipcount="1200" tips="20"><buyin amount="2000" date="02/02/26 18:00:00"/></result></results>
+    </cash>
+    <cash id="demo-import-3" startdate="03/03/26 12:00:00" enddate="03/03/26 17:00:00" location="Demo Room A" bankroll="Demo City" blinds="20/40" variant="Hold’em|Hold’em" limit="0" tablesize="6" comments="Fictional example: a winning session.">
+      <results><result owner="1" chipcount="7000" tips="30"><buyin amount="4000" date="03/03/26 12:00:00"/></result></results>
+    </cash>
+  </sessions>
+</model>

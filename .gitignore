@@ -1,0 +1,11 @@
+app/node_modules/
+app/dist/
+app/test-results/
+app/playwright-report/
+.DS_Store
+/PROMPT.md
+/analytics7-model.xml
+/uploads/
+/app/evidence/
+/app/tests/private/
+/app/playwright.private.config.js
