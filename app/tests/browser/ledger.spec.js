@@ -294,8 +294,8 @@ test('offline production reload, fonts, icons and sample import work after insta
   await expect(page.getByTestId('bankroll')).toHaveText('+$3,085');
   await page.evaluate(() => document.fonts.ready);
   const loadedFonts = await page.evaluate(async () => {
-    const heading = await document.fonts.load('600 26px "Barlow Semi Condensed"');
-    const body = await document.fonts.load('500 16px "Barlow"');
+    const heading = await document.fonts.load('400 26px "Barlow Condensed"');
+    const body = await document.fonts.load('400 16px "Barlow"');
     return heading.length > 0 && body.length > 0 && [...heading, ...body].every(font => font.status === 'loaded');
   });
   expect(loadedFonts).toBeTruthy();
@@ -345,9 +345,9 @@ test('main tabs have no browser errors or horizontal overflow at 402 and 320 pix
 test('design typography and chip favicon stay local, readable and outside app content', async ({ page }) => {
   await page.evaluate(() => document.fonts.ready);
   const heading = screen(page, 'home').getByText('xbenben', { exact: true });
-  await expect(heading).toHaveCSS('font-family', '"Barlow Semi Condensed", system-ui, sans-serif');
-  await expect(heading).toHaveCSS('font-weight', '600');
-  await expect(page.locator('body')).toHaveCSS('font-weight', '500');
+  await expect(heading).toHaveCSS('font-family', '"Barlow Condensed", system-ui, sans-serif');
+  await expect(heading).toHaveCSS('font-weight', '400');
+  await expect(page.locator('body')).toHaveCSS('font-weight', '400');
   await expect(screen(page, 'home').getByText('Avg', { exact: true })).toBeVisible();
   await sample(page);
   await settings(page); await choose(page, /^Display currency/, 'HKD Hong Kong');

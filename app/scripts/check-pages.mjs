@@ -24,7 +24,7 @@ try {
   await context.setOffline(true); await page.reload();
   const assets = await page.evaluate(async () => ({
     icons: await Promise.all([...document.querySelectorAll('link[rel="icon"]')].map(async icon => ({ path: new URL(icon.href).pathname, ok: (await fetch(icon.href)).ok }))),
-    fonts: (await Promise.all([document.fonts.load('600 26px "Barlow Semi Condensed"'), document.fonts.load('500 14px "Barlow"')])).every(faces => faces.length > 0 && faces.every(face => face.status === 'loaded')),
+    fonts: (await Promise.all([document.fonts.load('400 26px "Barlow Condensed"'), document.fonts.load('400 14px "Barlow"')])).every(faces => faces.length > 0 && faces.every(face => face.status === 'loaded')),
   }));
   if (assets.icons.length !== 3 || assets.icons.some(icon => !icon.path.startsWith(base + 'icons/favicon') || !icon.ok) || !assets.fonts) throw new Error('Offline fonts or favicon paths failed under the Pages base.');
   await page.getByRole('button', { name: 'Settings', exact: true }).click();

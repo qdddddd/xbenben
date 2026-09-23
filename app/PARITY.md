@@ -1,6 +1,6 @@
 # xbenben parity and verification
 
-Initial verification: 2026-09-22. Rename, session-currency, big-blind stats and typography/favicon verification: 2026-09-23. Chrome, 402×874; primary tabs also checked at 320 pixels. Private financial figures are intentionally omitted from this public report.
+Initial verification: 2026-09-22. Rename, session-currency, big-blind stats and typography/favicon verification: 2026-09-23. Original typography restored: 2026-09-24. Chrome, 402×874; primary tabs also checked at 320 pixels. Private financial figures are intentionally omitted from this public report.
 
 ## Screens
 
@@ -38,7 +38,7 @@ The baseline nine screens and all three import stages were captured in a real br
 
 The current suite passes 15 unit tests and 26 Chrome browser tests. It checks a real CSV/JSON download, offline fonts/sample/icons, storage-denial/corruption handling, keyboard focus, simulated share cancellation and a genuine service-worker script update. The update test verifies that a reload is offered and the stored ledger is retained. The share test mocks the OS API; it does not claim to verify iCloud delivery.
 
-The updated reference's Barlow Semi Condensed 600 headings, Barlow 500 body, lighter Home metadata and Barlow Log metadata are implemented. The nine-screen comparison and all import stages were recaptured against the supplied font update. Home, Log, Stats and Settings were also reviewed at 402px and 320px. The tighter stat labels retain a single line and ellipsis; Home now says Avg. Long HKD summaries exposed overflow after the font change, so amounts now shrink only when their available width requires it. A browser regression checks the full values against their card widths while resizing down and back up.
+The September 23 font update was compared against the supplied reference across nine screens and all import stages. On September 24 the user requested the original typography again: Barlow Condensed headings and Home/Log metadata with Barlow body text. The original regular 400 text, medium venue names and semibold Industry component styles are restored. Home, Log, Stats and Settings are checked at 402px and 320px. The tighter stat labels retain a single line and ellipsis; Home still says Avg. Long currency amounts shrink only when their available width requires it. A browser regression checks the full values against their card widths while resizing down and back up, and checks the restored font family/weights and offline loading.
 
 Direction 1C's smallest chip variant is used only for the favicon, following the user's latest scope. SVG plus 16/32 px PNG fallbacks were inspected at small sizes on light and dark backgrounds. Installed/PWA icons are unchanged. Browser checks verify the fixed accent, absence of the artwork from app content, and offline loading of the new heading/body fonts and all three favicon files. The fonts' original OFL notices ship with the app.
 
@@ -53,7 +53,7 @@ A real Pages update from `bf85ef4` to `15bedf3` was also verified in a retained 
 ## Deliberate changes
 
 - User-requested rename: xbenben replaces Ledger in the app name, wordmark, install metadata, messages and download filenames; the blueprint icon now uses an X. The reference files, stored-data key and backup format remain compatible.
-- The updated design defaults are shipped without its typeface/heavier exploration controls. The new chip artwork is confined to the favicon; the broader install-icon replacement in the earlier design brief was superseded by the user's latest instruction.
+- The user's font-revert request supersedes the updated design's typography. Typeface/heavier exploration controls remain outside Settings. The chip artwork is confined to the favicon; the broader install-icon replacement in the earlier design brief was superseded by the user's favicon-only instruction.
 - Real safe areas replace the design sheet, bezel, status bar and home indicator. Desktop width is capped; small viewports scroll within screens.
 - First launch is empty. Sample restoration is confirmed, tagged and idempotent, preserves personal records, switches to USD and offers separate sample removal.
 - The shipped XML sample is entirely fictional. The user's export is accepted through the file picker but never included in public assets, tests or screenshots.

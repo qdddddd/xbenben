@@ -80,7 +80,7 @@ return (<div className="ledger-app" style={{"height": "100%", "display": "flex",
 <span style={{"width": "var(--size-40)", "height": "var(--size-40)", "flex": "none", "border": "var(--size-1) solid var(--color-divider)", "display": "grid", "placeItems": "center", "fontFamily": "var(--font-heading)", "fontSize": "var(--size-13)", "letterSpacing": ".02em", "color": "var(--color-accent-700)"}}>{r.stakes}</span>
 <span style={{"flex": "1", "minWidth": "0"}}>
 <span style={{"display": "block", "fontSize": "var(--size-14)", "fontWeight": "500", "whiteSpace": "nowrap", "overflow": "hidden", "textOverflow": "ellipsis"}}>{r.venue}</span>
-<span style={{"display": "block", "fontSize": "var(--size-11)", "color": "var(--color-neutral-600)", "fontFamily": "var(--font-heading)", "letterSpacing": ".08em", "textTransform": "uppercase", "marginTop": "var(--size-1)", "fontWeight": "400"}}>{r.meta}</span>
+<span style={{"display": "block", "fontSize": "var(--size-11)", "color": "var(--color-neutral-600)", "fontFamily": "var(--font-heading)", "letterSpacing": ".08em", "textTransform": "uppercase", "marginTop": "var(--size-1)"}}>{r.meta}</span>
 </span>
 <span style={{"textAlign": "right"}}>
 <span style={{"display": "block", "fontFamily": "var(--font-heading)", "fontSize": "var(--size-19)", "fontVariantNumeric": "tabular-nums", "color": r.color}}>{r.pnl}</span>
@@ -135,7 +135,7 @@ return (<div className="ledger-app" style={{"height": "100%", "display": "flex",
 <span style={{"width": "var(--size-40)", "height": "var(--size-40)", "flex": "none", "border": "var(--size-1) solid var(--color-divider)", "display": "grid", "placeItems": "center", "fontFamily": "var(--font-heading)", "fontSize": "var(--size-13)", "color": "var(--color-accent-700)"}}>{r.stakes}</span>
 <span style={{"flex": "1", "minWidth": "0"}}>
 <span style={{"display": "block", "fontSize": "var(--size-14)", "fontWeight": "500", "whiteSpace": "nowrap", "overflow": "hidden", "textOverflow": "ellipsis"}}>{r.venue}</span>
-<span style={{"display": "block", "fontSize": "var(--size-11)", "color": "var(--color-neutral-600)", "fontFamily": "var(--font-body)", "letterSpacing": ".08em", "textTransform": "uppercase", "marginTop": "var(--size-1)"}}>{r.meta}</span>
+<span style={{"display": "block", "fontSize": "var(--size-11)", "color": "var(--color-neutral-600)", "fontFamily": "var(--font-heading)", "letterSpacing": ".08em", "textTransform": "uppercase", "marginTop": "var(--size-1)"}}>{r.meta}</span>
 </span>
 <span style={{"textAlign": "right"}}>
 <span style={{"display": "block", "fontFamily": "var(--font-heading)", "fontSize": "var(--size-19)", "fontVariantNumeric": "tabular-nums", "color": r.color}}>{r.pnl}</span>
