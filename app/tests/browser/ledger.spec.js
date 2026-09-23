@@ -129,6 +129,55 @@ test('invalid XML, empty XML and unreadable dates stay at step one with the prot
   await expect(screen(page, 'import')).toContainText('step 2/3');
 });
 
+const singleBlindXML = `<model>
+  <bankroll name="Demo city"/><currency bankroll="Demo city" currencyCode="HKD"/>
+  <cash id="synthetic-single-blind" startdate="05/09/26 12:00:00" enddate="05/09/26 14:00:00"
+    bankroll="Demo city" location="Single-blind demo" blinds="25" ante="5" islive="1" limit="0" variant="Hold'em" tablesize="6">
+    <result owner="1" buyin="1500" chipcount="1800" tips="50">
+      <buyin amount="1000" date="05/09/26 12:00:00"/><buyin amount="500" date="05/09/26 13:00:00"/>
+    </result>
+  </cash>
+</model>`;
+const xmlFile = content => ({ name: 'synthetic.xml', mimeType: 'application/xml', buffer: Buffer.from(content) });
+
+test('single-blind imports preserve money and use the recorded big blind for stats and duplicates', async ({ page }) => {
+  await openImport(page);
+  await page.getByLabel('Choose .xml file').setInputFiles(xmlFile(singleBlindXML));
+  await page.getByRole('button', { name: 'Review 1 rows' }).click();
+  await expect(screen(page, 'import')).toContainText('0/25');
+  await expect(screen(page, 'import')).toContainText('+HK$250');
+  await page.getByRole('button', { name: 'Import 1 sessions', exact: true }).click();
+  const data = await saved(page), imported = data.sessions[0];
+  expect(imported).toMatchObject({ sb: 0, bb: 25, cur: 'HKD', cashOut: 1800, tips: 50 });
+  expect(imported.buyIns.map(b => b.amount)).toEqual([1000, 500]);
+  await expect(page.getByTestId('bankroll')).toHaveText('+$32');
+  await page.getByRole('button', { name: 'Stats', exact: true }).click();
+  await expect(page.getByTestId('bb-per-100')).toHaveText('+16.7');
+  await expect(page.getByTestId('bb-per-hour')).toHaveText('+5.0');
+  await page.reload(); expect((await saved(page)).sessions).toEqual(data.sessions);
+  await openImport(page);
+  await page.getByLabel('Choose .xml file').setInputFiles(xmlFile(singleBlindXML));
+  await expect(screen(page, 'import')).toContainText('1 of 1 already in your log');
+  await page.getByRole('button', { name: 'Review 1 rows' }).click();
+  await expect(page.getByRole('button', { name: 'Import 0 sessions' })).toBeDisabled();
+});
+
+test('single-blind support still rejects invalid stakes, money and missing results without changing data', async ({ page }) => {
+  await sample(page); const original = await saved(page);
+  await openImport(page);
+  const invalid = [
+    ...['oops', '-25', 'Infinity', '1000000000001', '5/nope'].map(blinds => singleBlindXML.replace('blinds="25"', `blinds="${blinds}"`)),
+    singleBlindXML.replace('chipcount="1800"', 'chipcount="-1"'),
+    singleBlindXML.replace('amount="500"', 'amount="bad"'),
+    singleBlindXML.replace(/<result[\s\S]*?<\/result>/, ''),
+  ];
+  for (const xml of invalid) {
+    await page.getByLabel('Choose .xml file').setInputFiles(xmlFile(xml));
+    await expect(page.getByRole('alert')).toHaveText('Some sessions have missing results or invalid amounts. Check the export and try again.');
+    expect((await saved(page)).sessions).toEqual(original.sessions);
+  }
+});
+
 test('live clock and rebuy survive reload, closing a window, currency changes and booking', async ({ page, context }) => {
   const start = new Date('2026-09-22T08:00:00Z');
   await page.clock.install({ time: start });

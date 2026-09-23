@@ -34,6 +34,8 @@ In **Settings → Hands per hour**, set separate live and online estimates. Star
 
 Choose **Play type → Live / Online** when creating a session. Untagged older sessions and analytics7 imports count as live; open a completed session and tap **Play type** to correct it. Running sessions and records with no positive duration or big blind are excluded from the averages. Stats explains exclusions and shows a dash when there is no eligible data.
 
+Analytics7 imports accept both small/big blinds and a single numeric blind. A single blind is recorded as `0/big blind` (no small blind) and uses that big blind for statistics. The ante is not substituted for a small blind. Recorded buy-ins, cash-out and tips remain unchanged when keeping the original currency.
+
 ## Verify and build
 
 On macOS, the tests use installed Google Chrome. Elsewhere, install Playwright Chromium first:
