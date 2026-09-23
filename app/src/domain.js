@@ -3,12 +3,30 @@ export const USD_RATES = Object.freeze({ USD: 1, HKD: 0.128, EUR: 1.08, GBP: 1.2
 export const SYMBOLS = Object.freeze({ USD: '$', HKD: 'HK$', EUR: '€', GBP: '£', CAD: 'C$', AUD: 'A$' });
 export const DEFAULT_SETTINGS = Object.freeze({ currency: 'USD', game: 'NLHE', stakes: '2/5', seats: 9, accent: 'steel', pnlColor: 'Mono', showQuickStart: true });
 export const ACCENTS = ['steel', 'bronze', 'forest', 'violet'];
+export const DEFAULT_VENUES = [
+  { name: 'Macau table', city: 'Macau' }, { name: 'Home game', city: '' },
+  ...['Bellagio', 'Aria', 'Wynn', 'Encore', 'Resorts World'].map(name => ({ name, city: 'Las Vegas' })),
+];
+export const DEFAULT_STAKES = ['0.5/1', '1/2', '1/3', '2/5', '5/10', '10/20', '20/40', '25/50', '50/100', '100/200', '200/400', '500/1000'];
 export const buyIn = s => s.buyIns.reduce((n, b) => n + b.amount, 0);
 export const pnl = s => s.cashOut - buyIn(s) - s.tips;
 export const hours = s => Math.max(0, ((s.endedAt ?? Date.now()) - s.startedAt) / 3600000);
-export const symbol = code => SYMBOLS[code] || code + ' ';
+export const symbol = code => Object.hasOwn(SYMBOLS, code) ? SYMBOLS[code] : code + ' ';
 export const money = (n, code, signed = false) => (n < 0 ? '−' : signed ? '+' : '') + symbol(code) + Math.round(Math.abs(n)).toLocaleString('en-US');
-export const rate = (from, to) => from === to ? 1 : USD_RATES[from] && USD_RATES[to] ? Math.round(USD_RATES[from] / USD_RATES[to] * 1000) / 1000 : null;
+export const rate = (from, to) => from === to ? 1 : Object.hasOwn(USD_RATES, from) && Object.hasOwn(USD_RATES, to) ? Math.round(USD_RATES[from] / USD_RATES[to] * 1000) / 1000 : null;
+// Reporting never changes or rounds the recorded session amounts.
+export const reportNet = (session, currency) => {
+  const multiplier = rate(session.cur, currency);
+  return multiplier === null ? null : pnl(session) * multiplier;
+};
+export function setupFrom(session) {
+  return { venue: session.venue, city: session.city, cur: session.cur, sb: session.sb, bb: session.bb,
+    game: session.game, seats: session.seats, buyIn: String(Math.min(999999999, Math.round(session.buyIns[0].amount))) };
+}
+export function latestSession(sessions) {
+  const valid = sessions.filter(s => s.bb > 0), personal = valid.filter(s => !s.demo);
+  return (personal.length ? personal : valid).slice().sort((a, b) => b.startedAt - a.startedAt)[0];
+}
 export const newId = () => {
   if (crypto.randomUUID) return crypto.randomUUID();
   const bytes = crypto.getRandomValues(new Uint8Array(16));

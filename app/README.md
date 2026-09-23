@@ -18,6 +18,14 @@ npm run dev
 
 Open the printed localhost URL. First launch is empty. **Settings → Restore sample log** adds six fictional USD sessions without replacing personal data. **Use the sample export** imports a separate, entirely fictional three-session HKD example.
 
+## Session setup and currencies
+
+New session offers venue and stakes presets plus your imported and custom choices. The venue list includes Macau table, Home game and Las Vegas venues; stakes range from 0.5/1 to 500/1000. Your last-created session supplies the next venue, stakes, currency, game and table size. Before a session has been created, the latest logged setup or saved defaults are used. Enter the new buy-in explicitly, or choose a labelled one-tap shortcut.
+
+Choose **Session currency** before starting. All buy-ins, re-buys, tips and cash-out amounts belong to that session. Changing **Settings → Display currency** affects reporting, and starting, booking or importing never changes it automatically.
+
+Home and Stats convert all supported sessions to the display currency using the fixed rates shown in Settings. Calculations sum unrounded converted net; formatting rounds the displayed amount. Log entries and details retain original currencies, and stake groups keep USD 2/5 separate from HKD 2/5. Unavailable rates are identified and excluded from converted totals; those sessions remain accessible in the log. There are no live exchange rates.
+
 ## Verify and build
 
 On macOS, the tests use installed Google Chrome. Elsewhere, install Playwright Chromium first:
@@ -48,7 +56,7 @@ In Settings, choose **Back up to iCloud / file**. After preparation, choose **Sa
 
 **Restore backup** opens the Files picker. A preview lists the backup's date, currencies, session counts, running session and saved choices. **Replace ledger & restore** replaces the complete ledger after confirmation. It does not merge. The restored live clock continues from its original start time.
 
-The JSON format has a version, a SHA-256 checksum and a complete snapshot: every currency, active buy-ins, settings, venues, stakes, draft inputs and last-backup metadata. Validation and the checksum reject damaged or unrelated files before changing any data. Files are not encrypted; keep them private. CSV is a separate, displayed-currency report, not a full backup.
+The JSON format has a version, a SHA-256 checksum and a complete snapshot: every currency, active buy-ins, settings, venues, stakes, draft inputs, last-created setup and last-backup metadata. Validation and the checksum reject damaged or unrelated files before changing any data. Files are not encrypted; keep them private. CSV contains every session with its original currency and amounts; it is not a full backup. Older version-1 backups remain readable, including files created before session-currency defaults were added.
 
 There is no background iCloud access, account or synchronization. The app requests persistent browser storage when the API is available and displays the result. The browser may decline; retain file backups before clearing site data or removing the app.
 

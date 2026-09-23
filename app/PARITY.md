@@ -1,6 +1,6 @@
 # xbenben parity and verification
 
-Initial verification: 2026-09-22. Rename verification: 2026-09-23. Chrome, 402×874; primary tabs also checked at 320 pixels. Private financial figures are intentionally omitted from this public report.
+Initial verification: 2026-09-22. Rename and session-currency verification: 2026-09-23. Chrome, 402×874; primary tabs also checked at 320 pixels. Private financial figures are intentionally omitted from this public report.
 
 ## Screens
 
@@ -8,26 +8,26 @@ The native React view is ported from the reference markup. The comparison uses i
 
 | Screen | Verification and result |
 | --- | --- |
-| 01 Bankroll home | Passed: sample figures, currency isolation, recent order, empty state and resume state. Matched reference layout after safe-area normalization; the requested xbenben wordmark replaces LEDGER. |
-| 02 Session log | Passed: All / Wins / Losses, totals, hours, row order and navigation. Matched reference screenshot. |
-| 03 Session detail | Passed: signed result, hourly/big-blind rate, buy-ins, tips, duration, city and notes. Matched reference screenshot; delete now confirms. |
-| 04 New session | Passed: exact numpad/presets layout, repeat/default presets, saved defaults and dynamic pickers. Matched reference screenshot. |
+| 01 Bankroll home | Passed: sample figures, combined-currency totals, converted recent results, empty state and resume state. The xbenben wordmark and conversion note are deliberate additions. |
+| 02 Session log | Passed: All / Wins / Losses, every original-currency row, converted summary, hours and navigation. Currency labels clarify the amounts. |
+| 03 Session detail | Passed: signed result, hourly/big-blind rate, buy-ins, tips, duration, city and notes. Amounts stay in the session currency; delete confirms. |
+| 04 New session | Passed: venue/stakes presets, session-currency picker, remembered last-created setup, explicit buy-in entry, repeat/default shortcuts and custom choices. Added controls keep the Industry layout. |
 | 05 Live session | Passed: timer, invested sum, prescribed re-buy options, reload and close/reopen. Added a return-to-home control. |
 | 06 Cash out | Passed: cash/tips selection, keyboard, result equation, booking and currency. Valid zero-chip booking now looks enabled. |
-| 07 Stats | Passed: curve, stake groups and superlatives. Lifetime colour follows lifetime net; a one-session curve and peak now render correctly. |
-| 08 Settings | Passed: defaults, all three tweaks, CSV, safe sample controls, currency note, backup/restore and storage status. Added controls extend the scrollable screen. |
+| 07 Stats | Passed: converted curve, native-currency stake groups and converted superlatives. Lifetime colour follows lifetime net; single-session curves and peaks render correctly. |
+| 08 Settings | Passed: defaults, all three tweaks, CSV, safe sample controls, display currency, fixed-rate notes, backup/restore and storage status. Added controls extend the scrollable screen. |
 | 09 Import: pick | Passed: real file input, errors, mapping copy and a synthetic sample. Monospace mapping text now uses Industry's Barlow body token. |
 | 09 Import: map | Passed: date span, currencies, venues, fixed rate and skip switch. Filename uses Barlow. |
 | 09 Import: review | Passed: per-row data, included totals, skipped rows, back navigation and commit. Same data produces the reference layout. |
 
-All nine screens and all three import stages were captured in a real browser. Screenshot comparison uses Pixelmatch's 0.15 perceptual threshold; zero counted differences is not a claim of byte-identical images across browsers. A final local gallery records the percentages for the current build.
+The baseline nine screens and all three import stages were captured in a real browser. The updated new-session, Home, Stats, log and Settings screens were inspected at 402×874; new-session and multi-currency Stats layouts were also checked at 320px without horizontal overflow. Screenshot comparison uses Pixelmatch's 0.15 perceptual threshold; zero counted differences is not a claim of byte-identical images across browsers. The baseline gallery records its comparison percentages; newer requirements deliberately change currency behavior and add the controls described here.
 
 ## Acceptance checks
 
 | Check | Result and evidence |
 | --- | --- |
 | 1. USD sample | Passed in Chrome: six fictional sessions, all requested aggregates and four recent results. |
-| 2. Supplied private import | Passed locally with the real file: expected date range, venues, fixed conversion choice, aggregate figures, parked USD records and repeated-import duplicates. The private fixture and its tests are excluded from Git/CI. Public regression tests use a new synthetic export. |
+| 2. Supplied private import | The baseline private-file import passed locally for parsing, venues, fixed conversion, figures and duplicates. The later user requirement supersedes currency isolation and parked-session totals: all supported currencies now contribute to reports. The private fixture and its tests are excluded from Git/CI. Public regression tests use a new synthetic export. |
 | 3. Bad XML | Passed: invalid XML, no cash sessions and unreadable dates retain step one and the specified messages. |
 | 4. Live session | Passed: start, re-buy, simulated elapsed time, reload, close/reopen, currency change, cash/tips entry and booking; original timestamp and buy-ins survive. |
 | 5. Visual parity | Passed with the documented deliberate differences. Reference screenshots, app screenshots and diff images were inspected locally. |
@@ -36,7 +36,9 @@ All nine screens and all three import stages were captured in a real browser. Sc
 | 8. Publishing | Passed: [HTTPS app](https://qdddddd.github.io/xbenben/) and [public source](https://github.com/qdddddd/xbenben), with a successful Actions deployment. Live Chrome checks verified the name/icons, manifest scope, two-currency synthetic imports, backup download, offline reload with a running session and local fonts. Private-file URLs return 404; the Git history/site privacy audit passes. |
 | 9. Physical iPhone | Not run on this machine. Installation, native share sheet, iCloud Drive/AirDrop and airplane-mode checks are specified in README. |
 
-The standard suite currently has 9 unit tests and 18 Chrome browser tests. It checks a real CSV/JSON download, offline fonts/sample/icons, storage-denial/corruption handling, keyboard focus, simulated share cancellation and a genuine service-worker script update. The update test verifies that a reload is offered and the stored ledger is retained. The share test mocks the OS API; it does not claim to verify iCloud delivery.
+The current suite passes 12 unit tests and 20 Chrome browser tests. It checks a real CSV/JSON download, offline fonts/sample/icons, storage-denial/corruption handling, keyboard focus, simulated share cancellation and a genuine service-worker script update. The update test verifies that a reload is offered and the stored ledger is retained. The share test mocks the OS API; it does not claim to verify iCloud delivery.
+
+The new reporting check combines six USD demos with the three fictional HKD records: nine sessions, 42.7 hours, +$3,456 displayed in USD or +HK$27,003 displayed in HKD. Tests also verify that a new HKD session books in HKD while reporting in USD/EUR, the last-created setup survives reload/discard/later imports, native stakes stay separate, unsupported rates are visible, CSV includes both currencies, and legacy saved records/backups migrate safely.
 
 A real Pages update from `bf85ef4` to `15bedf3` was also verified in a retained Chrome profile after [successful deployment](https://github.com/qdddddd/xbenben/actions/runs/35763684641). Nine synthetic sessions in two currencies, a running session with a re-buy, settings and backup metadata survived closing/reopening the browser, the visible update prompt, explicit reload into the new release and an offline restart. Every persisted field matched the original snapshot.
 
@@ -47,14 +49,16 @@ A real Pages update from `bf85ef4` to `15bedf3` was also verified in a retained 
 - First launch is empty. Sample restoration is confirmed, tagged and idempotent, preserves personal records, switches to USD and offers separate sample removal.
 - The shipped XML sample is entirely fictional. The user's export is accepted through the file picker but never included in public assets, tests or screenshots.
 - Accent and P&L colour settings are added; quick-start toggles immediately. Other accent presets change the related ramp as well as the base accent.
-- Venue/stake pickers include the log, imported and user-added choices. These choices persist independently of log deletion. Saved defaults affect new-session setup.
-- Active-session amounts retain their original currency; booking returns to that currency. A second new-session action resumes the existing session.
+- Venue/stake pickers include the log, imported and user-added choices. Defaults include Macau table, Home game and Las Vegas venues, with stakes from 0.5/1 to 500/1000. Choices persist independently of log deletion. New setup prefers the last session created; before one exists, it uses the latest logged session or saved defaults. Buy-in entry stays explicit.
+- Each session has its own currency. Starting, booking and importing leave the global display currency unchanged; active amounts and details retain the session currency. A second new-session action resumes the existing session.
+- Home and Stats convert original session net at the fixed pair rate, summing without per-session rounding. Only formatted values are rounded. Rate notes explain conversion; unavailable rates are explicitly excluded from totals while entries remain accessible. The log shows original values and a converted summary, and stake groups include their native currency.
+- Last-created setup and draft currency persist and are included in backups. Older saved data and version-1 backups gain these optional defaults without changing sessions or live timestamps.
 - Delete, discard and erase require a separate confirmation. Zero-chip cash-out is valid and visually enabled.
 - Stats uses lifetime net's sign and draws a correct single-session curve/peak. Zero big blinds do not produce infinite rates.
 - Imports use the owning result where supplied, validate dates/amounts, reject mixed-currency exports and omit unsupported conversion pairs. The displayed fixed rate is the one applied. Kept amounts are not rounded again.
 - Duplicate recognition keeps the original venue / under-two-minutes rule, also checks earlier rows in the same import, and gives imported copies distinct internal IDs. Importing zero included rows is disabled.
 - XML errors preserve the requested messages; extra validation has specific messages. File input selection resets so the same file can be picked again. XML files are limited to 10 MB; backups to 20 MB.
-- CSV exports actual displayed-currency records, with exact numeric values, quoted fields and protection against spreadsheet formula injection. The numpad consistently limits manual amounts to nine digits.
+- CSV exports all sessions in their original currencies, with exact numeric values, quoted fields and protection against spreadsheet formula injection. The numpad consistently limits manual amounts to nine digits.
 - New modal controls manage focus and Escape; numpads support physical digits/backspace; file pickers stay keyboard accessible. Barlow replaces the prototype's out-of-system monospace text. Buttons use square corners consistently.
 - Storage is versioned, changes survive reload, and storage errors are visible. Corrupt saved data is preserved with a recovery download. Persistent storage is requested but browser approval is not assumed.
 - Backup/restore controls use Industry styles. Restore replaces the entire ledger after preview and confirmation. SHA-256 detects damaged payloads; a file version supports future migrations. A share cancellation does not advance last-backup time.

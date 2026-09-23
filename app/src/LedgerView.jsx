@@ -1,5 +1,5 @@
 import { Fragment } from "react";
-import { Sheet, BackupControls } from "./Overlays.jsx";
+import { Sheet, BackupControls, ConversionNote } from "./Overlays.jsx";
 
 // Native React markup ported from the read-only Ledger design. No template runtime.
 export default function LedgerView(v) {
@@ -14,6 +14,7 @@ return (<div className="ledger-app" style={{"height": "100%", "display": "flex",
 </div>
 <div style={{"textAlign": "right", "fontSize": "var(--size-11)", "color": "var(--color-neutral-600)", "fontFamily": "var(--font-heading)", "letterSpacing": ".1em", "textTransform": "uppercase", "paddingTop": "var(--size-4)"}}>{(v.sessionCount) + " sessions"}<br />{(v.hoursText) + " h logged"}</div>
 </div>
+<ConversionNote v={v} />
 <div style={{"marginTop": "var(--size-20)", "padding": "var(--size-16) var(--size-16) 0"}} className="blueprint"><i aria-hidden="true" className="corner tl"></i><i aria-hidden="true" className="corner tr"></i><i aria-hidden="true" className="corner bl"></i><i aria-hidden="true" className="corner br"></i>
 <div style={{"display": "flex", "alignItems": "baseline", "justifyContent": "space-between"}}>
 <div style={{"fontFamily": "var(--font-heading)", "fontSize": "var(--size-10)", "letterSpacing": ".16em", "textTransform": "uppercase", "color": "var(--color-accent-700)"}}>{"Bankroll · " + (v.currency)}</div>
@@ -65,7 +66,7 @@ return (<div className="ledger-app" style={{"height": "100%", "display": "flex",
 
 <div style={{"marginTop": "var(--size-12)", "padding": "var(--size-22) var(--size-16)", "display": "flex", "flexDirection": "column", "alignItems": "center", "gap": "var(--size-8)", "textAlign": "center"}} className="blueprint"><i aria-hidden="true" className="corner tl"></i><i aria-hidden="true" className="corner tr"></i><i aria-hidden="true" className="corner bl"></i><i aria-hidden="true" className="corner br"></i>
 <svg aria-hidden="true" focusable="false" width={"26"} height={"26"} viewBox={"0 0 24 24"} fill={"none"} stroke={"var(--color-accent)"} strokeWidth={"1.5"} strokeLinecap={"round"} strokeLinejoin={"round"}><path d={"M4 5h16v14H4zM4 10h16M9 5V3M15 5V3"}></path></svg>
-<div style={{"fontFamily": "var(--font-heading)", "fontSize": "var(--size-16)", "letterSpacing": ".08em", "textTransform": "uppercase"}}>{"Nothing logged in " + (v.currency)}</div>
+<div style={{"fontFamily": "var(--font-heading)", "fontSize": "var(--size-16)", "letterSpacing": ".08em", "textTransform": "uppercase"}}>{v.emptyTitle}</div>
 <div style={{"fontSize": "var(--size-12)", "lineHeight": "1.45", "color": "var(--color-neutral-700)", "maxWidth": "var(--size-238)"}}>{v.emptyLine}</div>
 <button type="button" onClick={v.openImport} style={{"marginTop": "var(--size-4)", "fontSize": "var(--size-12)", "letterSpacing": ".12em", "textTransform": "uppercase", "padding": "var(--size-9) var(--size-14)"}} className="btn btn-secondary">{"Import from analytics7"}</button>
 </div>
@@ -95,6 +96,8 @@ return (<div className="ledger-app" style={{"height": "100%", "display": "flex",
 
 <div aria-label="log" style={{"flex": "1", "overflowY": "auto", "padding": "calc(var(--safe-top) + var(--size-16)) var(--size-20) var(--size-12)"}} data-screen={"log"}>
 <div style={{"fontFamily": "var(--font-heading)", "fontSize": "var(--size-26)", "letterSpacing": ".02em"}}>{"SESSIONS"}</div>
+<ConversionNote v={v} />
+<p className="screen-help">Original session amounts · summary in {v.currency}</p>
 <div style={{"display": "flex", "marginTop": "var(--size-14)", "border": "var(--size-1) solid var(--color-divider)"}}>
 {v.filters.map((f, index) => <Fragment key={f.id ?? index}>
 
@@ -148,6 +151,7 @@ return (<div className="ledger-app" style={{"height": "100%", "display": "flex",
 
 <div aria-label="stats" style={{"flex": "1", "overflowY": "auto", "padding": "calc(var(--safe-top) + var(--size-16)) var(--size-20) var(--size-12)"}} data-screen={"stats"}>
 <div style={{"fontFamily": "var(--font-heading)", "fontSize": "var(--size-26)", "letterSpacing": ".02em"}}>{"STATS"}</div>
+<ConversionNote v={v} />
 {v.noSessions && <>
 
 <div style={{"marginTop": "var(--size-16)", "padding": "var(--size-24) var(--size-16)", "display": "flex", "flexDirection": "column", "alignItems": "center", "gap": "var(--size-8)", "textAlign": "center"}} className="blueprint"><i aria-hidden="true" className="corner tl"></i><i aria-hidden="true" className="corner tr"></i><i aria-hidden="true" className="corner bl"></i><i aria-hidden="true" className="corner br"></i>
@@ -162,7 +166,7 @@ return (<div className="ledger-app" style={{"height": "100%", "display": "flex",
 
 <div style={{"marginTop": "var(--size-16)", "padding": "var(--size-14) var(--size-14) 0"}} className="blueprint"><i aria-hidden="true" className="corner tl"></i><i aria-hidden="true" className="corner tr"></i><i aria-hidden="true" className="corner bl"></i><i aria-hidden="true" className="corner br"></i>
 <div style={{"display": "flex", "alignItems": "baseline", "justifyContent": "space-between"}}>
-<div style={{"fontFamily": "var(--font-heading)", "fontSize": "var(--size-10)", "letterSpacing": ".16em", "textTransform": "uppercase", "color": "var(--color-accent-700)"}}>{"Lifetime curve"}</div>
+<div style={{"fontFamily": "var(--font-heading)", "fontSize": "var(--size-10)", "letterSpacing": ".16em", "textTransform": "uppercase", "color": "var(--color-accent-700)"}}>{"Lifetime curve · " + v.currency}</div>
 <div style={{"fontSize": "var(--size-11)", "fontFamily": "var(--font-heading)", "letterSpacing": ".1em", "textTransform": "uppercase", "color": "var(--color-neutral-600)"}}>{v.curveSpan}</div>
 </div>
 <div style={{"fontFamily": "var(--font-heading)", "fontSize": "var(--size-40)", "lineHeight": "1.1", "fontVariantNumeric": "tabular-nums", "color": v.avgColor}}><span data-testid="bankroll">{v.bankrollText}</span></div>
@@ -181,7 +185,7 @@ return (<div className="ledger-app" style={{"height": "100%", "display": "flex",
 </div>
 <div style={{"fontFamily": "var(--font-heading)", "fontSize": "var(--size-11)", "letterSpacing": ".16em", "textTransform": "uppercase", "color": "var(--color-accent-700)", "marginTop": "var(--size-24)"}}>{"By stake"}</div>
 <table style={{"marginTop": "var(--size-4)"}} className="table">
-<thead><tr><th>{"Stake"}</th><th style={{"textAlign": "right"}}>{"Sess"}</th><th style={{"textAlign": "right"}}>{"Hours"}</th><th style={{"textAlign": "right"}}>{"Net"}</th><th style={{"textAlign": "right"}}>{"Per hour"}</th></tr></thead>
+<thead><tr><th>{"Stake"}</th><th style={{"textAlign": "right"}}>{"Sess"}</th><th style={{"textAlign": "right"}}>{"Hours"}</th><th style={{"textAlign": "right"}}>{"Net · " + v.currency}</th><th style={{"textAlign": "right"}}>{"Per hour"}</th></tr></thead>
 <tbody>
 {v.byStake.map((b, index) => <Fragment key={b.id ?? index}>
 
@@ -229,11 +233,12 @@ return (<div className="ledger-app" style={{"height": "100%", "display": "flex",
 
 </Fragment>)}
 </div>
-{v.hasParked && <>
-
-<div style={{"marginTop": "var(--size-10)", "borderLeft": "var(--size-2) solid var(--color-accent)", "padding": "var(--size-7) var(--size-11)", "fontSize": "var(--size-12)", "lineHeight": "1.45", "background": "var(--color-accent-100)"}}>{v.parkedNote}</div>
-
-</>}
+<section className="reporting-info" aria-label="Display currency information">
+<p>Home and Stats combine sessions in {v.currency}. The log and session details keep their original amounts.</p>
+{v.rateNotes.map(note => <p key={note}>{note}</p>)}
+{v.missingRateNote && <p role="status">{v.missingRateNote}</p>}
+<p>New sessions repeat your last setup. Defaults apply before your first session or through the Default quick-start.</p>
+</section>
 <div style={{"fontFamily": "var(--font-heading)", "fontSize": "var(--size-11)", "letterSpacing": ".16em", "textTransform": "uppercase", "color": "var(--color-accent-700)", "marginTop": "var(--size-24)"}}>{"Transfer"}</div>
 <button type="button" onClick={v.openImport} style={{"width": "100%", "marginTop": "var(--size-8)", "padding": "var(--size-12) var(--size-14)", "display": "flex", "alignItems": "center", "gap": "var(--size-12)", "textAlign": "left", "background": "transparent", "cursor": "pointer", "fontFamily": "var(--font-body)"}} className="blueprint interaction-4"><i aria-hidden="true" className="corner tl"></i><i aria-hidden="true" className="corner tr"></i><i aria-hidden="true" className="corner bl"></i><i aria-hidden="true" className="corner br"></i>
 <svg aria-hidden="true" focusable="false" width={"20"} height={"20"} viewBox={"0 0 24 24"} fill={"none"} stroke={"var(--color-accent-700)"} strokeWidth={"1.5"} strokeLinecap={"round"} strokeLinejoin={"round"}><path d={"M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"}></path></svg>
@@ -261,7 +266,7 @@ return (<div className="ledger-app" style={{"height": "100%", "display": "flex",
 <button type="button" onClick={v.goBack} style={{"display": "flex", "alignItems": "center", "gap": "var(--size-5)", "background": "transparent", "border": "0", "padding": "var(--size-6) 0", "cursor": "pointer", "color": "var(--color-accent-700)", "fontFamily": "var(--font-heading)", "fontSize": "var(--size-12)", "letterSpacing": ".14em", "textTransform": "uppercase"}}>
 <svg aria-hidden="true" focusable="false" width={"14"} height={"14"} viewBox={"0 0 24 24"} fill={"none"} stroke={"currentColor"} strokeWidth={"1.5"}><path d={"M15 6l-6 6 6 6"}></path></svg>{"Back"}</button>
 <div style={{"fontFamily": "var(--font-heading)", "fontSize": "var(--size-28)", "letterSpacing": ".01em", "marginTop": "var(--size-8)"}}>{v.d.venue}</div>
-<div style={{"fontFamily": "var(--font-heading)", "fontSize": "var(--size-11)", "letterSpacing": ".14em", "textTransform": "uppercase", "color": "var(--color-neutral-600)"}}>{(v.d.when) + " · " + (v.d.game) + " " + (v.d.stakes) + " · " + (v.d.seats) + "-max"}</div>
+<div style={{"fontFamily": "var(--font-heading)", "fontSize": "var(--size-11)", "letterSpacing": ".14em", "textTransform": "uppercase", "color": "var(--color-neutral-600)"}}>{(v.d.when) + " · " + (v.d.cur) + " · " + (v.d.game) + " " + (v.d.stakes) + " · " + (v.d.seats) + "-max"}</div>
 <div style={{"marginTop": "var(--size-18)", "padding": "var(--size-14) var(--size-16)"}} className="blueprint"><i aria-hidden="true" className="corner tl"></i><i aria-hidden="true" className="corner tr"></i><i aria-hidden="true" className="corner bl"></i><i aria-hidden="true" className="corner br"></i>
 <div style={{"fontFamily": "var(--font-heading)", "fontSize": "var(--size-10)", "letterSpacing": ".16em", "textTransform": "uppercase", "color": "var(--color-accent-700)"}}>{"Result"}</div>
 <div style={{"fontFamily": "var(--font-heading)", "fontSize": "var(--size-52)", "lineHeight": "1", "fontVariantNumeric": "tabular-nums", "color": v.d.color, "marginTop": "var(--size-4)"}}>{v.d.pnl}</div>
@@ -328,6 +333,7 @@ return (<div className="ledger-app" style={{"height": "100%", "display": "flex",
 <div style={{"fontFamily": "var(--font-heading)", "fontSize": "var(--size-10)", "letterSpacing": ".16em", "textTransform": "uppercase", "color": "var(--color-accent-700)", "paddingBottom": "var(--size-6)"}}>{"Buy-in"}</div>
 <div style={{"fontFamily": "var(--font-heading)", "fontSize": "var(--size-52)", "lineHeight": "1", "fontVariantNumeric": "tabular-nums"}}><output aria-label="Buy-in amount">{v.buyInText}</output></div>
 </div>
+<p className="screen-help">{v.draftHelp}</p>
 <div style={{"borderTop": "var(--size-1) solid var(--color-divider)", "marginTop": "var(--size-14)"}}>
 {v.draftRows.map((s, index) => <Fragment key={s.id ?? index}>
 
@@ -364,7 +370,7 @@ return (<div className="ledger-app" style={{"height": "100%", "display": "flex",
 <button type="button" onClick={v.onAbandon} style={{"background": "transparent", "border": "0", "padding": "var(--size-6) 0", "cursor": "pointer", "color": "var(--color-neutral-700)", "fontFamily": "var(--font-heading)", "fontSize": "var(--size-11)", "letterSpacing": ".14em", "textTransform": "uppercase"}}>{"Discard"}</button>
 </div>
 <div style={{"fontFamily": "var(--font-heading)", "fontSize": "var(--size-26)", "letterSpacing": ".01em", "marginTop": "var(--size-10)"}}>{v.a.venue}</div>
-<div style={{"fontFamily": "var(--font-heading)", "fontSize": "var(--size-11)", "letterSpacing": ".14em", "textTransform": "uppercase", "color": "var(--color-neutral-600)"}}>{(v.a.game) + " " + (v.a.stakes) + " · " + (v.a.seats) + "-max · started " + (v.a.startedAt)}</div>
+<div style={{"fontFamily": "var(--font-heading)", "fontSize": "var(--size-11)", "letterSpacing": ".14em", "textTransform": "uppercase", "color": "var(--color-neutral-600)"}}>{(v.a.cur) + " · " + (v.a.game) + " " + (v.a.stakes) + " · " + (v.a.seats) + "-max · started " + (v.a.startedAt)}</div>
 <div style={{"marginTop": "var(--size-18)", "padding": "var(--size-16)", "textAlign": "center"}} className="blueprint"><i aria-hidden="true" className="corner tl"></i><i aria-hidden="true" className="corner tr"></i><i aria-hidden="true" className="corner bl"></i><i aria-hidden="true" className="corner br"></i>
 <div style={{"fontFamily": "var(--font-heading)", "fontSize": "var(--size-10)", "letterSpacing": ".18em", "textTransform": "uppercase", "color": "var(--color-accent-700)"}}>{"Elapsed"}</div>
 <div style={{"fontFamily": "var(--font-heading)", "fontSize": "var(--size-62)", "lineHeight": "1", "fontVariantNumeric": "tabular-nums", "letterSpacing": ".01em"}}><span data-testid="timer">{v.timerText}</span></div>

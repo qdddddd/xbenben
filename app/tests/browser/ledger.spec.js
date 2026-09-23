@@ -33,7 +33,7 @@ test.beforeEach(async ({ page }) => { await page.goto('/'); });
 
 test('empty first launch and the USD sample acceptance figures, log filters and detail', async ({ page }) => {
   await expect(page.getByTestId('bankroll')).toHaveText('+$0');
-  await expect(page.getByText('Nothing logged in USD')).toBeVisible();
+  await expect(page.getByText('Nothing logged yet')).toBeVisible();
   await sample(page);
   await expect(page.getByTestId('bankroll')).toHaveText('+$3,085');
   for (const value of ['6 sessions', '30.7 h logged', '+$100', '67%', '+$514', '+$960', '−$180', '+$2,090', '+$465']) await expect(screen(page, 'home')).toContainText(value);
@@ -55,7 +55,7 @@ test('empty first launch and the USD sample acceptance figures, log filters and 
   expect((await saved(page)).sessions).toHaveLength(5);
 });
 
-test('HKD import, currency isolation, dates, venues and repeated import skipping', async ({ page }) => {
+test('HKD import keeps original amounts while reports combine currencies and duplicates skip', async ({ page }) => {
   await sample(page); await importFile(page);
   await expect(screen(page, 'import')).toContainText('3');
   await expect(screen(page, 'import')).toContainText('Feb 26 – Mar 26');
@@ -64,11 +64,13 @@ test('HKD import, currency isolation, dates, venues and repeated import skipping
   await page.getByRole('button', { name: 'Review 3 rows' }).click();
   for (const value of ['+HK$2,900', '12.0 h', '3 to add · 0 skipped']) await expect(screen(page, 'import')).toContainText(value);
   await page.getByRole('button', { name: 'Import 3 sessions', exact: true }).click();
-  await expect(page.getByTestId('bankroll')).toHaveText('+HK$2,900');
+  await expect(page.getByTestId('bankroll')).toHaveText('+$3,456');
   await expect(screen(page, 'home')).toContainText('67%');
-  await expect(screen(page, 'home')).toContainText('+HK$967');
+  await expect(screen(page, 'home')).toContainText('+$384');
+  await expect(screen(page, 'home')).toContainText('42.7 h logged');
+  expect((await saved(page)).settings.currency).toBe('USD');
   await settings(page);
-  await expect(screen(page, 'settings')).toContainText('6 sessions in another currency are held aside');
+  await expect(screen(page, 'settings')).toContainText('1 HKD = 0.128 USD');
   await page.getByRole('button', { name: /Import from analytics7/ }).click();
   await page.getByLabel('Choose .xml file').setInputFiles(fixture);
   await expect(screen(page, 'import')).toContainText('3 of 3 already in your log');
@@ -76,9 +78,14 @@ test('HKD import, currency isolation, dates, venues and repeated import skipping
   await expect(screen(page, 'import')).toContainText('0 to add · 3 skipped');
   await expect(page.getByRole('button', { name: 'Import 0 sessions' })).toBeDisabled();
   await page.getByRole('button', { name: 'Cancel', exact: true }).click();
-  await choose(page, /^Currency/, 'USD US Dollar');
+  await choose(page, /^Display currency/, 'HKD Hong Kong');
   await home(page);
-  await expect(page.getByTestId('bankroll')).toHaveText('+$3,085');
+  await expect(page.getByTestId('bankroll')).toHaveText('+HK$27,003');
+  await page.getByRole('button', {name:'Stats',exact:true}).click();
+  await expect(page.getByTestId('bankroll')).toHaveText('+HK$27,003');
+  const data = await saved(page);
+  expect(data.sessions.filter(s => s.cur === 'USD')).toHaveLength(6);
+  expect(data.sessions.filter(s => s.cur === 'HKD')).toHaveLength(3);
 });
 
 test('converted import uses displayed fixed rate, and importing duplicates gives unique IDs', async ({ page }) => {
@@ -139,7 +146,7 @@ test('live clock and rebuy survive reload, closing a window, currency changes an
   await reopened.goto('/');
   await expect(reopened.getByTestId('timer')).toHaveText('0:10:00');
   await reopened.getByRole('button', { name: '← Back to xbenben' }).click();
-  await settings(reopened); await choose(reopened, /^Currency/, 'HKD Hong Kong');
+  await settings(reopened); await choose(reopened, /^Display currency/, 'HKD Hong Kong');
   await reopened.getByRole('button', { name: 'Live', exact: true }).click();
   await reopened.getByRole('button', { name: 'Cash out', exact: true }).click();
   await digits(reopened, '1500');
@@ -147,13 +154,14 @@ test('live clock and rebuy survive reload, closing a window, currency changes an
   await expect(screen(reopened, 'cashout')).toContainText('+$480');
   await expect(screen(reopened, 'cashout')).not.toContainText('HK$');
   await reopened.getByRole('button', { name: 'Book session', exact: true }).click();
-  await expect(reopened.getByTestId('bankroll')).toHaveText('+$480');
+  await expect(reopened.getByTestId('bankroll')).toHaveText('+HK$3,750');
+  expect((await saved(reopened)).settings.currency).toBe('HKD');
   const data = await saved(reopened);
   expect(data.active).toBeNull(); expect(data.sessions[0].cur).toBe('USD'); expect(data.sessions[0].tips).toBe(20);
 });
 
 test('settings, quick presets, personal pickers and imported venues persist', async ({ page }) => {
-  await sample(page); await settings(page);
+  await settings(page);
   await choose(page, /^Accent colour/, 'Forest');
   await choose(page, /^Profit & loss colours/, 'Signal Green / red');
   await page.getByRole('button', { name: /^Quick-start presets/ }).click();
@@ -211,14 +219,19 @@ test('sample restore preserves real data; all destructive actions require confir
   expect((await saved(page)).active).toBeNull();
 });
 
-test('CSV exports a real downloadable file for the displayed currency', async ({ page }) => {
-  await sample(page); await settings(page);
+test('CSV exports all original session currencies and amounts in a real file', async ({ page }) => {
+  await sample(page); await importFile(page);
+  await page.getByRole('button', {name:'Review 3 rows'}).click();
+  await page.getByRole('button', {name:'Import 3 sessions',exact:true}).click();
+  await settings(page);
   const pending = page.waitForEvent('download');
   await page.getByRole('button', { name: 'Export CSV' }).click();
   const file = await pending, content = await fs.readFile(await file.path(), 'utf8');
-  expect(file.suggestedFilename()).toMatch(/^xbenben-USD-.*\.csv$/);
+  expect(file.suggestedFilename()).toMatch(/^xbenben-sessions-.*\.csv$/);
   expect(content).toContain('Bellagio'); expect(content).toContain('"960"');
-  expect(content.trim().split('\r\n')).toHaveLength(7);
+  expect(content.trim().split('\r\n')).toHaveLength(10);
+  expect(content).toContain('"HKD"'); expect(content).toContain('"USD"');
+  expect(content).toContain('"2970"');
 });
 
 test('offline production reload, fonts, icons and sample import work after install caching', async ({ page, context }) => {
@@ -314,7 +327,7 @@ test('unlisted currencies can be kept, mixed currencies are rejected, and within
 
 test('dialogs contain keyboard focus, Escape restores focus, and numpad supports physical keys', async ({ page }) => {
   await settings(page);
-  const trigger = page.getByRole('button', { name: /^Currency/ });
+  const trigger = page.getByRole('button', { name: /^Display currency/ });
   await trigger.click();
   await expect(page.getByRole('dialog')).toBeVisible();
   for (let i = 0; i < 10; i++) {
@@ -356,11 +369,11 @@ test('backup preview and confirmed replacement round-trip two currencies, live c
   await input.setInputFiles({ name: 'xbenben.json', mimeType: 'application/json', buffer: Buffer.from(text) });
   await page.getByRole('button', { name: 'Replace ledger & restore' }).click();
   const restored = await saved(page);
-  for (const field of ['sessions', 'active', 'settings', 'venues', 'stakes', 'draft', 'out', 'lastBackupAt']) expect(restored[field]).toEqual(original[field]);
+  for (const field of ['sessions', 'active', 'settings', 'venues', 'stakes', 'draft', 'out', 'lastBackupAt', 'lastSetup']) expect(restored[field]).toEqual(original[field]);
   expect(restored.active.startedAt).toBe(envelope.ledger.active.startedAt);
   await expect(screen(page, 'active')).toBeVisible();
   await page.getByRole('button', { name: '← Back to xbenben' }).click();
-  await expect(page.getByTestId('bankroll')).toHaveText('+HK$2,900');
+  await expect(page.getByTestId('bankroll')).toHaveText('+$3,456');
   await settings(page);
   for (const contents of ['not json', '{"unrelated":true}', JSON.stringify({ ...envelope, checksum: 'broken' })]) {
     await input.setInputFiles({ name: 'bad.json', mimeType: 'application/json', buffer: Buffer.from(contents) });
@@ -397,4 +410,76 @@ test('a service-worker update waits for reload and keeps the saved ledger', asyn
     await expect(page.getByTestId('bankroll')).toHaveText('+$3,085');
     expect((await saved(page)).sessions).toEqual(before.sessions);
   } finally { await fs.writeFile(workerPath, original); }
+});
+
+test('new sessions offer presets, keep their own currency and repeat the last created setup', async ({ page }) => {
+  await page.getByRole('button', {name:'Start session',exact:true}).click();
+  await choose(page, /^Venue/, 'Macau table Macau');
+  await choose(page, /^Stakes/, '50/100');
+  await choose(page, /^Session currency/, 'HKD Hong Kong');
+  await choose(page, /^Game/, 'PLO');
+  await choose(page, /^Table/, '6-max');
+  await digits(page, '5000');
+  await expect(page.getByLabel('Buy-in amount')).toHaveText('HK$5,000');
+  await page.getByRole('button', {name:'Start · clock runs'}).click();
+  const started = await saved(page);
+  expect(started.settings.currency).toBe('USD'); expect(started.active.cur).toBe('HKD');
+  await page.getByRole('button', {name:'Cash out',exact:true}).click();
+  await digits(page, '6500');
+  await page.getByRole('button', {name:/Tips & rake paid/}).click(); await digits(page, '100');
+  await page.getByRole('button', {name:'Book session',exact:true}).click();
+  await expect(page.getByTestId('bankroll')).toHaveText('+$179');
+  await page.getByRole('button', {name:'Log',exact:true}).click();
+  await page.getByRole('button', {name:/Macau table/}).click();
+  await expect(screen(page, 'detail')).toContainText('+HK$1,400');
+  await expect(screen(page, 'detail')).toContainText('HK$5,000');
+  await settings(page); await choose(page, /^Display currency/, 'EUR Euro');
+  await home(page); await expect(page.getByTestId('bankroll')).toHaveText('+€167');
+  await page.reload(); await page.getByRole('button', {name:'Start session',exact:true}).click();
+  for (const value of ['Macau table', '50/100', 'HKD', 'PLO', '6-max']) await expect(screen(page, 'new')).toContainText(value);
+  await expect(page.getByLabel('Buy-in amount')).toHaveText('HK$0');
+  await choose(page, /^Venue/, 'Aria Las Vegas');
+  await choose(page, /^Session currency/, 'USD US Dollar');
+  await page.getByRole('button', {name:'Cancel',exact:true}).click();
+  await page.getByRole('button', {name:'Start session',exact:true}).click();
+  await expect(page.getByRole('button', {name:/^Venue/})).toContainText('Macau table');
+  await expect(page.getByRole('button', {name:/^Session currency/})).toContainText('HKD');
+  await page.getByRole('button', {name:/Repeat Macau table/}).click();
+  expect((await saved(page)).active.buyIns[0].amount).toBe(5000);
+  await page.getByRole('button', {name:'Discard',exact:true}).click();
+  await page.getByRole('dialog').getByRole('button', {name:'Discard session',exact:true}).click();
+  await importFile(page); await page.getByRole('button', {name:'Review 3 rows'}).click();
+  await page.getByRole('button', {name:'Import 3 sessions',exact:true}).click();
+  expect((await saved(page)).settings.currency).toBe('EUR');
+  await page.getByRole('button', {name:'Start session',exact:true}).click();
+  await expect(page.getByRole('button', {name:/^Venue/})).toContainText('Macau table');
+  await expect(page.getByRole('button', {name:/^Stakes/})).toContainText('50/100');
+});
+
+test('reports separate native stake groups and explicitly exclude unavailable exchange rates', async ({ page }) => {
+  await sample(page);
+  const data = await saved(page), template = data.sessions[0];
+  data.sessions = [
+    { ...template, id:'usd', venue:'Dollar table', cur:'USD', cashOut:1100 },
+    { ...template, id:'hkd', venue:'Hong Kong table', cur:'HKD', cashOut:2000 },
+    { ...template, id:'jpy', venue:'Yen table', cur:'JPY', cashOut:10000 },
+  ].map(s => ({...s, demo:false, sb:2, bb:5, tips:0, buyIns:[{amount:1000,at:s.startedAt}]}));
+  await page.evaluate(({key,data}) => localStorage.setItem(key, JSON.stringify(data)), {key,data});
+  await page.reload();
+  await expect(page.getByTestId('bankroll')).toHaveText('+$228');
+  await expect(screen(page, 'home')).toContainText('1 session in JPY excluded from totals');
+  await page.getByRole('button', {name:'Stats',exact:true}).click();
+  await expect(page.getByTestId('bankroll')).toHaveText('+$228');
+  await expect(page.getByText('USD 2/5', {exact:true})).toBeVisible();
+  await expect(page.getByText('HKD 2/5', {exact:true})).toBeVisible();
+  await page.getByRole('button', {name:'Log',exact:true}).click();
+  await expect(page.getByRole('button', {name:/Hong Kong table/})).toContainText('+HK$1,000');
+  await page.getByRole('button', {name:/Yen table/}).click();
+  await expect(screen(page, 'detail')).toContainText('+JPY 9,000');
+  await settings(page); await choose(page, /^Display currency/, 'HKD Hong Kong');
+  await home(page); await expect(page.getByTestId('bankroll')).toHaveText('+HK$1,781');
+  await settings(page); await choose(page, /^Display currency/, 'JPY');
+  await home(page); await expect(page.getByTestId('bankroll')).toHaveText('+JPY 9,000');
+  await expect(screen(page, 'home')).toContainText('2 sessions in USD, HKD excluded from totals');
+  expect((await saved(page)).sessions).toEqual(data.sessions);
 });

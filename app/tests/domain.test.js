@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { money, rate, scale, duplicateFlags, a7Date, csv, pnl, hours } from '../src/domain.js';
+import { money, rate, scale, duplicateFlags, a7Date, csv, pnl, hours, reportNet } from '../src/domain.js';
 import { freshLedger, loadLedger, saveLedger, validateSaved, STORAGE_KEY } from '../src/storage.js';
 
 const row = { id: 'one', cur: 'HKD', venue: 'Demo Room A', city: 'Demo City', game: 'NLHE', seats: 8,
@@ -24,6 +24,16 @@ test('conversion applies exactly the displayed fixed rate to each component', ()
   assert.equal(pnl(converted), 224);
   assert.equal(row.cashOut, 3800);
   assert.equal(scale({ ...row, tips: .5 }, 1).tips, .5);
+});
+test('reporting converts native net without mutating or rounding sessions', () => {
+  const small = { ...row, buyIns: [{ amount: 100, at: row.startedAt }], cashOut: 104.5, tips: 0 };
+  const original = structuredClone(small);
+  assert.ok(Math.abs(reportNet(small, 'USD') - .576) < 1e-12);
+  assert.equal(money(reportNet(small, 'USD') * 2, 'USD', true), '+$1');
+  assert.equal(reportNet(small, 'HKD'), 4.5);
+  assert.equal(reportNet(small, 'JPY'), null);
+  assert.equal(rate('constructor', 'USD'), null);
+  assert.deepEqual(small, original);
 });
 test('duplicate rule is the venue and strictly less than two minutes, including within a file', () => {
   assert.deepEqual(duplicateFlags([row, { ...row, id: 'two' }, { ...row, startedAt: row.startedAt + 120000 }, { ...row, venue: 'Demo Room B' }], []), [false, true, false, false]);
@@ -58,4 +68,16 @@ test('corrupt or unavailable storage never silently overwrites the original', ()
   assert.ok(result.error); assert.equal(result.raw, '{broken'); assert.equal(writes, 0);
   assert.ok(loadLedger({ getItem() { throw new Error('blocked'); } }).error);
   assert.throws(() => saveLedger(freshLedger(), { setItem() { throw new Error('full'); } }));
+});
+test('old saved ledgers acquire session currency and last setup without altering records', () => {
+  const old = { version: 1, ...freshLedger(), sessions: [row], active: { ...row, id: 'running', endedAt: null } };
+  old.settings.currency = 'EUR'; delete old.draft.cur; delete old.lastSetup;
+  const result = loadLedger({ getItem: () => JSON.stringify(old) });
+  assert.equal(result.error, null);
+  assert.equal(result.data.draft.cur, 'HKD');
+  assert.equal(result.data.lastSetup.cur, 'HKD');
+  assert.equal(result.data.lastSetup.buyIn, '2000');
+  assert.equal(result.data.settings.currency, 'EUR');
+  assert.deepEqual(result.data.sessions, old.sessions);
+  assert.deepEqual(result.data.active, old.active);
 });

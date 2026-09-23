@@ -2,7 +2,7 @@ import React from "react";
 import LedgerView from "./LedgerView.jsx";
 import { Dialogs, StorageNotice } from "./Overlays.jsx";
 import * as domain from "./domain.js";
-import { loadLedger, saveLedger, STORAGE_KEY, persistedKeys, freshLedger } from "./storage.js";
+import { loadLedger, saveLedger, STORAGE_KEY, persistedKeys, freshLedger, normalizeSaved } from "./storage.js";
 import { createBackup, parseBackup } from './backup.js';
 
 export default class Ledger extends React.Component {
@@ -102,9 +102,7 @@ export default class Ledger extends React.Component {
     const add = imp.rows.filter((r, i) => !(imp.skip && dupes[i]))
       .map(r => ({ ...this.scale(r, k), id: domain.newId(), cur, sourceCurrency: r.cur, importRate: k }));
     if (!add.length) return;
-    const last = add.slice().sort((a, b) => b.startedAt - a.startedAt)[0];
-    this.setState({ sessions: [...add, ...this.state.sessions], settings: { ...S, currency: cur },
-      draft: last.bb > 0 ? this.setupFrom(last) : { ...this.state.draft, cur },
+    this.setState({ sessions: [...add, ...this.state.sessions],
       venues: this.mergeVenues(add), stakes: this.mergeStakes(add),
       imp: null, flow: null, detailId: null, tab: 'home' });
     this.say(add.length + ' sessions imported from analytics7');
@@ -164,10 +162,10 @@ export default class Ledger extends React.Component {
       if (st.active) return { flow: 'active', detailId: null };
       const d = { ...st.draft, ...over }, amount = Number(d.buyIn);
       if (!Number.isFinite(amount) || amount <= 0 || amount > 999999999 || d.bb <= 0) return null;
-      const at = Date.now(), cur = st.settings.currency;
+      const at = Date.now(), cur = d.cur || 'USD';
       return { active: { id: domain.newId(), cur, startedAt: at, endedAt: null, venue: d.venue, city: d.city,
         sb: d.sb, bb: d.bb, game: d.game, seats: d.seats, buyIns: [{ amount, at }], cashOut: 0, tips: 0, notes: '' },
-        draft: { ...d, cur, buyIn: '' }, out: { cash: '', tips: '' },
+        draft: { ...d, cur, buyIn: '' }, lastSetup: { ...d, cur, buyIn: String(amount) }, out: { cash: '', tips: '' },
         flow: 'active', tab: 'home', detailId: null, sheet: null, now: at };
     });
   }
@@ -185,14 +183,14 @@ export default class Ledger extends React.Component {
       if (!st.active) return null;
       done = { ...st.active, endedAt: Date.now(), cashOut: Number(st.out.cash) || 0, tips: Number(st.out.tips) || 0 };
       return { sessions: [done, ...st.sessions], active: null, out: { cash: '', tips: '' },
-        settings: { ...st.settings, currency: done.cur }, flow: null, tab: 'home' };
+        flow: null, tab: 'home' };
     }, () => { if (done) this.say('Session booked · ' + this.moneyIn(this.pnl(done), done.cur, true)); });
   }
 
-  curve(list, w, h) {
+  curve(list, w, h, value = s => this.pnl(s)) {
     const pts = [];
     let run = 0;
-    list.slice().sort((a, b) => a.startedAt - b.startedAt).forEach((s) => { run += this.pnl(s); pts.push(run); });
+    list.slice().sort((a, b) => a.startedAt - b.startedAt).forEach((s) => { run += value(s); pts.push(run); });
     if (!pts.length) return { line: '', area: '', zero: h / 2, peak: 0, last: run };
     if (pts.length === 1) pts.unshift(0);
     const all = pts.concat([0]);
@@ -206,72 +204,81 @@ export default class Ledger extends React.Component {
 
   renderVals() {
     const st = this.state, S = st.settings;
-    const sessions = st.sessions.filter((s) => (s.cur || S.currency) === S.currency);
-    const parked = st.sessions.length - sessions.length;
+    const reporting = s => domain.reportNet(s, S.currency);
+    const sessions = st.sessions.filter(s => reporting(s) !== null);
+    const excluded = st.sessions.filter(s => reporting(s) === null);
+    const foreign = [...new Set(st.sessions.map(s => s.cur))].filter(cur => cur !== S.currency);
+    const missingCodes = [...new Set(excluded.map(s => s.cur))].join(', ');
+    const conversionNote = foreign.length ? 'Totals in ' + S.currency + ' · fixed exchange rates.' : '';
+    const missingRateNote = excluded.length ? excluded.length + ' session' + (excluded.length === 1 ? '' : 's') + ' in ' + missingCodes + ' excluded from totals: no fixed rate to ' + S.currency + '. Original amounts remain in the log.' : '';
     const flow = st.flow, det = st.detailId;
     const onTab = !flow && !det;
-    const net = sessions.reduce((n, s) => n + this.pnl(s), 0);
+    const net = sessions.reduce((n, s) => n + reporting(s), 0);
     const hrs = sessions.reduce((n, s) => n + this.hours(s), 0);
-    const wins = sessions.filter((s) => this.pnl(s) > 0).length;
+    const wins = sessions.filter(s => this.pnl(s) > 0).length;
     const m0 = new Date(); m0.setDate(1); m0.setHours(0, 0, 0, 0);
-    const monthNet = sessions.filter((s) => s.startedAt >= m0.getTime()).reduce((n, s) => n + this.pnl(s), 0);
+    const monthNet = sessions.filter(s => s.startedAt >= m0.getTime()).reduce((n, s) => n + reporting(s), 0);
 
-    const row = (s) => ({
-      id: s.id, stakes: this.stakeLabel(s), venue: s.venue,
-      meta: this.when(s.startedAt) + ' \u00b7 ' + this.shortDur((s.endedAt || Date.now()) - s.startedAt) + ' \u00b7 ' + s.seats + '-max',
-      pnl: this.money(this.pnl(s), true), color: this.col(this.pnl(s)),
-      rate: this.money(this.hours(s) > 0 ? this.pnl(s) / this.hours(s) : 0, true),
-      onClick: () => this.openDetail(s.id),
+    const row = (s, converted = false) => {
+      const value = converted ? reporting(s) : this.pnl(s), cur = converted ? S.currency : s.cur;
+      const source = converted && s.cur !== S.currency ? s.cur + ' → ' + S.currency : s.cur;
+      return {
+        id: s.id, stakes: this.stakeLabel(s), venue: s.venue,
+        meta: this.when(s.startedAt) + ' · ' + this.shortDur((s.endedAt || Date.now()) - s.startedAt) + ' · ' + s.seats + '-max · ' + source,
+        pnl: value === null ? '—' : this.moneyIn(value, cur, true), color: value === null ? 'var(--color-neutral-600)' : this.col(value),
+        rate: value === null ? '—' : this.moneyIn(this.hours(s) > 0 ? value / this.hours(s) : 0, cur, true),
+        onClick: () => this.openDetail(s.id),
+      };
+    };
+    const sorted = st.sessions.slice().sort((a, b) => b.startedAt - a.startedAt);
+    const valuedSorted = sessions.slice().sort((a, b) => b.startedAt - a.startedAt);
+    const filtered = sorted.filter(s => st.filter === 'All' || (st.filter === 'Wins' ? this.pnl(s) > 0 : this.pnl(s) <= 0));
+    const valuedFiltered = filtered.filter(s => reporting(s) !== null);
+    const fNet = valuedFiltered.reduce((n, s) => n + reporting(s), 0);
+    const spark = this.curve(sessions, 370, 72, reporting);
+    const big = this.curve(sessions, 342, 150, reporting);
+
+    // Keep native stakes in distinct currency groups; only results are converted.
+    const groups = Object.create(null);
+    sessions.forEach(s => {
+      const k = s.cur + ' ' + this.stakeLabel(s);
+      groups[k] ||= { label: k, n: 0, h: 0, net: 0, bb: s.bb * this.rate(s.cur, S.currency) };
+      groups[k].n++; groups[k].h += this.hours(s); groups[k].net += reporting(s);
     });
-    const sorted = sessions.slice().sort((a, b) => b.startedAt - a.startedAt);
-    const filtered = sorted.filter((s) => st.filter === 'All' || (st.filter === 'Wins' ? this.pnl(s) > 0 : this.pnl(s) <= 0));
-    const fNet = filtered.reduce((n, s) => n + this.pnl(s), 0);
-
-    const spark = this.curve(sessions, 370, 72);
-    const big = this.curve(sessions, 342, 150);
-
-    // by stake
-    const groups = {};
-    sessions.forEach((s) => {
-      const k = this.stakeLabel(s);
-      groups[k] = groups[k] || { label: k, n: 0, h: 0, net: 0, bb: s.bb };
-      groups[k].n++; groups[k].h += this.hours(s); groups[k].net += this.pnl(s);
-    });
-    const byStake = Object.keys(groups).map((k) => groups[k]).sort((a, b) => b.bb - a.bb).map((g) => ({
+    const byStake = Object.values(groups).sort((a, b) => b.bb - a.bb).map(g => ({
       label: g.label, n: g.n, hours: g.h.toFixed(1), net: this.money(g.net, true),
       rate: this.money(g.h > 0 ? g.net / g.h : 0, true), color: this.col(g.net),
     }));
-
-    const best = sorted.slice().sort((a, b) => this.pnl(b) - this.pnl(a))[0];
-    const worst = sorted.slice().sort((a, b) => this.pnl(a) - this.pnl(b))[0];
-    const longest = sorted.slice().sort((a, b) => this.hours(b) - this.hours(a))[0];
-    const venues = {};
-    sessions.forEach((s) => { venues[s.venue] = (venues[s.venue] || 0) + this.pnl(s); });
+    const best = sessions.slice().sort((a, b) => reporting(b) - reporting(a))[0];
+    const worst = sessions.slice().sort((a, b) => reporting(a) - reporting(b))[0];
+    const longest = sessions.slice().sort((a, b) => this.hours(b) - this.hours(a))[0];
+    const venues = Object.create(null);
+    sessions.forEach(s => { venues[s.venue] = (venues[s.venue] || 0) + reporting(s); });
     const topVenue = Object.keys(venues).sort((a, b) => venues[b] - venues[a])[0];
     const supers = best ? [
-      { label: 'Best session', value: best.venue + ' \u00b7 ' + this.when(best.startedAt), figure: this.money(this.pnl(best), true), color: this.col(this.pnl(best)) },
-      { label: 'Worst session', value: worst.venue + ' \u00b7 ' + this.when(worst.startedAt), figure: this.money(this.pnl(worst), true), color: this.col(this.pnl(worst)) },
-      { label: 'Longest', value: longest.venue + ' \u00b7 ' + this.stakeLabel(longest), figure: this.shortDur(longest.endedAt - longest.startedAt), color: 'var(--color-text)' },
+      { label: 'Best session', value: best.venue + ' · ' + this.when(best.startedAt), figure: this.money(reporting(best), true), color: this.col(reporting(best)) },
+      { label: 'Worst session', value: worst.venue + ' · ' + this.when(worst.startedAt), figure: this.money(reporting(worst), true), color: this.col(reporting(worst)) },
+      { label: 'Longest', value: longest.venue + ' · ' + longest.cur + ' ' + this.stakeLabel(longest), figure: this.shortDur(longest.endedAt - longest.startedAt), color: 'var(--color-text)' },
       { label: 'Top venue', value: topVenue, figure: this.money(venues[topVenue], true), color: this.col(venues[topVenue]) },
     ] : [];
 
-    // detail
-    const ds = sessions.filter((s) => s.id === det)[0];
+    // Details always show the session's original currency and amounts.
+    const ds = st.sessions.find(s => s.id === det);
     let d = null;
     if (ds) {
-      const p = this.pnl(ds), h = this.hours(ds);
-      const lines = ds.buyIns.map((b, i) => ({ label: (i === 0 ? 'Buy-in' : 'Re-buy ' + i) + ' \u00b7 ' + this.hm(b.at), value: '\u2212' + this.money(b.amount), color: 'var(--color-text)' }));
-      lines.push({ label: 'Tips & rake', value: '\u2212' + this.money(ds.tips), color: 'var(--color-text)' });
-      lines.push({ label: 'Chips off table', value: this.money(ds.cashOut), color: 'var(--color-text)' });
-      lines.push({ label: 'Net', value: this.money(p, true), color: this.col(p) });
+      const p = this.pnl(ds), h = this.hours(ds), nativeMoney = (n, sign) => this.moneyIn(n, ds.cur, sign);
+      const lines = ds.buyIns.map((b, i) => ({ label: (i === 0 ? 'Buy-in' : 'Re-buy ' + i) + ' · ' + this.hm(b.at), value: '−' + nativeMoney(b.amount), color: 'var(--color-text)' }));
+      lines.push({ label: 'Tips & rake', value: '−' + nativeMoney(ds.tips), color: 'var(--color-text)' });
+      lines.push({ label: 'Chips off table', value: nativeMoney(ds.cashOut), color: 'var(--color-text)' });
+      lines.push({ label: 'Net', value: nativeMoney(p, true), color: this.col(p) });
       d = {
-        venue: ds.venue, when: this.when(ds.startedAt), game: ds.game, stakes: this.stakeLabel(ds), seats: ds.seats,
-        pnl: this.money(p, true), color: this.col(p),
-        rate: this.money(h > 0 ? p / h : 0, true), bbRate: (h > 0 && ds.bb > 0 ? (p / h) / ds.bb : 0).toFixed(1),
+        venue: ds.venue, cur: ds.cur, when: this.when(ds.startedAt), game: ds.game, stakes: this.stakeLabel(ds), seats: ds.seats,
+        pnl: nativeMoney(p, true), color: this.col(p),
+        rate: nativeMoney(h > 0 ? p / h : 0, true), bbRate: (h > 0 && ds.bb > 0 ? (p / h) / ds.bb : 0).toFixed(1),
         lines,
         tiles: [
           { label: 'Duration', value: this.shortDur(ds.endedAt - ds.startedAt) },
-          { label: 'Invested', value: this.money(this.buyIn(ds)) },
+          { label: 'Invested', value: nativeMoney(this.buyIn(ds)) },
           { label: 'Bullets', value: ds.buyIns.length },
           { label: 'City', value: ds.city },
         ],
@@ -285,7 +292,7 @@ export default class Ledger extends React.Component {
     if (A) {
       const inv = this.buyIn(A);
       a = {
-        venue: A.venue, game: A.game, stakes: this.stakeLabel(A), seats: A.seats, startedAt: this.hm(A.startedAt),
+        venue: A.venue, cur: A.cur, game: A.game, stakes: this.stakeLabel(A), seats: A.seats, startedAt: this.hm(A.startedAt),
         invested: this.moneyIn(inv, A.cur), bbs: A.bb > 0 ? Math.round(inv / A.bb) : '—',
         buyIns: A.buyIns.map((b, i) => ({ label: i === 0 ? 'Buy-in' : 'Re-buy ' + i, at: this.hm(b.at), amount: this.moneyIn(b.amount, A.cur) })),
       };
@@ -307,13 +314,9 @@ export default class Ledger extends React.Component {
       onClick: () => apply(it.value),
     }));
     const setDraft = (patch) => this.setState({ draft: Object.assign({}, st.draft, patch), sheet: null });
-    const venueDefaults = [
-      { label: 'Bellagio', sub: 'Las Vegas' }, { label: 'Aria', sub: 'Las Vegas' }, { label: 'Wynn', sub: 'Las Vegas' },
-      { label: 'Encore', sub: 'Las Vegas' }, { label: 'Resorts World', sub: 'Las Vegas' }, { label: "Mike's home game", sub: 'Henderson' },
-    ].map((v) => ({ label: v.label, sub: v.sub, value: v.label }));
     const venueItems = this.mergeVenues(st.sessions).map(v => ({ label: v.name, sub: v.city, value: v.name }));
-    venueDefaults.forEach(v => { if (!venueItems.some(x => x.value === v.value)) venueItems.push(v); });
-    const stakeItems = [...new Set(['1/2', '1/3', '2/5', '5/10', '10/20', '25/50', S.stakes, ...this.mergeStakes(st.sessions)])].map(s => ({ label: s, value: s }));
+    domain.DEFAULT_VENUES.forEach(v => { if (!venueItems.some(x => x.value === v.name)) venueItems.push({ label: v.name, sub: v.city, value: v.name }); });
+    const stakeItems = [...new Set([...this.mergeStakes(st.sessions), S.stakes, ...domain.DEFAULT_STAKES])].map(value => ({ label: value, value }));
     const gameItems = ['NLHE', 'PLO', 'PLO5', 'Mixed', 'LHE'].map((g) => ({ label: g, value: g }));
     const seatItems = [6, 8, 9].map((n) => ({ label: n + '-max', value: n }));
     const curItems = [
@@ -322,14 +325,15 @@ export default class Ledger extends React.Component {
       { label: 'AUD', sub: 'Australian', value: 'AUD' }, { label: 'HKD', sub: 'Hong Kong', value: 'HKD' },
     ];
 
-    [...new Set(st.sessions.map(s => s.cur))].forEach(code => { if (!curItems.some(x => x.value === code)) curItems.push({ label: code, value: code }); });
+    [...new Set([...st.sessions.map(s => s.cur), st.draft.cur, st.active?.cur, S.currency].filter(Boolean))].forEach(code => { if (!curItems.some(x => x.value === code)) curItems.push({ label: code, value: code }); });
     const sheets = {
       venue: { title: 'Venue', items: sheetItems(venueItems, st.draft.venue, (v) => setDraft({ venue: v, city: (venueItems.filter((x) => x.value === v)[0] || {}).sub })) },
       stakes: { title: 'Stakes', items: sheetItems(stakeItems, this.stakeLabel(st.draft), (v) => setDraft({ sb: Number(v.split('/')[0]), bb: Number(v.split('/')[1]) })) },
       game: { title: 'Game', items: sheetItems(gameItems, st.draft.game, (v) => setDraft({ game: v })) },
       seats: { title: 'Table size', items: sheetItems(seatItems, st.draft.seats, (v) => setDraft({ seats: v })) },
       rebuy: { title: 'Re-buy amount', items: (A ? [A.buyIns[0].amount, A.bb * 100, A.bb * 200, A.bb * 400] : []).filter((v, i, arr) => arr.indexOf(v) === i).map((v) => ({ label: this.moneyIn(v, A.cur), sub: Math.round(v / (A ? A.bb : 1)) + ' bb', bg: 'transparent', fg: 'var(--color-text)', onClick: () => this.rebuy(v) })) },
-      currency: { title: 'Currency', items: sheetItems(curItems, S.currency, (v) => this.setState({ settings: Object.assign({}, S, { currency: v }), sheet: null })) },
+      sessionCurrency: { title: 'Session currency', items: sheetItems(curItems, st.draft.cur, cur => setDraft({ cur })) },
+      currency: { title: 'Display currency', items: sheetItems(curItems, S.currency, (v) => this.setState({ settings: Object.assign({}, S, { currency: v }), sheet: null })) },
       defGame: { title: 'Default game', items: sheetItems(gameItems, S.game, (v) => this.updateDefault('game', v)) },
       defStakes: { title: 'Default stakes', items: sheetItems(stakeItems, S.stakes, (v) => this.updateDefault('stakes', v)) },
       defSeats: { title: 'Default table', items: sheetItems(seatItems, S.seats, (v) => this.updateDefault('seats', v)) },
@@ -338,16 +342,16 @@ export default class Ledger extends React.Component {
     sheets.pnl = { title: 'Profit & loss colours', items: sheetItems(['Mono', 'Signal'].map(v => ({ label: v, value: v, sub: v === 'Mono' ? 'Steel / ink' : 'Green / red' })), S.pnlColor, v => this.setState({ settings: { ...S, pnlColor: v }, sheet: null })) };
     const sheet = st.sheet ? sheets[st.sheet] : null;
 
-    const last = sorted[0];
+    const last = this.recentSetup();
     const presets = [];
-    if (last) presets.push({
-      label: this.money(this.buyIn(last) / last.buyIns.length) + ' \u00b7 ' + this.stakeLabel(last),
+    if (last && Number(last.buyIn) > 0) presets.push({
+      label: last.cur + ' ' + this.moneyIn(Number(last.buyIn), last.cur) + ' · ' + this.stakeLabel(last),
       sub: 'Repeat ' + last.venue,
-      onClick: () => this.startSession({ venue: last.venue, city: last.city, sb: last.sb, bb: last.bb, game: last.game, seats: last.seats, buyIn: String(Math.round(this.buyIn(last) / last.buyIns.length)) }),
+      onClick: () => this.startSession(last),
     });
     const dsb = Number(S.stakes.split('/')[0]), dbb = Number(S.stakes.split('/')[1]);
     presets.push({
-      label: this.money(dbb * 100) + ' \u00b7 ' + S.stakes, sub: 'Default ' + S.game + ' ' + S.seats + '-max',
+      label: st.draft.cur + ' ' + this.moneyIn(dbb * 100, st.draft.cur) + ' · ' + S.stakes, sub: 'Default ' + S.game + ' ' + S.seats + '-max',
       onClick: () => this.startSession({ sb: dsb, bb: dbb, game: S.game, seats: S.seats, buyIn: String(dbb * 100) }),
     });
 
@@ -408,14 +412,16 @@ export default class Ledger extends React.Component {
       onPlus: () => this.openNew(),
 
       dateLine: new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' }),
-      currency: S.currency, sessionCount: sessions.length,
-      bankrollText: this.money(net, true), monthText: this.money(monthNet, true), monthColor: this.col(monthNet),
+      currency: S.currency, sessionCount: st.sessions.length,
+      conversionNote, missingRateNote,
+      rateNotes: foreign.map(cur => this.rate(cur, S.currency) === null ? cur + " → " + S.currency + ": unavailable" : "1 " + cur + " = " + this.rate(cur, S.currency) + " " + S.currency),
+      bankrollText: !sessions.length && excluded.length ? '—' : this.money(net, true), monthText: this.money(monthNet, true), monthColor: this.col(monthNet),
       hourlyText: this.money(hrs > 0 ? net / hrs : 0, true), hourlyColor: this.col(net),
       hoursText: hrs.toFixed(1), winRateText: sessions.length ? Math.round((wins / sessions.length) * 100) + '%' : '—',
       avgText: this.money(sessions.length ? net / sessions.length : 0, true), avgColor: this.col(net),
       sparkLine: spark.line, sparkArea: spark.area, sparkZero: spark.zero,
       hasActive: !!A, noActive: !A, timerText: this.clock(elapsed),
-      recent: sorted.slice(0, 4).map(row),
+      recent: sorted.slice(0, 4).map(s => row(s, true)),
       goNew: () => this.openNew(),
       goActive: () => this.setState({ flow: 'active', detailId: null }),
       goLog: () => this.go('log'), goBack: () => this.setState({ detailId: null }),
@@ -425,13 +431,13 @@ export default class Ledger extends React.Component {
         fg: st.filter === f ? 'var(--color-bg)' : 'var(--color-text)',
         onClick: () => this.setState({ filter: f }),
       })),
-      logRows: filtered.map(row), logCount: filtered.length,
-      logNet: this.money(fNet, true), logNetColor: this.col(fNet),
+      logRows: filtered.map(s => row(s)), logCount: filtered.length,
+      logNet: !valuedFiltered.length && filtered.length ? '—' : this.money(fNet, true), logNetColor: this.col(fNet),
       logHours: filtered.reduce((n, s) => n + this.hours(s), 0).toFixed(1),
 
       curveLine: big.line, curveArea: big.area, curveZero: big.zero,
       curveSpan: sessions.length + ' sessions \u00b7 ' + hrs.toFixed(0) + 'h',
-      curveFirst: sorted.length ? this.when(sorted[sorted.length - 1].startedAt) : '—',
+      curveFirst: valuedSorted.length ? this.when(valuedSorted[valuedSorted.length - 1].startedAt) : '—',
       curvePeak: this.money(big.peak, true), curveLast: 'Now',
       byStake, supers,
 
@@ -439,8 +445,10 @@ export default class Ledger extends React.Component {
 
       showQuick: this.state.settings.showQuickStart !== false,
       presets,
-      buyInText: st.draft.buyIn ? this.sym() + Number(st.draft.buyIn).toLocaleString('en-US') : this.sym() + '0',
+      buyInText: this.moneyIn(Number(st.draft.buyIn) || 0, st.draft.cur),
+      draftHelp: last ? 'Using your last session setup. Tap any row to change it.' : 'Choose your venue, stakes and session currency.',
       draftRows: [
+        { label: 'Session currency', value: st.draft.cur, onClick: () => this.setState({ sheet: 'sessionCurrency' }) },
         { label: 'Venue', value: st.draft.venue, onClick: () => this.setState({ sheet: 'venue' }) },
         { label: 'Stakes', value: this.stakeLabel(st.draft), onClick: () => this.setState({ sheet: 'stakes' }) },
         { label: 'Game', value: st.draft.game, onClick: () => this.setState({ sheet: 'game' }) },
@@ -466,7 +474,7 @@ export default class Ledger extends React.Component {
       onConfirm: () => this.book(),
 
       setRows: [
-        { label: 'Currency', value: S.currency, onClick: () => this.setState({ sheet: 'currency' }) },
+        { label: 'Display currency', value: S.currency, onClick: () => this.setState({ sheet: 'currency' }) },
         { label: 'Default game', value: S.game, onClick: () => this.setState({ sheet: 'defGame' }) },
         { label: 'Default stakes', value: S.stakes, onClick: () => this.setState({ sheet: 'defStakes' }) },
         { label: 'Default table', value: S.seats + '-max', onClick: () => this.setState({ sheet: 'defSeats' }) },
@@ -477,16 +485,15 @@ export default class Ledger extends React.Component {
       hasSamples: st.sessions.some(s => s.demo), removeSamples: () => this.ask('removeSamples'),
       backHome: () => this.go('home'),
       hasSessions: sessions.length > 0, noSessions: sessions.length === 0,
-      emptyLine: parked > 0
-        ? parked + ' session' + (parked === 1 ? '' : 's') + ' sit in another currency. Switch currency in Settings, start one at the table, or bring a log across.'
+      emptyTitle: st.sessions.length ? 'No convertible sessions' : 'Nothing logged yet',
+      emptyLine: excluded.length
+        ? 'Choose a supported display currency in Settings. Your sessions remain in the log.'
         : 'Start one at the table, or bring your history across from analytics7.',
       noLogRows: filtered.length === 0,
-      logEmptyTitle: sessions.length === 0 ? 'Nothing logged in ' + S.currency : 'No ' + st.filter.toLowerCase() + ' yet',
-      logEmptyLine: sessions.length === 0
-        ? 'The log follows the currency you are showing. Import or start a session to fill it.'
-        : 'Every ' + S.currency + ' session so far sits in one of the other two filters.',
-      hasParked: parked > 0,
-      parkedNote: parked + ' session' + (parked === 1 ? '' : 's') + ' in another currency are held aside. Bankroll, stats and the log only ever sum the currency shown above \u2014 switch currency to see them.',
+      logEmptyTitle: st.sessions.length === 0 ? 'Nothing logged yet' : 'No ' + st.filter.toLowerCase() + ' yet',
+      logEmptyLine: st.sessions.length === 0
+        ? 'Import or start a session to fill your log.'
+        : 'Your sessions are in one of the other two filters.',
       onExport: () => this.exportCsv(),
       onSeed: () => this.ask('sample'),
       onReset: () => this.ask('erase'),
@@ -533,9 +540,9 @@ export default class Ledger extends React.Component {
       impSpan: impSpan, impBank: imp ? imp.bank : '', impCode: imp ? imp.code : '',
       impVenues: impVenues,
       impModes: !imp ? [] : (impSameCur ? [
-        { label: 'Keep ' + imp.code, sub: 'Same currency as your ledger \u00b7 nothing to convert', bg: 'color-mix(in srgb, var(--color-accent) 12%, transparent)', dot: 'var(--color-accent)', onClick: () => this.setState({ imp: Object.assign({}, imp, { mode: 'keep' }) }) },
+        { label: 'Keep ' + imp.code, sub: 'Keep original session amounts · no conversion needed', bg: 'color-mix(in srgb, var(--color-accent) 12%, transparent)', dot: 'var(--color-accent)', onClick: () => this.setState({ imp: Object.assign({}, imp, { mode: 'keep' }) }) },
       ] : [
-        { label: 'Keep ' + imp.code, sub: 'xbenben switches to ' + imp.code + ' \u00b7 your ' + sessions.length + ' ' + S.currency + ' sessions stay in the log, shown when you switch back', bg: !impConvert ? 'color-mix(in srgb, var(--color-accent) 12%, transparent)' : 'transparent', dot: !impConvert ? 'var(--color-accent)' : 'transparent', onClick: () => this.setState({ imp: Object.assign({}, imp, { mode: 'keep' }) }) },
+        { label: 'Keep ' + imp.code, sub: 'Keep original amounts · Home and Stats display in ' + S.currency, bg: !impConvert ? 'color-mix(in srgb, var(--color-accent) 12%, transparent)' : 'transparent', dot: !impConvert ? 'var(--color-accent)' : 'transparent', onClick: () => this.setState({ imp: Object.assign({}, imp, { mode: 'keep' }) }) },
         { label: 'Convert to ' + S.currency, sub: 'At 1 ' + imp.code + ' = ' + impRate + ' ' + S.currency + ' \u00b7 amounts and stakes rescaled', bg: impConvert ? 'color-mix(in srgb, var(--color-accent) 12%, transparent)' : 'transparent', dot: impConvert ? 'var(--color-accent)' : 'transparent', onClick: () => this.setState({ imp: Object.assign({}, imp, { mode: 'convert' }) }) },
       ]),
       impCanConvert: !!impRate,
@@ -557,28 +564,29 @@ export default class Ledger extends React.Component {
       toastOpen: !!st.toast, toast: st.toast || '',
     };
   }
-  setupFrom(s) {
-    return { venue: s.venue, city: s.city, sb: s.sb, bb: s.bb, game: s.game, seats: s.seats, cur: s.cur, buyIn: '' };
+  setupFrom(s) { return domain.setupFrom(s); }
+  recentSetup() {
+    if (this.state.lastSetup) return this.state.lastSetup;
+    const last = domain.latestSession(this.state.sessions);
+    return last ? this.setupFrom(last) : null;
   }
   openNew() {
-    const { active, settings: S, draft, sessions } = this.state;
+    const { active, settings: S, draft } = this.state;
     if (active) { this.setState({ flow: 'active', detailId: null }); return; }
-    const last = sessions.filter(s => s.cur === S.currency && s.bb > 0).sort((a, b) => b.startedAt - a.startedAt)[0];
     const [sb, bb] = S.stakes.split('/').map(Number);
-    const setup = (draft.cur || 'USD') === S.currency ? draft : last ? this.setupFrom(last) : { ...draft, sb, bb, game: S.game, seats: S.seats, cur: S.currency, buyIn: '' };
-    this.setState({ flow: 'new', detailId: null, padTarget: 'buyIn', draft: setup });
+    const setup = this.recentSetup() || { ...draft, sb, bb, game: S.game, seats: S.seats };
+    this.setState({ flow: 'new', detailId: null, padTarget: 'buyIn', draft: { ...setup, buyIn: '' } });
   }
   updateDefault(key, value) {
-    const patch = key === 'stakes' ? { sb: Number(value.split('/')[0]), bb: Number(value.split('/')[1]) } : { [key]: value };
-    this.setState(st => ({ settings: { ...st.settings, [key]: value }, draft: { ...st.draft, ...patch }, sheet: null }));
+    this.setState(st => ({ settings: { ...st.settings, [key]: value }, sheet: null }));
   }
   mergeVenues(sessions) {
-    const list = [...this.state.venues];
-    [...sessions, this.state.draft].forEach(s => { if (s.venue && !list.some(v => v.name === s.venue)) list.push({ name: s.venue, city: s.city || '' }); });
+    const list = [];
+    [this.state.lastSetup, ...sessions.slice().sort((a, b) => b.startedAt - a.startedAt), this.state.draft, ...this.state.venues.map(v => ({ venue: v.name, city: v.city }))].filter(Boolean).forEach(s => { if (s.venue && !list.some(v => v.name === s.venue)) list.push({ name: s.venue, city: s.city || '' }); });
     return list;
   }
   mergeStakes(sessions) {
-    return [...new Set([...this.state.stakes, ...sessions.filter(s => s.bb > 0).map(s => this.stakeLabel(s))])];
+    return [...new Set([this.state.lastSetup, this.state.draft, ...sessions.slice().sort((a, b) => b.startedAt - a.startedAt)].filter(s => s?.bb > 0).map(s => this.stakeLabel(s)).concat(this.state.stakes))];
   }
   loadA7Error(error) { this.setState({ imp: { step: 'pick', error } }); }
   ask(modal) { this.setState({ modal, sheet: null }); }
@@ -590,7 +598,7 @@ export default class Ledger extends React.Component {
     if (action === 'removeSamples') this.setState(st => ({ sessions: st.sessions.filter(s => !s.demo) }));
     if (action === 'sample') {
       const sample = this.seed(Date.now(), 86400000, 3600000).map(s => ({ ...s, id: 'demo-' + s.id, demo: true }));
-      this.setState(st => ({ sessions: [...sample, ...st.sessions.filter(s => !s.demo)], settings: { ...st.settings, currency: 'USD' }, draft: this.setupFrom(sample[0]) }));
+      this.setState(st => ({ sessions: [...sample, ...st.sessions.filter(s => !s.demo)], settings: { ...st.settings, currency: 'USD' }, draft: st.lastSetup ? st.draft : { ...this.setupFrom(sample[0]), buyIn: '' } }));
     }
     if (action === 'resetStorage') {
       if (this.state.recoveryRaw && !this.state.recoveryDownloaded) return;
@@ -602,9 +610,8 @@ export default class Ledger extends React.Component {
     this.say({ delete: 'Session deleted', discard: 'Live session discarded', erase: 'All sessions erased', sample: 'Sample log restored', removeSamples: 'Sample log removed', resetStorage: 'Storage reset' }[action]);
   }
   exportCsv() {
-    const { currency } = this.state.settings;
-    const list = this.state.sessions.filter(s => s.cur === currency).sort((a, b) => b.startedAt - a.startedAt);
-    domain.download(domain.csv(list), 'xbenben-' + currency + '-' + new Date().toISOString().slice(0, 10) + '.csv', 'text/csv;charset=utf-8');
+    const list = this.state.sessions.slice().sort((a, b) => b.startedAt - a.startedAt);
+    domain.download(domain.csv(list), 'xbenben-sessions-' + new Date().toISOString().slice(0, 10) + '.csv', 'text/csv;charset=utf-8');
     this.say(list.length + ' rows exported');
   }
   recoveryDownload() {
@@ -648,7 +655,7 @@ export default class Ledger extends React.Component {
   }
   restoreBackup() {
     const backup = this.state.restoreBackup; if (!backup) return;
-    const restored = { ...Object.fromEntries(persistedKeys.map(k => [k, backup.ledger[k]])), lastBackupAt: backup.ledger.lastBackupAt ?? null };
+    const restored = normalizeSaved(backup.ledger);
     // Commit the complete snapshot atomically before replacing the current view.
     try { saveLedger(restored); }
     catch { this.setState({ backupError: 'The backup could not be saved on this device. Free some storage and try again. Your current ledger is unchanged.' }); return; }

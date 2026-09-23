@@ -41,7 +41,7 @@ export function Sheet({ v }) {
 }
 
 const confirmations = {
-  delete: ['Delete session?', 'This permanently removes this session from your log and recalculates its currency’s totals.', 'Delete session'],
+  delete: ['Delete session?', 'This permanently removes this session from your log and recalculates your totals.', 'Delete session'],
   discard: ['Discard live session?', 'The running session and its buy-ins will be removed. It will not be booked in your log.', 'Discard session'],
   erase: ['Erase all sessions?', 'This permanently removes every session in every currency, including the running session. Export any log you want to keep first.', 'Erase all sessions'],
   sample: ['Restore sample log?', 'Add or refresh six example USD sessions and switch the ledger to USD. Your personal sessions, imports and running session stay intact. Remove the examples separately when you are done.', 'Restore sample log'],
@@ -122,6 +122,14 @@ export function BackupControls({ controller }) {
     <p className="backup-meta">Last backup: {s.lastBackupAt ? new Date(s.lastBackupAt).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' }) : 'Never'}</p>
     <p className="backup-meta">{s.durableStorage || 'Browser-managed storage · keep regular backups'}</p>
   </section>;
+}
+
+export function ConversionNote({ v }) {
+  if (!v.conversionNote && !v.missingRateNote) return null;
+  return <aside className="conversion-note" aria-label="Currency conversion">
+    {v.conversionNote && <p>{v.conversionNote}</p>}
+    {v.missingRateNote && <p role="status">{v.missingRateNote}</p>}
+  </aside>;
 }
 
 function BackupDialog({ controller }) {

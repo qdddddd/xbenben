@@ -72,3 +72,8 @@ label:has(.file-input:focus-visible) { outline: var(--size-2) solid var(--color-
   .table td, .table th { padding-left: var(--size-4); padding-right: var(--size-4); font-size: var(--size-11); }
 }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; scroll-behavior: auto !important; } }
+
+.conversion-note, .reporting-info { margin-top: var(--size-12); padding: var(--size-8) var(--size-10); border-left: var(--size-2) solid var(--color-accent); background: var(--color-accent-100); font-size: var(--size-12); line-height: 1.45; }
+.conversion-note p, .reporting-info p { margin: 0; }
+.reporting-info p + p, .conversion-note p + p { margin-top: var(--size-4); }
+.screen-help { margin: var(--size-12) 0 0; font-size: var(--size-12); line-height: 1.45; color: var(--color-neutral-700); }
