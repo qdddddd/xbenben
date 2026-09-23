@@ -13,9 +13,13 @@ export default function FittedValue({ children, ...props }) {
       text.current.style.fontSize = '1em';
       const range = document.createRange();
       range.selectNodeContents(text.current);
-      const natural = range.getBoundingClientRect().width;
-      if (available > 0 && natural > available) {
-        text.current.style.fontSize = `${available / natural * 100}%`;
+      // Font shaping/rounding can change with size; check the rendered result.
+      let scale = 1;
+      for (let attempt = 0; available > 0 && attempt < 4; attempt++) {
+        const width = range.getBoundingClientRect().width;
+        if (width <= available) break;
+        scale *= (available - 0.5) / width;
+        text.current.style.fontSize = `${scale * 100}%`;
       }
     };
     const observer = new ResizeObserver(([entry]) => {

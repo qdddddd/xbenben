@@ -360,10 +360,11 @@ test('design typography and chip favicon stay local, readable and outside app co
         await expect(label).toHaveCSS('white-space', 'nowrap');
         await expect(label).toHaveCSS('text-overflow', 'ellipsis');
       }
-      await expect.poll(() => page.locator('.fitted-value').evaluateAll(values => values.every(value => {
+      await expect.poll(() => page.locator('.fitted-value').evaluateAll(values => values.flatMap(value => {
         const range = document.createRange(); range.selectNodeContents(value);
-        return range.getBoundingClientRect().width <= value.clientWidth + 1;
-      })), { message: `Full amounts fit their cards on ${tab} at ${width}px` }).toBe(true);
+        const textWidth = range.getBoundingClientRect().width;
+        return textWidth <= value.clientWidth + 1 ? [] : [{ text: value.textContent, textWidth, available: value.clientWidth, fontSize: getComputedStyle(value.firstElementChild).fontSize }];
+      })), { message: `Full amounts fit their cards on ${tab} at ${width}px` }).toEqual([]);
     }
   }
   const before = await page.locator('link[rel="icon"][type="image/svg+xml"]').getAttribute('href');
