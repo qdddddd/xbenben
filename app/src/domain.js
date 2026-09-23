@@ -103,8 +103,8 @@ export function parseA7(text, name, Parser = DOMParser) {
     const city = get(c, 'bankroll') || firstBank;
     const cur = get(currencies.find(v => get(v, 'bankroll') === city) || currencies[0], 'currencyCode') || 'USD';
     const blinds = (get(c, 'blinds') || '0/0').split('/').map(number);
-    // A single blind is the big blind; do not invent a small blind or use the ante.
-    const [sb, bb] = blinds.length === 1 ? [0, blinds[0]] : blinds;
+    // A single value is the big blind; default the small blind to half of it.
+    const [sb, bb] = blinds.length === 1 ? [blinds[0] / 2, blinds[0]] : blinds;
     const list = res ? Array.from(res.getElementsByTagName('buyin')) : [];
     const buyIns = list.length ? list.map(b => ({ amount: number(get(b, 'amount')), at: a7Date(get(b, 'date')) ?? startedAt })) : [{ amount: number(get(res, 'buyin')), at: startedAt }];
     const cashOut = number(get(res, 'chipcount')), tips = number(get(res, 'tips'));

@@ -140,15 +140,15 @@ const singleBlindXML = `<model>
 </model>`;
 const xmlFile = content => ({ name: 'synthetic.xml', mimeType: 'application/xml', buffer: Buffer.from(content) });
 
-test('single-blind imports preserve money and use the recorded big blind for stats and duplicates', async ({ page }) => {
+test('single-blind imports default the small blind to half and preserve money, stats and duplicates', async ({ page }) => {
   await openImport(page);
   await page.getByLabel('Choose .xml file').setInputFiles(xmlFile(singleBlindXML));
   await page.getByRole('button', { name: 'Review 1 rows' }).click();
-  await expect(screen(page, 'import')).toContainText('0/25');
+  await expect(screen(page, 'import')).toContainText('12.5/25');
   await expect(screen(page, 'import')).toContainText('+HK$250');
   await page.getByRole('button', { name: 'Import 1 sessions', exact: true }).click();
   const data = await saved(page), imported = data.sessions[0];
-  expect(imported).toMatchObject({ sb: 0, bb: 25, cur: 'HKD', cashOut: 1800, tips: 50 });
+  expect(imported).toMatchObject({ sb: 12.5, bb: 25, cur: 'HKD', cashOut: 1800, tips: 50 });
   expect(imported.buyIns.map(b => b.amount)).toEqual([1000, 500]);
   await expect(page.getByTestId('bankroll')).toHaveText('+$32');
   await page.getByRole('button', { name: 'Stats', exact: true }).click();
