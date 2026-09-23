@@ -1,4 +1,5 @@
 import { Fragment } from "react";
+import FittedValue from "./FittedValue.jsx";
 import { Sheet, BackupControls, ConversionNote, BigBlindStats } from "./Overlays.jsx";
 
 // Native React markup ported from the read-only Ledger design. No template runtime.
@@ -20,7 +21,7 @@ return (<div className="ledger-app" style={{"height": "100%", "display": "flex",
 <div style={{"fontFamily": "var(--font-heading)", "fontSize": "var(--size-10)", "letterSpacing": ".16em", "textTransform": "uppercase", "color": "var(--color-accent-700)"}}>{"Bankroll · " + (v.currency)}</div>
 <div style={{"fontSize": "var(--size-11)", "fontFamily": "var(--font-heading)", "letterSpacing": ".1em", "textTransform": "uppercase", "color": v.monthColor}}>{(v.monthText) + " this month"}</div>
 </div>
-<div style={{"fontFamily": "var(--font-heading)", "fontSize": "var(--size-58)", "lineHeight": "1", "letterSpacing": "-.01em", "fontVariantNumeric": "tabular-nums", "marginTop": "var(--size-6)"}}><span data-testid="bankroll">{v.bankrollText}</span></div>
+<FittedValue data-testid="bankroll" style={{"fontFamily": "var(--font-heading)", "fontSize": "var(--size-58)", "lineHeight": "1", "letterSpacing": "-.01em", "fontVariantNumeric": "tabular-nums", "marginTop": "var(--size-6)"}}>{v.bankrollText}</FittedValue>
 <div style={{"margin": "var(--size-12) calc(-1 * var(--size-16)) 0", "borderTop": "var(--size-1) solid var(--color-divider)"}}>
 <svg aria-hidden="true" focusable="false" viewBox={"0 0 370 72"} width={"100%"} height={"72"} style={{"display": "block"}} preserveAspectRatio={"none"}>
 <polygon points={v.sparkArea} fill={"var(--color-accent)"} opacity={"0.14"}></polygon>
@@ -28,18 +29,18 @@ return (<div className="ledger-app" style={{"height": "100%", "display": "flex",
 <line x1={"0"} x2={"370"} y1={v.sparkZero} y2={v.sparkZero} stroke={"var(--color-text)"} strokeOpacity={".25"} strokeWidth={"1"} strokeDasharray={"3 4"}></line>
 </svg>
 </div>
-<div style={{"display": "grid", "gridTemplateColumns": "1fr 1fr 1fr", "borderTop": "var(--size-1) solid var(--color-divider)"}}>
+<div style={{"display": "grid", "gridTemplateColumns": "repeat(3, minmax(0, 1fr))", "borderTop": "var(--size-1) solid var(--color-divider)"}}>
 <div style={{"padding": "var(--size-10) 0 var(--size-12)"}}>
-<div style={{"fontFamily": "var(--font-heading)", "fontSize": "var(--size-10)", "letterSpacing": ".14em", "textTransform": "uppercase", "color": "var(--color-neutral-600)"}}>{"Per hour"}</div>
-<div style={{"fontFamily": "var(--font-heading)", "fontSize": "var(--size-22)", "fontVariantNumeric": "tabular-nums", "color": v.hourlyColor}}>{v.hourlyText}</div>
+<div className="stat-label">{"Per hour"}</div>
+<FittedValue style={{"fontFamily": "var(--font-heading)", "fontSize": "var(--size-22)", "fontVariantNumeric": "tabular-nums", "color": v.hourlyColor}}>{v.hourlyText}</FittedValue>
 </div>
 <div style={{"padding": "var(--size-10) 0 var(--size-12) var(--size-14)", "borderLeft": "var(--size-1) solid var(--color-divider)"}}>
-<div style={{"fontFamily": "var(--font-heading)", "fontSize": "var(--size-10)", "letterSpacing": ".14em", "textTransform": "uppercase", "color": "var(--color-neutral-600)"}}>{"Win rate"}</div>
-<div style={{"fontFamily": "var(--font-heading)", "fontSize": "var(--size-22)", "fontVariantNumeric": "tabular-nums"}}>{v.winRateText}</div>
+<div className="stat-label">{"Win rate"}</div>
+<FittedValue style={{"fontFamily": "var(--font-heading)", "fontSize": "var(--size-22)", "fontVariantNumeric": "tabular-nums"}}>{v.winRateText}</FittedValue>
 </div>
 <div style={{"padding": "var(--size-10) 0 var(--size-12) var(--size-14)", "borderLeft": "var(--size-1) solid var(--color-divider)"}}>
-<div style={{"fontFamily": "var(--font-heading)", "fontSize": "var(--size-10)", "letterSpacing": ".14em", "textTransform": "uppercase", "color": "var(--color-neutral-600)"}}>{"Avg / sess"}</div>
-<div style={{"fontFamily": "var(--font-heading)", "fontSize": "var(--size-22)", "fontVariantNumeric": "tabular-nums", "color": v.avgColor}}>{v.avgText}</div>
+<div className="stat-label">{"Avg"}</div>
+<FittedValue style={{"fontFamily": "var(--font-heading)", "fontSize": "var(--size-22)", "fontVariantNumeric": "tabular-nums", "color": v.avgColor}}>{v.avgText}</FittedValue>
 </div>
 </div>
 </div>
@@ -79,7 +80,7 @@ return (<div className="ledger-app" style={{"height": "100%", "display": "flex",
 <span style={{"width": "var(--size-40)", "height": "var(--size-40)", "flex": "none", "border": "var(--size-1) solid var(--color-divider)", "display": "grid", "placeItems": "center", "fontFamily": "var(--font-heading)", "fontSize": "var(--size-13)", "letterSpacing": ".02em", "color": "var(--color-accent-700)"}}>{r.stakes}</span>
 <span style={{"flex": "1", "minWidth": "0"}}>
 <span style={{"display": "block", "fontSize": "var(--size-14)", "fontWeight": "500", "whiteSpace": "nowrap", "overflow": "hidden", "textOverflow": "ellipsis"}}>{r.venue}</span>
-<span style={{"display": "block", "fontSize": "var(--size-11)", "color": "var(--color-neutral-600)", "fontFamily": "var(--font-heading)", "letterSpacing": ".08em", "textTransform": "uppercase", "marginTop": "var(--size-1)"}}>{r.meta}</span>
+<span style={{"display": "block", "fontSize": "var(--size-11)", "color": "var(--color-neutral-600)", "fontFamily": "var(--font-heading)", "letterSpacing": ".08em", "textTransform": "uppercase", "marginTop": "var(--size-1)", "fontWeight": "400"}}>{r.meta}</span>
 </span>
 <span style={{"textAlign": "right"}}>
 <span style={{"display": "block", "fontFamily": "var(--font-heading)", "fontSize": "var(--size-19)", "fontVariantNumeric": "tabular-nums", "color": r.color}}>{r.pnl}</span>
@@ -105,17 +106,17 @@ return (<div className="ledger-app" style={{"height": "100%", "display": "flex",
 
 </Fragment>)}
 </div>
-<div style={{"marginTop": "var(--size-16)", "display": "grid", "gridTemplateColumns": "1fr 1fr 1fr"}} className="blueprint"><i aria-hidden="true" className="corner tl"></i><i aria-hidden="true" className="corner tr"></i><i aria-hidden="true" className="corner bl"></i><i aria-hidden="true" className="corner br"></i>
+<div style={{"marginTop": "var(--size-16)", "display": "grid", "gridTemplateColumns": "repeat(3, minmax(0, 1fr))"}} className="blueprint"><i aria-hidden="true" className="corner tl"></i><i aria-hidden="true" className="corner tr"></i><i aria-hidden="true" className="corner bl"></i><i aria-hidden="true" className="corner br"></i>
 <div style={{"padding": "var(--size-10) var(--size-12)"}}>
-<div style={{"fontFamily": "var(--font-heading)", "fontSize": "var(--size-10)", "letterSpacing": ".14em", "textTransform": "uppercase", "color": "var(--color-neutral-600)"}}>{"Shown"}</div>
+<div className="stat-label">{"Shown"}</div>
 <div style={{"fontFamily": "var(--font-heading)", "fontSize": "var(--size-20)", "fontVariantNumeric": "tabular-nums"}}>{v.logCount}</div>
 </div>
 <div style={{"padding": "var(--size-10) var(--size-12)", "borderLeft": "var(--size-1) solid var(--color-divider)"}}>
-<div style={{"fontFamily": "var(--font-heading)", "fontSize": "var(--size-10)", "letterSpacing": ".14em", "textTransform": "uppercase", "color": "var(--color-neutral-600)"}}>{"Net"}</div>
-<div style={{"fontFamily": "var(--font-heading)", "fontSize": "var(--size-20)", "fontVariantNumeric": "tabular-nums", "color": v.logNetColor}}>{v.logNet}</div>
+<div className="stat-label">{"Net"}</div>
+<FittedValue style={{"fontFamily": "var(--font-heading)", "fontSize": "var(--size-20)", "fontVariantNumeric": "tabular-nums", "color": v.logNetColor}}>{v.logNet}</FittedValue>
 </div>
 <div style={{"padding": "var(--size-10) var(--size-12)", "borderLeft": "var(--size-1) solid var(--color-divider)"}}>
-<div style={{"fontFamily": "var(--font-heading)", "fontSize": "var(--size-10)", "letterSpacing": ".14em", "textTransform": "uppercase", "color": "var(--color-neutral-600)"}}>{"Hours"}</div>
+<div className="stat-label">{"Hours"}</div>
 <div style={{"fontFamily": "var(--font-heading)", "fontSize": "var(--size-20)", "fontVariantNumeric": "tabular-nums"}}>{v.logHours}</div>
 </div>
 </div>
@@ -134,7 +135,7 @@ return (<div className="ledger-app" style={{"height": "100%", "display": "flex",
 <span style={{"width": "var(--size-40)", "height": "var(--size-40)", "flex": "none", "border": "var(--size-1) solid var(--color-divider)", "display": "grid", "placeItems": "center", "fontFamily": "var(--font-heading)", "fontSize": "var(--size-13)", "color": "var(--color-accent-700)"}}>{r.stakes}</span>
 <span style={{"flex": "1", "minWidth": "0"}}>
 <span style={{"display": "block", "fontSize": "var(--size-14)", "fontWeight": "500", "whiteSpace": "nowrap", "overflow": "hidden", "textOverflow": "ellipsis"}}>{r.venue}</span>
-<span style={{"display": "block", "fontSize": "var(--size-11)", "color": "var(--color-neutral-600)", "fontFamily": "var(--font-heading)", "letterSpacing": ".08em", "textTransform": "uppercase", "marginTop": "var(--size-1)"}}>{r.meta}</span>
+<span style={{"display": "block", "fontSize": "var(--size-11)", "color": "var(--color-neutral-600)", "fontFamily": "var(--font-body)", "letterSpacing": ".08em", "textTransform": "uppercase", "marginTop": "var(--size-1)"}}>{r.meta}</span>
 </span>
 <span style={{"textAlign": "right"}}>
 <span style={{"display": "block", "fontFamily": "var(--font-heading)", "fontSize": "var(--size-19)", "fontVariantNumeric": "tabular-nums", "color": r.color}}>{r.pnl}</span>
@@ -170,7 +171,7 @@ return (<div className="ledger-app" style={{"height": "100%", "display": "flex",
 <div style={{"fontFamily": "var(--font-heading)", "fontSize": "var(--size-10)", "letterSpacing": ".16em", "textTransform": "uppercase", "color": "var(--color-accent-700)"}}>{"Lifetime curve · " + v.currency}</div>
 <div style={{"fontSize": "var(--size-11)", "fontFamily": "var(--font-heading)", "letterSpacing": ".1em", "textTransform": "uppercase", "color": "var(--color-neutral-600)"}}>{v.curveSpan}</div>
 </div>
-<div style={{"fontFamily": "var(--font-heading)", "fontSize": "var(--size-40)", "lineHeight": "1.1", "fontVariantNumeric": "tabular-nums", "color": v.avgColor}}><span data-testid="bankroll">{v.bankrollText}</span></div>
+<FittedValue data-testid="bankroll" style={{"fontFamily": "var(--font-heading)", "fontSize": "var(--size-40)", "lineHeight": "1.1", "fontVariantNumeric": "tabular-nums", "color": v.avgColor}}>{v.bankrollText}</FittedValue>
 <div style={{"margin": "var(--size-6) calc(-1 * var(--size-14)) 0"}}>
 <svg aria-hidden="true" focusable="false" viewBox={"0 0 342 150"} width={"100%"} height={"150"} style={{"display": "block"}} preserveAspectRatio={"none"}>
 <line x1={"0"} x2={"342"} y1={"37.5"} y2={"37.5"} stroke={"var(--color-text)"} strokeOpacity={".08"}></line>
@@ -285,11 +286,11 @@ return (<div className="ledger-app" style={{"height": "100%", "display": "flex",
 
 </Fragment>)}
 </div>
-<div style={{"display": "grid", "gridTemplateColumns": "1fr 1fr", "gap": "var(--size-10)", "marginTop": "var(--size-18)"}}>
+<div style={{"display": "grid", "gridTemplateColumns": "repeat(2, minmax(0, 1fr))", "gap": "var(--size-10)", "marginTop": "var(--size-18)"}}>
 {v.d.tiles.map((t, index) => <Fragment key={t.id ?? index}>
 
 <div style={{"padding": "var(--size-10) var(--size-12)"}} className="blueprint"><i aria-hidden="true" className="corner tl"></i><i aria-hidden="true" className="corner tr"></i><i aria-hidden="true" className="corner bl"></i><i aria-hidden="true" className="corner br"></i>
-<div style={{"fontFamily": "var(--font-heading)", "fontSize": "var(--size-10)", "letterSpacing": ".14em", "textTransform": "uppercase", "color": "var(--color-neutral-600)"}}>{t.label}</div>
+<div className="stat-label">{t.label}</div>
 <div style={{"fontFamily": "var(--font-heading)", "fontSize": "var(--size-21)", "fontVariantNumeric": "tabular-nums"}}>{t.value}</div>
 </div>
 
@@ -377,13 +378,13 @@ return (<div className="ledger-app" style={{"height": "100%", "display": "flex",
 <div style={{"fontFamily": "var(--font-heading)", "fontSize": "var(--size-10)", "letterSpacing": ".18em", "textTransform": "uppercase", "color": "var(--color-accent-700)"}}>{"Elapsed"}</div>
 <div style={{"fontFamily": "var(--font-heading)", "fontSize": "var(--size-62)", "lineHeight": "1", "fontVariantNumeric": "tabular-nums", "letterSpacing": ".01em"}}><span data-testid="timer">{v.timerText}</span></div>
 </div>
-<div style={{"display": "grid", "gridTemplateColumns": "1fr 1fr", "gap": "var(--size-10)", "marginTop": "var(--size-12)"}}>
+<div style={{"display": "grid", "gridTemplateColumns": "repeat(2, minmax(0, 1fr))", "gap": "var(--size-10)", "marginTop": "var(--size-12)"}}>
 <div style={{"padding": "var(--size-10) var(--size-12)"}} className="blueprint"><i aria-hidden="true" className="corner tl"></i><i aria-hidden="true" className="corner tr"></i><i aria-hidden="true" className="corner bl"></i><i aria-hidden="true" className="corner br"></i>
-<div style={{"fontFamily": "var(--font-heading)", "fontSize": "var(--size-10)", "letterSpacing": ".14em", "textTransform": "uppercase", "color": "var(--color-neutral-600)"}}>{"Invested"}</div>
+<div className="stat-label">{"Invested"}</div>
 <div style={{"fontFamily": "var(--font-heading)", "fontSize": "var(--size-26)", "fontVariantNumeric": "tabular-nums"}}>{v.a.invested}</div>
 </div>
 <div style={{"padding": "var(--size-10) var(--size-12)"}} className="blueprint"><i aria-hidden="true" className="corner tl"></i><i aria-hidden="true" className="corner tr"></i><i aria-hidden="true" className="corner bl"></i><i aria-hidden="true" className="corner br"></i>
-<div style={{"fontFamily": "var(--font-heading)", "fontSize": "var(--size-10)", "letterSpacing": ".14em", "textTransform": "uppercase", "color": "var(--color-neutral-600)"}}>{"In big blinds"}</div>
+<div className="stat-label">{"In big blinds"}</div>
 <div style={{"fontFamily": "var(--font-heading)", "fontSize": "var(--size-26)", "fontVariantNumeric": "tabular-nums"}}>{(v.a.bbs) + " bb"}</div>
 </div>
 </div>
@@ -512,13 +513,13 @@ return (<div className="ledger-app" style={{"height": "100%", "display": "flex",
 <div style={{"fontFamily": "var(--font-heading)", "fontSize": "var(--size-12)", "letterSpacing": ".1em", "textTransform": "uppercase", "color": "var(--color-neutral-700)"}}>{"cash sessions · " + (v.impSpan)}</div>
 <div style={{"fontSize": "var(--size-12)", "fontFamily": "var(--font-body)", "color": "var(--color-neutral-700)", "marginTop": "var(--size-8)", "wordBreak": "break-all"}}>{v.impName}</div>
 </div>
-<div style={{"display": "grid", "gridTemplateColumns": "1fr 1fr", "gap": "var(--size-10)", "marginTop": "var(--size-10)"}}>
+<div style={{"display": "grid", "gridTemplateColumns": "repeat(2, minmax(0, 1fr))", "gap": "var(--size-10)", "marginTop": "var(--size-10)"}}>
 <div style={{"padding": "var(--size-10) var(--size-12)"}} className="blueprint"><i aria-hidden="true" className="corner tl"></i><i aria-hidden="true" className="corner tr"></i><i aria-hidden="true" className="corner bl"></i><i aria-hidden="true" className="corner br"></i>
-<div style={{"fontFamily": "var(--font-heading)", "fontSize": "var(--size-10)", "letterSpacing": ".14em", "textTransform": "uppercase", "color": "var(--color-neutral-600)"}}>{"Bankroll"}</div>
+<div className="stat-label">{"Bankroll"}</div>
 <div style={{"fontFamily": "var(--font-heading)", "fontSize": "var(--size-19)"}}>{v.impBank}</div>
 </div>
 <div style={{"padding": "var(--size-10) var(--size-12)"}} className="blueprint"><i aria-hidden="true" className="corner tl"></i><i aria-hidden="true" className="corner tr"></i><i aria-hidden="true" className="corner bl"></i><i aria-hidden="true" className="corner br"></i>
-<div style={{"fontFamily": "var(--font-heading)", "fontSize": "var(--size-10)", "letterSpacing": ".14em", "textTransform": "uppercase", "color": "var(--color-neutral-600)"}}>{"Venues"}</div>
+<div className="stat-label">{"Venues"}</div>
 <div style={{"fontFamily": "var(--font-heading)", "fontSize": "var(--size-19)"}}>{v.impVenues}</div>
 </div>
 </div>

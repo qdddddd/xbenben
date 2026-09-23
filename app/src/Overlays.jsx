@@ -113,10 +113,10 @@ export function BigBlindStats({ v }) {
   return <section className="bb-stats" aria-label="Big-blind averages">
     <div className="blueprint bb-grid">
       {['tl', 'tr', 'bl', 'br'].map(c => <i key={c} aria-hidden="true" className={'corner ' + c} />)}
-      <div><div className="section-label">Avg bb / 100 hands</div>
+      <div><div className="section-label stat-label" title="Avg bb / 100 hands">Avg bb / 100 hands</div>
         <div className="bb-value" data-testid="bb-per-100" style={{ color: v.bbColor }}>{v.bbPer100}</div>
         <div className="bb-caption">Estimated</div></div>
-      <div><div className="section-label">Avg bb / hour</div>
+      <div><div className="section-label stat-label" title="Avg bb / hour">Avg bb / hour</div>
         <div className="bb-value" data-testid="bb-per-hour" style={{ color: v.bbColor }}>{v.bbPerHour}</div>
         <div className="bb-caption">Per hour played</div></div>
     </div>

@@ -18,6 +18,12 @@ npm run dev
 
 Open the printed localhost URL. First launch is empty. **Settings → Restore sample log** adds six fictional USD sessions without replacing personal data. **Use the sample export** imports a separate, entirely fictional three-session HKD example.
 
+## Typography and favicon
+
+Headings use Barlow Semi Condensed 600 and body text uses Barlow 500, with the reference's lighter Home metadata. The fonts are bundled locally and cached for offline use. Their SIL Open Font Licenses are included in `public/licenses/`. Typeface exploration controls from the design are not app settings.
+
+The browser favicon uses direction 1C's simplified chip on a fixed steel field, with SVG and 16/32 px PNG versions. This artwork appears only as the favicon; installed-app icons retain the existing X design. Regenerate the PNG fallbacks from `public/icons/favicon.svg` with `node scripts/favicon.mjs` after installing Playwright's browser. Stat labels stay on one line with an ellipsis, and long currency summaries shrink to fit their cards without dropping digits.
+
 ## Session setup and currencies
 
 New session offers venue and stakes presets plus your imported and custom choices. The venue list includes Macau table, Home game and Las Vegas venues; stakes range from 0.5/1 to 500/1000. Your last-created session supplies the next venue, stakes, currency, live/online play type, game and table size. Before a session has been created, the latest logged setup or saved defaults are used. Enter the new buy-in explicitly, or choose a labelled one-tap shortcut.

@@ -293,11 +293,18 @@ test('offline production reload, fonts, icons and sample import work after insta
   await context.setOffline(true); await page.reload();
   await expect(page.getByTestId('bankroll')).toHaveText('+$3,085');
   await page.evaluate(() => document.fonts.ready);
-  expect(await page.evaluate(() => document.fonts.check('16px "Barlow"'))).toBeTruthy();
+  const loadedFonts = await page.evaluate(async () => {
+    const heading = await document.fonts.load('600 26px "Barlow Semi Condensed"');
+    const body = await document.fonts.load('500 16px "Barlow"');
+    return heading.length > 0 && body.length > 0 && [...heading, ...body].every(font => font.status === 'loaded');
+  });
+  expect(loadedFonts).toBeTruthy();
   await openImport(page); await page.getByRole('button', { name: 'Use the sample export' }).click();
   await expect(screen(page, 'import')).toContainText('3');
   const iconLoaded = await page.evaluate(async () => (await fetch('/icons/icon-192.png')).ok);
   expect(iconLoaded).toBeTruthy();
+  const favicons = await page.evaluate(async () => Promise.all([...document.querySelectorAll('link[rel="icon"]')].map(async icon => (await fetch(icon.href)).ok)));
+  expect(favicons).toEqual([true, true, true]);
 });
 
 test('storage recovery preserves unreadable data and offers a real recovery download', async ({ page }) => {
@@ -333,6 +340,48 @@ test('main tabs have no browser errors or horizontal overflow at 402 and 320 pix
     }
   }
   expect(errors).toEqual([]);
+});
+
+test('design typography and chip favicon stay local, readable and outside app content', async ({ page }) => {
+  await page.evaluate(() => document.fonts.ready);
+  const heading = screen(page, 'home').getByText('xbenben', { exact: true });
+  await expect(heading).toHaveCSS('font-family', '"Barlow Semi Condensed", system-ui, sans-serif');
+  await expect(heading).toHaveCSS('font-weight', '600');
+  await expect(page.locator('body')).toHaveCSS('font-weight', '500');
+  await expect(screen(page, 'home').getByText('Avg', { exact: true })).toBeVisible();
+  await sample(page);
+  await settings(page); await choose(page, /^Display currency/, 'HKD Hong Kong');
+  for (const width of [402, 320, 402]) {
+    await page.setViewportSize({ width, height: 874 });
+    for (const tab of ['Home', 'Log', 'Stats']) {
+      await page.getByRole('button', { name: tab, exact: true }).click();
+      if (tab === 'Home' || tab === 'Stats') await expect(page.getByTestId('bankroll')).toHaveText('+HK$24,103');
+      for (const label of await page.locator('.stat-label').all()) {
+        await expect(label).toHaveCSS('white-space', 'nowrap');
+        await expect(label).toHaveCSS('text-overflow', 'ellipsis');
+      }
+      await expect.poll(() => page.locator('.fitted-value').evaluateAll(values => values.every(value => {
+        const range = document.createRange(); range.selectNodeContents(value);
+        return range.getBoundingClientRect().width <= value.clientWidth + 1;
+      })), { message: `Full amounts fit their cards on ${tab} at ${width}px` }).toBe(true);
+    }
+  }
+  const before = await page.locator('link[rel="icon"][type="image/svg+xml"]').getAttribute('href');
+  expect(before).toBe('/icons/favicon.svg');
+  await settings(page); await choose(page, /^Accent colour/, 'Forest');
+  expect(await page.locator('link[rel="icon"][type="image/svg+xml"]').getAttribute('href')).toBe(before);
+  await expect(page.locator('#root img, #root image, #root object, #root iframe')).toHaveCount(0);
+  const metadata = await page.evaluate(async () => ({
+    apple: document.querySelector('link[rel="apple-touch-icon"]').getAttribute('href'),
+    manifest: await (await fetch(document.querySelector('link[rel="manifest"]').href)).json(),
+    favicon: await (await fetch(document.querySelector('link[rel="icon"][type="image/svg+xml"]').href)).text(),
+    externalFonts: performance.getEntriesByType('resource').filter(r => /fonts\.(googleapis|gstatic)\.com/.test(r.name)).length,
+  }));
+  expect(metadata.apple).toBe('/icons/apple-touch-icon.png');
+  expect(metadata.manifest.icons.every(icon => !icon.src.includes('favicon'))).toBeTruthy();
+  expect(metadata.favicon).toContain('fill="#5980a6"');
+  expect(metadata.favicon).toContain('stroke-dasharray="11 13.35"');
+  expect(metadata.externalFonts).toBe(0);
 });
 
 test('single-session peak and lifetime colour remain correct when this month is losing', async ({ page }) => {

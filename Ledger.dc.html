@@ -7,8 +7,8 @@
 </head>
 <body>
 <x-dc>
-<helmet data-dc-atomics><link rel="stylesheet" href="_ds/industry-3309bdcc-3d1d-444d-b606-aea82f920485/styles.css"><script src="_ds/industry-3309bdcc-3d1d-444d-b606-aea82f920485/_ds_bundle.js"></script><style>@keyframes lg-blink{50%{opacity:.25}}@keyframes lg-up{from{transform:translateY(100%)}to{transform:translateY(0)}}@keyframes lg-fade{from{opacity:0}to{opacity:1}}body{margin:0;background:var(--color-bg)}a{color:var(--color-accent-700)}a:hover{color:var(--color-accent)}</style></helmet>
-<div style="min-height:100vh;display:flex;flex-wrap:wrap;gap:44px;justify-content:center;align-items:flex-start;padding:40px 32px 64px;font-family:var(--font-body)">
+<helmet data-dc-atomics=""><link rel="stylesheet" href="_ds/industry-3309bdcc-3d1d-444d-b606-aea82f920485/styles.css"><script src="_ds/industry-3309bdcc-3d1d-444d-b606-aea82f920485/_ds_bundle.js"></script><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700&amp;family=Barlow+Semi+Condensed:wght@500;600;700&amp;family=Barlow:wght@400;500;600&amp;family=Archivo+Narrow:wght@500;600;700&amp;family=Archivo:wght@400;500;600&amp;family=IBM+Plex+Sans+Condensed:wght@500;600;700&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;family=Oswald:wght@400;500;600&amp;family=Source+Sans+3:wght@400;500;600&amp;display=swap"><style>[style*="--font-heading"]{font-weight:var(--lg-hw,500)}body{font-weight:var(--lg-bw,400)}@keyframes lg-blink{50%{opacity:.25}}@keyframes lg-up{from{transform:translateY(100%)}to{transform:translateY(0)}}@keyframes lg-fade{from{opacity:0}to{opacity:1}}body{margin:0;background:var(--color-bg)}a{color:var(--color-accent-700)}a:hover{color:var(--color-accent)}</style></helmet>
+<div style="min-height: 100vh; display: flex; flex-wrap: wrap; gap: 44px; justify-content: center; align-items: flex-start; padding: 40px 32px 64px; font-family: var(--font-body); font-weight: 400; font-size: 10px">
 
 <aside style="width:320px;max-width:100%;display:flex;flex-direction:column;gap:22px">
 <div>
@@ -76,15 +76,15 @@
 </div>
 <div style="display:grid;grid-template-columns:1fr 1fr 1fr;border-top:1px solid var(--color-divider)">
 <div style="padding:10px 0 12px">
-<div style="font-family:var(--font-heading);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--color-neutral-600)">Per hour</div>
+<div style="font-family:var(--font-heading);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-neutral-600);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Per hour</div>
 <div style="font-family:var(--font-heading);font-size:22px;font-variant-numeric:tabular-nums;color:{{ hourlyColor }}">{{ hourlyText }}</div>
 </div>
 <div style="padding:10px 0 12px 14px;border-left:1px solid var(--color-divider)">
-<div style="font-family:var(--font-heading);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--color-neutral-600)">Win rate</div>
+<div style="font-family:var(--font-heading);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-neutral-600);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Win rate</div>
 <div style="font-family:var(--font-heading);font-size:22px;font-variant-numeric:tabular-nums">{{ winRateText }}</div>
 </div>
 <div style="padding:10px 0 12px 14px;border-left:1px solid var(--color-divider)">
-<div style="font-family:var(--font-heading);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--color-neutral-600)">Avg / sess</div>
+<div style="font-family:var(--font-heading);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-neutral-600);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Avg</div>
 <div style="font-family:var(--font-heading);font-size:22px;font-variant-numeric:tabular-nums;color:{{ avgColor }}">{{ avgText }}</div>
 </div>
 </div>
@@ -122,7 +122,7 @@ Start session
 <span style="width:40px;height:40px;flex:none;border:1px solid var(--color-divider);display:grid;place-items:center;font-family:var(--font-heading);font-size:13px;letter-spacing:.02em;color:var(--color-accent-700)">{{ r.stakes }}</span>
 <span style="flex:1;min-width:0">
 <span style="display:block;font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.venue }}</span>
-<span style="display:block;font-size:11px;color:var(--color-neutral-600);font-family:var(--font-heading);letter-spacing:.08em;text-transform:uppercase;margin-top:1px">{{ r.meta }}</span>
+<span style="display: block; font-size: 11px; color: var(--color-neutral-600); font-family: var(--font-heading); letter-spacing: .08em; text-transform: uppercase; margin-top: 1px; font-weight: 400">{{ r.meta }}</span>
 </span>
 <span style="text-align:right">
 <span style="display:block;font-family:var(--font-heading);font-size:19px;font-variant-numeric:tabular-nums;color:{{ r.color }}">{{ r.pnl }}</span>
@@ -144,15 +144,15 @@ Start session
 </div>
 <div class="blueprint" style="margin-top:16px;display:grid;grid-template-columns:1fr 1fr 1fr"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
 <div style="padding:10px 12px">
-<div style="font-family:var(--font-heading);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--color-neutral-600)">Shown</div>
+<div style="font-family:var(--font-heading);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-neutral-600);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Shown</div>
 <div style="font-family:var(--font-heading);font-size:20px;font-variant-numeric:tabular-nums">{{ logCount }}</div>
 </div>
 <div style="padding:10px 12px;border-left:1px solid var(--color-divider)">
-<div style="font-family:var(--font-heading);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--color-neutral-600)">Net</div>
+<div style="font-family:var(--font-heading);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-neutral-600);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Net</div>
 <div style="font-family:var(--font-heading);font-size:20px;font-variant-numeric:tabular-nums;color:{{ logNetColor }}">{{ logNet }}</div>
 </div>
 <div style="padding:10px 12px;border-left:1px solid var(--color-divider)">
-<div style="font-family:var(--font-heading);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--color-neutral-600)">Hours</div>
+<div style="font-family:var(--font-heading);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-neutral-600);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Hours</div>
 <div style="font-family:var(--font-heading);font-size:20px;font-variant-numeric:tabular-nums">{{ logHours }}</div>
 </div>
 </div>
@@ -168,7 +168,7 @@ Start session
 <span style="width:40px;height:40px;flex:none;border:1px solid var(--color-divider);display:grid;place-items:center;font-family:var(--font-heading);font-size:13px;color:var(--color-accent-700)">{{ r.stakes }}</span>
 <span style="flex:1;min-width:0">
 <span style="display:block;font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.venue }}</span>
-<span style="display:block;font-size:11px;color:var(--color-neutral-600);font-family:var(--font-heading);letter-spacing:.08em;text-transform:uppercase;margin-top:1px">{{ r.meta }}</span>
+<span style="display: block; font-size: 11px; color: var(--color-neutral-600); font-family: var(--font-body); letter-spacing: .08em; text-transform: uppercase; margin-top: 1px">{{ r.meta }}</span>
 </span>
 <span style="text-align:right">
 <span style="display:block;font-family:var(--font-heading);font-size:19px;font-variant-numeric:tabular-nums;color:{{ r.color }}">{{ r.pnl }}</span>
@@ -303,7 +303,7 @@ Start session
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px">
 <sc-for list="{{ d.tiles }}" as="t" hint-placeholder-count="4">
 <div class="blueprint" style="padding:10px 12px"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
-<div style="font-family:var(--font-heading);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--color-neutral-600)">{{ t.label }}</div>
+<div style="font-family:var(--font-heading);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-neutral-600);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ t.label }}</div>
 <div style="font-family:var(--font-heading);font-size:21px;font-variant-numeric:tabular-nums">{{ t.value }}</div>
 </div>
 </sc-for>
@@ -384,11 +384,11 @@ Start session
 
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px">
 <div class="blueprint" style="padding:10px 12px"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
-<div style="font-family:var(--font-heading);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--color-neutral-600)">Invested</div>
+<div style="font-family:var(--font-heading);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-neutral-600);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Invested</div>
 <div style="font-family:var(--font-heading);font-size:26px;font-variant-numeric:tabular-nums">{{ a.invested }}</div>
 </div>
 <div class="blueprint" style="padding:10px 12px"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
-<div style="font-family:var(--font-heading);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--color-neutral-600)">In big blinds</div>
+<div style="font-family:var(--font-heading);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-neutral-600);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">In big blinds</div>
 <div style="font-family:var(--font-heading);font-size:26px;font-variant-numeric:tabular-nums">{{ a.bbs }} bb</div>
 </div>
 </div>
@@ -505,11 +505,11 @@ Start session
 </div>
 <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px">
 <div class="blueprint" style="padding:10px 12px"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
-<div style="font-family:var(--font-heading);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--color-neutral-600)">Bankroll</div>
+<div style="font-family:var(--font-heading);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-neutral-600);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Bankroll</div>
 <div style="font-family:var(--font-heading);font-size:19px">{{ impBank }}</div>
 </div>
 <div class="blueprint" style="padding:10px 12px"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
-<div style="font-family:var(--font-heading);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--color-neutral-600)">Venues</div>
+<div style="font-family:var(--font-heading);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--color-neutral-600);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Venues</div>
 <div style="font-family:var(--font-heading);font-size:19px">{{ impVenues }}</div>
 </div>
 </div>
@@ -590,7 +590,7 @@ Start session
 </x-import>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:&quot;1060&quot;,&quot;height&quot;:&quot;1000&quot;},&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#5980a6&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;options&quot;:[&quot;#5980a6&quot;,&quot;#7a6a55&quot;,&quot;#4f6b58&quot;,&quot;#6b5a7a&quot;],&quot;section&quot;:&quot;Theme&quot;},&quot;pnlColor&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Mono&quot;,&quot;options&quot;:[&quot;Mono&quot;,&quot;Signal&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Theme&quot;},&quot;showQuickStart&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Behavior&quot;}}">
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:&quot;1060&quot;,&quot;height&quot;:&quot;1000&quot;},&quot;typeface&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Barlow Semi&quot;,&quot;options&quot;:[&quot;Industry (original)&quot;,&quot;Barlow Semi&quot;,&quot;Archivo&quot;,&quot;IBM Plex&quot;,&quot;Oswald + Source&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Type&quot;},&quot;heavier&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Type&quot;},&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#5980a6&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;options&quot;:[&quot;#5980a6&quot;,&quot;#7a6a55&quot;,&quot;#4f6b58&quot;,&quot;#6b5a7a&quot;],&quot;section&quot;:&quot;Theme&quot;},&quot;pnlColor&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Mono&quot;,&quot;options&quot;:[&quot;Mono&quot;,&quot;Signal&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Theme&quot;},&quot;showQuickStart&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Behavior&quot;}}">
 class Component extends DCLogic {
   constructor(props) {
     super(props);
@@ -627,11 +627,27 @@ class Component extends DCLogic {
     this.tick = setInterval(() => { if (this.state.active) this.setState({ now: Date.now() }); }, 1000);
     this.applyAccent();
   }
-  componentDidUpdate(prev) { if (prev.accent !== this.props.accent) this.applyAccent(); }
+  componentDidUpdate(prev) {
+    if (prev.accent !== this.props.accent || prev.typeface !== this.props.typeface || prev.heavier !== this.props.heavier) this.applyAccent();
+  }
   componentWillUnmount() { clearInterval(this.tick); if (this.toastT) clearTimeout(this.toastT); }
   applyAccent() {
     const a = this.props.accent;
-    if (a) document.documentElement.style.setProperty('--color-accent', a);
+    const root = document.documentElement.style;
+    if (a) root.setProperty('--color-accent', a);
+    const faces = {
+      'Industry (original)': ['"Barlow Condensed"', '"Barlow"', 500, 400],
+      'Barlow Semi': ['"Barlow Semi Condensed"', '"Barlow"', 600, 500],
+      'Archivo': ['"Archivo Narrow"', '"Archivo"', 600, 500],
+      'IBM Plex': ['"IBM Plex Sans Condensed"', '"IBM Plex Sans"', 600, 500],
+      'Oswald + Source': ['"Oswald"', '"Source Sans 3"', 500, 500],
+    };
+    const f = faces[this.props.typeface] || faces['Barlow Semi'];
+    const bump = this.props.heavier ? 100 : 0;
+    root.setProperty('--font-heading', f[0] + ', system-ui, sans-serif');
+    root.setProperty('--font-body', f[1] + ', system-ui, sans-serif');
+    root.setProperty('--lg-hw', String(Math.min(700, f[2] + bump)));
+    root.setProperty('--lg-bw', String(Math.min(600, f[3] + bump)));
   }
 
   // ── money + time ────────────────────────────────────────────

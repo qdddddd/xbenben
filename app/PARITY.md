@@ -1,6 +1,6 @@
 # xbenben parity and verification
 
-Initial verification: 2026-09-22. Rename, session-currency and big-blind stats verification: 2026-09-23. Chrome, 402×874; primary tabs also checked at 320 pixels. Private financial figures are intentionally omitted from this public report.
+Initial verification: 2026-09-22. Rename, session-currency, big-blind stats and typography/favicon verification: 2026-09-23. Chrome, 402×874; primary tabs also checked at 320 pixels. Private financial figures are intentionally omitted from this public report.
 
 ## Screens
 
@@ -36,7 +36,11 @@ The baseline nine screens and all three import stages were captured in a real br
 | 8. Publishing | Passed: [HTTPS app](https://qdddddd.github.io/xbenben/) and [public source](https://github.com/qdddddd/xbenben), with a successful Actions deployment. Live Chrome checks verified the name/icons, manifest scope, two-currency synthetic imports, backup download, offline reload with a running session and local fonts. Private-file URLs return 404; the Git history/site privacy audit passes. |
 | 9. Physical iPhone | Not run on this machine. Installation, native share sheet, iCloud Drive/AirDrop and airplane-mode checks are specified in README. |
 
-The current suite passes 15 unit tests and 25 Chrome browser tests. It checks a real CSV/JSON download, offline fonts/sample/icons, storage-denial/corruption handling, keyboard focus, simulated share cancellation and a genuine service-worker script update. The update test verifies that a reload is offered and the stored ledger is retained. The share test mocks the OS API; it does not claim to verify iCloud delivery.
+The current suite passes 15 unit tests and 26 Chrome browser tests. It checks a real CSV/JSON download, offline fonts/sample/icons, storage-denial/corruption handling, keyboard focus, simulated share cancellation and a genuine service-worker script update. The update test verifies that a reload is offered and the stored ledger is retained. The share test mocks the OS API; it does not claim to verify iCloud delivery.
+
+The updated reference's Barlow Semi Condensed 600 headings, Barlow 500 body, lighter Home metadata and Barlow Log metadata are implemented. The nine-screen comparison and all import stages were recaptured against the supplied font update. Home, Log, Stats and Settings were also reviewed at 402px and 320px. The tighter stat labels retain a single line and ellipsis; Home now says Avg. Long HKD summaries exposed overflow after the font change, so amounts now shrink only when their available width requires it. A browser regression checks the full values against their card widths while resizing down and back up.
+
+Direction 1C's smallest chip variant is used only for the favicon, following the user's latest scope. SVG plus 16/32 px PNG fallbacks were inspected at small sizes on light and dark backgrounds. Installed/PWA icons are unchanged. Browser checks verify the fixed accent, absence of the artwork from app content, and offline loading of the new heading/body fonts and all three favicon files. The fonts' original OFL notices ship with the app.
 
 Single-blind import regression: a synthetic export with a single 25 blind and a separate 5 ante imports as 12.5/25, retaining its two buy-ins, cash-out and tips. Its +250 native net over two hours produces +5.0 bb/hour and estimated +16.7 bb/100; reload and duplicate checks pass. Invalid numbers, negative amounts and missing results are still rejected without changing existing records. The reported private export was also checked locally; its contents and evidence remain excluded from Git and the site.
 
@@ -49,6 +53,7 @@ A real Pages update from `bf85ef4` to `15bedf3` was also verified in a retained 
 ## Deliberate changes
 
 - User-requested rename: xbenben replaces Ledger in the app name, wordmark, install metadata, messages and download filenames; the blueprint icon now uses an X. The reference files, stored-data key and backup format remain compatible.
+- The updated design defaults are shipped without its typeface/heavier exploration controls. The new chip artwork is confined to the favicon; the broader install-icon replacement in the earlier design brief was superseded by the user's latest instruction.
 - Real safe areas replace the design sheet, bezel, status bar and home indicator. Desktop width is capped; small viewports scroll within screens.
 - First launch is empty. Sample restoration is confirmed, tagged and idempotent, preserves personal records, switches to USD and offers separate sample removal.
 - The shipped XML sample is entirely fictional. The user's export is accepted through the file picker but never included in public assets, tests or screenshots.

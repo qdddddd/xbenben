@@ -10,7 +10,7 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'prompt',
-      includeAssets: ['icons/*.png', 'icons/xbenben.svg', 'sample-analytics7.xml'],
+      includeAssets: ['icons/*.png', 'icons/*.svg', 'sample-analytics7.xml'],
       manifest: {
         name: 'xbenben · Poker sessions', short_name: 'xbenben',
         description: 'A private cash-game session log.',
