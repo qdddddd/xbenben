@@ -1,7 +1,10 @@
 // Money stays in the currency of its session. Exchange rates match the design.
 export const USD_RATES = Object.freeze({ USD: 1, HKD: 0.128, EUR: 1.08, GBP: 1.27, CAD: 0.74, AUD: 0.66 });
 export const SYMBOLS = Object.freeze({ USD: '$', HKD: 'HK$', EUR: '€', GBP: '£', CAD: 'C$', AUD: 'A$' });
-export const DEFAULT_SETTINGS = Object.freeze({ currency: 'USD', game: 'NLHE', stakes: '2/5', seats: 9, accent: 'steel', pnlColor: 'Mono', showQuickStart: true });
+export const DEFAULT_SETTINGS = Object.freeze({ currency: 'USD', game: 'NLHE', stakes: '2/5', seats: 9, accent: 'steel', pnlColor: 'Mono', showQuickStart: true, liveHandsPerHour: 30, onlineHandsPerHour: 75 });
+export const playType = session => session?.playType === 'online' ? 'online' : 'live';
+export const playLabel = session => playType(session) === 'online' ? 'Online' : 'Live';
+export const validHandsPerHour = n => Number.isInteger(n) && n >= 1 && n <= 10000;
 export const ACCENTS = ['steel', 'bronze', 'forest', 'violet'];
 export const DEFAULT_VENUES = [
   { name: 'Macau table', city: 'Macau' }, { name: 'Home game', city: '' },
@@ -19,9 +22,29 @@ export const reportNet = (session, currency) => {
   const multiplier = rate(session.cur, currency);
   return multiplier === null ? null : pnl(session) * multiplier;
 };
+// Normalize each result in its own big blind before weighting by time or hands.
+export function bigBlindStats(sessions, settings = DEFAULT_SETTINGS) {
+  let bbWon = 0, totalHours = 0, estimatedHands = 0, count = 0;
+  for (const session of sessions) {
+    const duration = hours(session), won = pnl(session) / session.bb;
+    if (!Number.isFinite(session.endedAt) || !Number.isFinite(duration) || duration <= 0 || session.bb <= 0 || !Number.isFinite(won)) continue;
+    const key = playType(session) === 'online' ? 'onlineHandsPerHour' : 'liveHandsPerHour';
+    const handsPerHour = settings[key] ?? DEFAULT_SETTINGS[key];
+    bbWon += won; totalHours += duration; count++;
+    estimatedHands += validHandsPerHour(handsPerHour) ? duration * handsPerHour : NaN;
+  }
+  const perHour = bbWon / totalHours, per100 = bbWon / estimatedHands * 100;
+  return { bbWon, hours: totalHours, estimatedHands, count, excluded: sessions.length - count,
+    perHour: Number.isFinite(perHour) ? perHour : null, per100: Number.isFinite(per100) ? per100 : null };
+}
+export function formatBB(value) {
+  if (!Number.isFinite(value)) return '—';
+  const n = Math.abs(value) < .05 ? 0 : value;
+  return (n < 0 ? '−' : '+') + Math.abs(n).toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+}
 export function setupFrom(session) {
   return { venue: session.venue, city: session.city, cur: session.cur, sb: session.sb, bb: session.bb,
-    game: session.game, seats: session.seats, buyIn: String(Math.min(999999999, Math.round(session.buyIns[0].amount))) };
+    game: session.game, seats: session.seats, playType: playType(session), buyIn: String(Math.min(999999999, Math.round(session.buyIns[0].amount))) };
 }
 export function latestSession(sessions) {
   const valid = sessions.filter(s => s.bb > 0), personal = valid.filter(s => !s.demo);
@@ -89,7 +112,7 @@ export function parseA7(text, name, Parser = DOMParser) {
       startedAt, endedAt, venue: get(c, 'location') || 'Unknown', city, sb, bb,
       game: (get(c, 'limit') === '0' ? 'NL' : 'L') + (/hold/i.test(variant) ? 'HE' : 'O'),
       seats: Number(get(c, 'tablesize')) || 9, buyIns, cashOut, tips,
-      notes: get(c, 'comments') || '', src: 'analytics7', cur };
+      notes: get(c, 'comments') || '', src: 'analytics7', cur, playType: 'live' };
   }).filter(r => r.startedAt !== null && r.endedAt >= r.startedAt);
   if (!rows.length) return { error: 'Sessions were found but none had readable dates.' };
   if (invalidAmounts) return { error: 'Some sessions have missing results or invalid amounts. Check the export and try again.' };
@@ -98,7 +121,7 @@ export function parseA7(text, name, Parser = DOMParser) {
 }
 
 export function csv(sessions) {
-  const header = ['id', 'currency', 'started_at', 'ended_at', 'venue', 'city', 'game', 'small_blind', 'big_blind', 'seats', 'buy_ins', 'cash_out', 'tips', 'net', 'hours', 'notes', 'buy_in_events'];
+  const header = ['id', 'currency', 'started_at', 'ended_at', 'venue', 'city', 'game', 'small_blind', 'big_blind', 'seats', 'buy_ins', 'cash_out', 'tips', 'net', 'hours', 'notes', 'buy_in_events', 'play_type'];
   // Quote every field; prevent user-controlled text from becoming spreadsheet formulas.
   const cell = (v, untrusted = false) => {
     let s = String(v ?? '');
@@ -109,7 +132,7 @@ export function csv(sessions) {
     cell(s.id, true), cell(s.cur, true), cell(new Date(s.startedAt).toISOString()), cell(new Date(s.endedAt).toISOString()),
     cell(s.venue, true), cell(s.city, true), cell(s.game, true), cell(s.sb), cell(s.bb), cell(s.seats),
     cell(buyIn(s)), cell(s.cashOut), cell(s.tips), cell(pnl(s)), cell(hours(s).toFixed(4)),
-    cell(s.notes, true), cell(JSON.stringify(s.buyIns)),
+    cell(s.notes, true), cell(JSON.stringify(s.buyIns)), cell(playType(s)),
   ].join(','))].join('\r\n') + '\r\n';
 }
 

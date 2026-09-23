@@ -1,5 +1,5 @@
 import { Fragment } from "react";
-import { Sheet, BackupControls, ConversionNote } from "./Overlays.jsx";
+import { Sheet, BackupControls, ConversionNote, BigBlindStats } from "./Overlays.jsx";
 
 // Native React markup ported from the read-only Ledger design. No template runtime.
 export default function LedgerView(v) {
@@ -151,6 +151,7 @@ return (<div className="ledger-app" style={{"height": "100%", "display": "flex",
 
 <div aria-label="stats" style={{"flex": "1", "overflowY": "auto", "padding": "calc(var(--safe-top) + var(--size-16)) var(--size-20) var(--size-12)"}} data-screen={"stats"}>
 <div style={{"fontFamily": "var(--font-heading)", "fontSize": "var(--size-26)", "letterSpacing": ".02em"}}>{"STATS"}</div>
+<BigBlindStats v={v} />
 <ConversionNote v={v} />
 {v.noSessions && <>
 
@@ -267,6 +268,7 @@ return (<div className="ledger-app" style={{"height": "100%", "display": "flex",
 <svg aria-hidden="true" focusable="false" width={"14"} height={"14"} viewBox={"0 0 24 24"} fill={"none"} stroke={"currentColor"} strokeWidth={"1.5"}><path d={"M15 6l-6 6 6 6"}></path></svg>{"Back"}</button>
 <div style={{"fontFamily": "var(--font-heading)", "fontSize": "var(--size-28)", "letterSpacing": ".01em", "marginTop": "var(--size-8)"}}>{v.d.venue}</div>
 <div style={{"fontFamily": "var(--font-heading)", "fontSize": "var(--size-11)", "letterSpacing": ".14em", "textTransform": "uppercase", "color": "var(--color-neutral-600)"}}>{(v.d.when) + " · " + (v.d.cur) + " · " + (v.d.game) + " " + (v.d.stakes) + " · " + (v.d.seats) + "-max"}</div>
+<button type="button" className="play-type-row" onClick={v.d.editPlayType}><span>Play type</span><span>{v.d.playType} · Edit</span></button>
 <div style={{"marginTop": "var(--size-18)", "padding": "var(--size-14) var(--size-16)"}} className="blueprint"><i aria-hidden="true" className="corner tl"></i><i aria-hidden="true" className="corner tr"></i><i aria-hidden="true" className="corner bl"></i><i aria-hidden="true" className="corner br"></i>
 <div style={{"fontFamily": "var(--font-heading)", "fontSize": "var(--size-10)", "letterSpacing": ".16em", "textTransform": "uppercase", "color": "var(--color-accent-700)"}}>{"Result"}</div>
 <div style={{"fontFamily": "var(--font-heading)", "fontSize": "var(--size-52)", "lineHeight": "1", "fontVariantNumeric": "tabular-nums", "color": v.d.color, "marginTop": "var(--size-4)"}}>{v.d.pnl}</div>
@@ -365,12 +367,12 @@ return (<div className="ledger-app" style={{"height": "100%", "display": "flex",
 <div style={{"display": "flex", "alignItems": "center", "justifyContent": "space-between"}}>
 <div style={{"display": "flex", "alignItems": "center", "gap": "var(--size-7)"}}>
 <span style={{"width": "var(--size-8)", "height": "var(--size-8)", "background": "var(--color-accent)", "animation": "lg-blink 1.2s infinite"}}></span>
-<span style={{"fontFamily": "var(--font-heading)", "fontSize": "var(--size-12)", "letterSpacing": ".18em", "textTransform": "uppercase", "color": "var(--color-accent-700)"}}>{"Live"}</span>
+<span style={{"fontFamily": "var(--font-heading)", "fontSize": "var(--size-12)", "letterSpacing": ".18em", "textTransform": "uppercase", "color": "var(--color-accent-700)"}}>{"In progress"}</span>
 </div>
 <button type="button" onClick={v.onAbandon} style={{"background": "transparent", "border": "0", "padding": "var(--size-6) 0", "cursor": "pointer", "color": "var(--color-neutral-700)", "fontFamily": "var(--font-heading)", "fontSize": "var(--size-11)", "letterSpacing": ".14em", "textTransform": "uppercase"}}>{"Discard"}</button>
 </div>
 <div style={{"fontFamily": "var(--font-heading)", "fontSize": "var(--size-26)", "letterSpacing": ".01em", "marginTop": "var(--size-10)"}}>{v.a.venue}</div>
-<div style={{"fontFamily": "var(--font-heading)", "fontSize": "var(--size-11)", "letterSpacing": ".14em", "textTransform": "uppercase", "color": "var(--color-neutral-600)"}}>{(v.a.cur) + " · " + (v.a.game) + " " + (v.a.stakes) + " · " + (v.a.seats) + "-max · started " + (v.a.startedAt)}</div>
+<div style={{"fontFamily": "var(--font-heading)", "fontSize": "var(--size-11)", "letterSpacing": ".14em", "textTransform": "uppercase", "color": "var(--color-neutral-600)"}}>{(v.a.playType) + " · " + (v.a.cur) + " · " + (v.a.game) + " " + (v.a.stakes) + " · " + (v.a.seats) + "-max · started " + (v.a.startedAt)}</div>
 <div style={{"marginTop": "var(--size-18)", "padding": "var(--size-16)", "textAlign": "center"}} className="blueprint"><i aria-hidden="true" className="corner tl"></i><i aria-hidden="true" className="corner tr"></i><i aria-hidden="true" className="corner bl"></i><i aria-hidden="true" className="corner br"></i>
 <div style={{"fontFamily": "var(--font-heading)", "fontSize": "var(--size-10)", "letterSpacing": ".18em", "textTransform": "uppercase", "color": "var(--color-accent-700)"}}>{"Elapsed"}</div>
 <div style={{"fontFamily": "var(--font-heading)", "fontSize": "var(--size-62)", "lineHeight": "1", "fontVariantNumeric": "tabular-nums", "letterSpacing": ".01em"}}><span data-testid="timer">{v.timerText}</span></div>

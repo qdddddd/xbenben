@@ -162,10 +162,10 @@ export default class Ledger extends React.Component {
       if (st.active) return { flow: 'active', detailId: null };
       const d = { ...st.draft, ...over }, amount = Number(d.buyIn);
       if (!Number.isFinite(amount) || amount <= 0 || amount > 999999999 || d.bb <= 0) return null;
-      const at = Date.now(), cur = d.cur || 'USD';
-      return { active: { id: domain.newId(), cur, startedAt: at, endedAt: null, venue: d.venue, city: d.city,
+      const at = Date.now(), cur = d.cur || 'USD', playType = domain.playType(d);
+      return { active: { id: domain.newId(), cur, playType, startedAt: at, endedAt: null, venue: d.venue, city: d.city,
         sb: d.sb, bb: d.bb, game: d.game, seats: d.seats, buyIns: [{ amount, at }], cashOut: 0, tips: 0, notes: '' },
-        draft: { ...d, cur, buyIn: '' }, lastSetup: { ...d, cur, buyIn: String(amount) }, out: { cash: '', tips: '' },
+        draft: { ...d, cur, playType, buyIn: '' }, lastSetup: { ...d, cur, playType, buyIn: String(amount) }, out: { cash: '', tips: '' },
         flow: 'active', tab: 'home', detailId: null, sheet: null, now: at };
     });
   }
@@ -209,12 +209,13 @@ export default class Ledger extends React.Component {
     const excluded = st.sessions.filter(s => reporting(s) === null);
     const foreign = [...new Set(st.sessions.map(s => s.cur))].filter(cur => cur !== S.currency);
     const missingCodes = [...new Set(excluded.map(s => s.cur))].join(', ');
-    const conversionNote = foreign.length ? 'Totals in ' + S.currency + ' · fixed exchange rates.' : '';
-    const missingRateNote = excluded.length ? excluded.length + ' session' + (excluded.length === 1 ? '' : 's') + ' in ' + missingCodes + ' excluded from totals: no fixed rate to ' + S.currency + '. Original amounts remain in the log.' : '';
+    const conversionNote = foreign.length ? 'Currency totals in ' + S.currency + ' · fixed exchange rates.' : '';
+    const missingRateNote = excluded.length ? excluded.length + ' session' + (excluded.length === 1 ? '' : 's') + ' in ' + missingCodes + ' excluded from currency totals: no fixed rate to ' + S.currency + '. Original amounts remain in the log.' : '';
     const flow = st.flow, det = st.detailId;
     const onTab = !flow && !det;
     const net = sessions.reduce((n, s) => n + reporting(s), 0);
     const hrs = sessions.reduce((n, s) => n + this.hours(s), 0);
+    const bbStats = domain.bigBlindStats(st.sessions, S);
     const wins = sessions.filter(s => this.pnl(s) > 0).length;
     const m0 = new Date(); m0.setDate(1); m0.setHours(0, 0, 0, 0);
     const monthNet = sessions.filter(s => s.startedAt >= m0.getTime()).reduce((n, s) => n + reporting(s), 0);
@@ -273,8 +274,9 @@ export default class Ledger extends React.Component {
       lines.push({ label: 'Net', value: nativeMoney(p, true), color: this.col(p) });
       d = {
         venue: ds.venue, cur: ds.cur, when: this.when(ds.startedAt), game: ds.game, stakes: this.stakeLabel(ds), seats: ds.seats,
+        playType: domain.playLabel(ds), editPlayType: () => this.setState({ sheet: 'detailPlayType' }),
         pnl: nativeMoney(p, true), color: this.col(p),
-        rate: nativeMoney(h > 0 ? p / h : 0, true), bbRate: (h > 0 && ds.bb > 0 ? (p / h) / ds.bb : 0).toFixed(1),
+        rate: nativeMoney(h > 0 ? p / h : 0, true), bbRate: domain.formatBB(domain.bigBlindStats([ds], S).perHour),
         lines,
         tiles: [
           { label: 'Duration', value: this.shortDur(ds.endedAt - ds.startedAt) },
@@ -292,7 +294,7 @@ export default class Ledger extends React.Component {
     if (A) {
       const inv = this.buyIn(A);
       a = {
-        venue: A.venue, cur: A.cur, game: A.game, stakes: this.stakeLabel(A), seats: A.seats, startedAt: this.hm(A.startedAt),
+        venue: A.venue, cur: A.cur, game: A.game, stakes: this.stakeLabel(A), seats: A.seats, startedAt: this.hm(A.startedAt), playType: domain.playLabel(A),
         invested: this.moneyIn(inv, A.cur), bbs: A.bb > 0 ? Math.round(inv / A.bb) : '—',
         buyIns: A.buyIns.map((b, i) => ({ label: i === 0 ? 'Buy-in' : 'Re-buy ' + i, at: this.hm(b.at), amount: this.moneyIn(b.amount, A.cur) })),
       };
@@ -318,6 +320,7 @@ export default class Ledger extends React.Component {
     domain.DEFAULT_VENUES.forEach(v => { if (!venueItems.some(x => x.value === v.name)) venueItems.push({ label: v.name, sub: v.city, value: v.name }); });
     const stakeItems = [...new Set([...this.mergeStakes(st.sessions), S.stakes, ...domain.DEFAULT_STAKES])].map(value => ({ label: value, value }));
     const gameItems = ['NLHE', 'PLO', 'PLO5', 'Mixed', 'LHE'].map((g) => ({ label: g, value: g }));
+    const playItems = [{ label: 'Live', value: 'live', sub: S.liveHandsPerHour + ' hands/hour' }, { label: 'Online', value: 'online', sub: S.onlineHandsPerHour + ' hands/hour' }];
     const seatItems = [6, 8, 9].map((n) => ({ label: n + '-max', value: n }));
     const curItems = [
       { label: 'USD', sub: 'US Dollar', value: 'USD' }, { label: 'EUR', sub: 'Euro', value: 'EUR' },
@@ -330,6 +333,10 @@ export default class Ledger extends React.Component {
       venue: { title: 'Venue', items: sheetItems(venueItems, st.draft.venue, (v) => setDraft({ venue: v, city: (venueItems.filter((x) => x.value === v)[0] || {}).sub })) },
       stakes: { title: 'Stakes', items: sheetItems(stakeItems, this.stakeLabel(st.draft), (v) => setDraft({ sb: Number(v.split('/')[0]), bb: Number(v.split('/')[1]) })) },
       game: { title: 'Game', items: sheetItems(gameItems, st.draft.game, (v) => setDraft({ game: v })) },
+      playType: { title: 'Play type', items: sheetItems(playItems, domain.playType(st.draft), playType => setDraft({ playType })) },
+      detailPlayType: { title: 'Play type', items: sheetItems(playItems, domain.playType(ds), playType => this.setState(st => ({
+        sessions: st.sessions.map(s => s.id === ds?.id ? { ...s, playType } : s), sheet: null,
+      }))) },
       seats: { title: 'Table size', items: sheetItems(seatItems, st.draft.seats, (v) => setDraft({ seats: v })) },
       rebuy: { title: 'Re-buy amount', items: (A ? [A.buyIns[0].amount, A.bb * 100, A.bb * 200, A.bb * 400] : []).filter((v, i, arr) => arr.indexOf(v) === i).map((v) => ({ label: this.moneyIn(v, A.cur), sub: Math.round(v / (A ? A.bb : 1)) + ' bb', bg: 'transparent', fg: 'var(--color-text)', onClick: () => this.rebuy(v) })) },
       sessionCurrency: { title: 'Session currency', items: sheetItems(curItems, st.draft.cur, cur => setDraft({ cur })) },
@@ -440,6 +447,11 @@ export default class Ledger extends React.Component {
       curveFirst: valuedSorted.length ? this.when(valuedSorted[valuedSorted.length - 1].startedAt) : '—',
       curvePeak: this.money(big.peak, true), curveLast: 'Now',
       byStake, supers,
+      bbPer100: domain.formatBB(bbStats.per100), bbPerHour: domain.formatBB(bbStats.perHour), bbColor: this.col(bbStats.bbWon),
+      bbSummary: bbStats.count + ' completed session' + (bbStats.count === 1 ? '' : 's') + ' · all currencies',
+      bbExcluded: bbStats.excluded ? bbStats.excluded + ' session' + (bbStats.excluded === 1 ? '' : 's') + ' excluded: a positive duration and big blind are required.' : '',
+      handEstimates: S.liveHandsPerHour + ' live / ' + S.onlineHandsPerHour + ' online hands per hour',
+      editHandEstimates: () => this.ask('handEstimates'),
 
       d, a, onDelete: () => this.ask('delete'),
 
@@ -449,6 +461,7 @@ export default class Ledger extends React.Component {
       draftHelp: last ? 'Using your last session setup. Tap any row to change it.' : 'Choose your venue, stakes and session currency.',
       draftRows: [
         { label: 'Session currency', value: st.draft.cur, onClick: () => this.setState({ sheet: 'sessionCurrency' }) },
+        { label: 'Play type', value: domain.playLabel(st.draft), onClick: () => this.setState({ sheet: 'playType' }) },
         { label: 'Venue', value: st.draft.venue, onClick: () => this.setState({ sheet: 'venue' }) },
         { label: 'Stakes', value: this.stakeLabel(st.draft), onClick: () => this.setState({ sheet: 'stakes' }) },
         { label: 'Game', value: st.draft.game, onClick: () => this.setState({ sheet: 'game' }) },
@@ -475,6 +488,7 @@ export default class Ledger extends React.Component {
 
       setRows: [
         { label: 'Display currency', value: S.currency, onClick: () => this.setState({ sheet: 'currency' }) },
+        { label: 'Hands per hour', value: S.liveHandsPerHour + ' live · ' + S.onlineHandsPerHour + ' online', onClick: () => this.ask('handEstimates') },
         { label: 'Default game', value: S.game, onClick: () => this.setState({ sheet: 'defGame' }) },
         { label: 'Default stakes', value: S.stakes, onClick: () => this.setState({ sheet: 'defStakes' }) },
         { label: 'Default table', value: S.seats + '-max', onClick: () => this.setState({ sheet: 'defSeats' }) },

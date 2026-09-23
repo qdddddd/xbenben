@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import { backupSummary } from './backup.js';
+import { validHandsPerHour } from './domain.js';
 
 function Modal({ title, onClose, children, sheet = false }) {
   const ref = useRef(null), titleId = useId();
@@ -84,10 +85,52 @@ function PickerForm({ controller, kind }) {
   </Modal>;
 }
 
+function HandEstimatesForm({ controller }) {
+  const [error, setError] = useState('');
+  const close = () => controller.setState({ modal: null });
+  const submit = e => {
+    e.preventDefault();
+    const data = new FormData(e.currentTarget);
+    const liveHandsPerHour = Number(data.get('live')), onlineHandsPerHour = Number(data.get('online'));
+    if (![liveHandsPerHour, onlineHandsPerHour].every(validHandsPerHour)) {
+      setError('Enter whole numbers from 1 to 10,000 for both estimates.'); return;
+    }
+    controller.setState(st => ({ settings: { ...st.settings, liveHandsPerHour, onlineHandsPerHour }, modal: null }));
+  };
+  return <Modal title="Hands per hour" onClose={close}>
+    <p id="hand-estimates-help" className="confirm-copy">Used to estimate bb/100 for all completed sessions. For online play, include hands across all your tables.</p>
+    <form onSubmit={submit} className="picker-form" noValidate aria-describedby="hand-estimates-help">
+      <label>Live hands per hour<input autoFocus required name="live" type="number" inputMode="numeric" min="1" max="10000" step="1" defaultValue={controller.state.settings.liveHandsPerHour} /></label>
+      <label>Online hands per hour<input required name="online" type="number" inputMode="numeric" min="1" max="10000" step="1" defaultValue={controller.state.settings.onlineHandsPerHour} /></label>
+      {error && <p role="alert">{error}</p>}
+      <div className="dialog-actions"><button type="button" className="btn btn-secondary" onClick={close}>Cancel</button>
+        <button type="submit" className="btn btn-primary">Save estimates</button></div>
+    </form>
+  </Modal>;
+}
+
+export function BigBlindStats({ v }) {
+  return <section className="bb-stats" aria-label="Big-blind averages">
+    <div className="blueprint bb-grid">
+      {['tl', 'tr', 'bl', 'br'].map(c => <i key={c} aria-hidden="true" className={'corner ' + c} />)}
+      <div><div className="section-label">Avg bb / 100 hands</div>
+        <div className="bb-value" data-testid="bb-per-100" style={{ color: v.bbColor }}>{v.bbPer100}</div>
+        <div className="bb-caption">Estimated</div></div>
+      <div><div className="section-label">Avg bb / hour</div>
+        <div className="bb-value" data-testid="bb-per-hour" style={{ color: v.bbColor }}>{v.bbPerHour}</div>
+        <div className="bb-caption">Per hour played</div></div>
+    </div>
+    <p className="screen-help">{v.bbSummary}. Estimates use {v.handEstimates}.</p>
+    {v.bbExcluded && <p className="screen-help" role="status">{v.bbExcluded}</p>}
+    <button type="button" className="text-action" onClick={v.editHandEstimates}>Edit hand estimates</button>
+  </section>;
+}
+
 export function Dialogs({ controller }) {
   const { modal } = controller.state;
   if (!modal) return null;
   if (modal === 'backup' || modal === 'restore') return <BackupDialog controller={controller} />;
+  if (modal === 'handEstimates') return <HandEstimatesForm controller={controller} />;
   if (['venue', 'stakes'].includes(modal)) return <PickerForm key={modal} controller={controller} kind={modal} />;
   const [title, copy, action] = confirmations[modal];
   const close = () => controller.setState({ modal: null });

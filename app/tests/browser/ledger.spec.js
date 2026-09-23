@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import fs from 'node:fs/promises';
 import path from 'node:path';
+import { freshLedger } from '../../src/storage.js';
 
 const fixture = path.resolve('public/sample-analytics7.xml');
 const key = 'ledger:data:v1';
@@ -69,6 +70,7 @@ test('HKD import keeps original amounts while reports combine currencies and dup
   await expect(screen(page, 'home')).toContainText('+$384');
   await expect(screen(page, 'home')).toContainText('42.7 h logged');
   expect((await saved(page)).settings.currency).toBe('USD');
+  expect((await saved(page)).sessions.filter(s => s.src === 'analytics7').every(s => s.playType === 'live')).toBeTruthy();
   await settings(page);
   await expect(screen(page, 'settings')).toContainText('1 HKD = 0.128 USD');
   await page.getByRole('button', { name: /Import from analytics7/ }).click();
@@ -346,8 +348,14 @@ test('backup preview and confirmed replacement round-trip two currencies, live c
   await page.getByRole('button', { name: 'Review 3 rows' }).click();
   await page.getByRole('button', { name: 'Import 3 sessions', exact: true }).click();
   await settings(page); await choose(page, /^Accent colour/, 'Violet');
+  await page.getByRole('button', { name: /^Hands per hour/ }).click();
+  await page.getByLabel('Live hands per hour').fill('25');
+  await page.getByLabel('Online hands per hour').fill('180');
+  await page.getByRole('button', { name: 'Save estimates' }).click();
   await page.getByRole('button', { name: 'New', exact: true }).click();
-  await page.getByRole('button', { name: /Repeat Demo Room A/ }).click();
+  await choose(page, /^Play type/, 'Online 180 hands/hour');
+  await digits(page, '4000');
+  await page.getByRole('button', { name: 'Start · clock runs' }).click();
   await page.getByRole('button', { name: '+ Re-buy', exact: true }).click();
   await page.getByRole('dialog').getByRole('button', { name: /HK\$4,000/ }).click();
   await page.getByRole('button', { name: '← Back to xbenben' }).click(); await settings(page);
@@ -356,6 +364,8 @@ test('backup preview and confirmed replacement round-trip two currencies, live c
   await page.getByRole('dialog').getByRole('button', { name: 'Download backup' }).click();
   const backupPath = await (await pending).path(), text = await fs.readFile(backupPath, 'utf8');
   const envelope = JSON.parse(text), original = await saved(page);
+  expect(original.active.playType).toBe('online');
+  expect(original.settings.onlineHandsPerHour).toBe(180);
   await expect(screen(page, 'settings')).not.toContainText('Last backup: Never');
   await page.getByRole('button', { name: 'Erase all sessions', exact: true }).click();
   await page.getByRole('dialog').getByRole('button', { name: 'Erase all sessions', exact: true }).click();
@@ -419,11 +429,16 @@ test('new sessions offer presets, keep their own currency and repeat the last cr
   await choose(page, /^Session currency/, 'HKD Hong Kong');
   await choose(page, /^Game/, 'PLO');
   await choose(page, /^Table/, '6-max');
+  await choose(page, /^Play type/, 'Online 75 hands/hour');
   await digits(page, '5000');
   await expect(page.getByLabel('Buy-in amount')).toHaveText('HK$5,000');
   await page.getByRole('button', {name:'Start · clock runs'}).click();
   const started = await saved(page);
   expect(started.settings.currency).toBe('USD'); expect(started.active.cur).toBe('HKD');
+  expect(started.active.playType).toBe('online'); expect(started.lastSetup.playType).toBe('online');
+  await page.reload();
+  await expect(screen(page, 'active')).toContainText('Online · HKD');
+  expect((await saved(page)).active).toEqual(started.active);
   await page.getByRole('button', {name:'Cash out',exact:true}).click();
   await digits(page, '6500');
   await page.getByRole('button', {name:/Tips & rake paid/}).click(); await digits(page, '100');
@@ -436,7 +451,7 @@ test('new sessions offer presets, keep their own currency and repeat the last cr
   await settings(page); await choose(page, /^Display currency/, 'EUR Euro');
   await home(page); await expect(page.getByTestId('bankroll')).toHaveText('+€167');
   await page.reload(); await page.getByRole('button', {name:'Start session',exact:true}).click();
-  for (const value of ['Macau table', '50/100', 'HKD', 'PLO', '6-max']) await expect(screen(page, 'new')).toContainText(value);
+  for (const value of ['Macau table', '50/100', 'HKD', 'PLO', '6-max', 'Online']) await expect(screen(page, 'new')).toContainText(value);
   await expect(page.getByLabel('Buy-in amount')).toHaveText('HK$0');
   await choose(page, /^Venue/, 'Aria Las Vegas');
   await choose(page, /^Session currency/, 'USD US Dollar');
@@ -446,6 +461,7 @@ test('new sessions offer presets, keep their own currency and repeat the last cr
   await expect(page.getByRole('button', {name:/^Session currency/})).toContainText('HKD');
   await page.getByRole('button', {name:/Repeat Macau table/}).click();
   expect((await saved(page)).active.buyIns[0].amount).toBe(5000);
+  expect((await saved(page)).active.playType).toBe('online');
   await page.getByRole('button', {name:'Discard',exact:true}).click();
   await page.getByRole('dialog').getByRole('button', {name:'Discard session',exact:true}).click();
   await importFile(page); await page.getByRole('button', {name:'Review 3 rows'}).click();
@@ -454,6 +470,82 @@ test('new sessions offer presets, keep their own currency and repeat the last cr
   await page.getByRole('button', {name:'Start session',exact:true}).click();
   await expect(page.getByRole('button', {name:/^Venue/})).toContainText('Macau table');
   await expect(page.getByRole('button', {name:/^Stakes/})).toContainText('50/100');
+});
+
+const bbSession = { id: 'live', cur: 'USD', venue: 'Live room', city: '', game: 'NLHE', seats: 6, sb: 2, bb: 5,
+  startedAt: 1770000000000, endedAt: 1770007200000, buyIns: [{ amount: 2000, at: 1770000000000 }], cashOut: 2100, tips: 0, notes: '' };
+async function installLedger(page, data) {
+  await page.evaluate(({ key, data }) => localStorage.setItem(key, JSON.stringify(data)), { key, data });
+  await page.reload();
+}
+async function stats(page, per100, perHour) {
+  await page.getByRole('button', { name: 'Stats', exact: true }).click();
+  await expect(page.getByTestId('bb-per-100')).toHaveText(per100);
+  await expect(page.getByTestId('bb-per-hour')).toHaveText(perHour);
+}
+
+test('weighted big-blind stats use live/online estimates, recalculate history and ignore display currency', async ({ page }) => {
+  const data = { version: 1, ...freshLedger(), sessions: [
+    { ...bbSession, playType: 'live' },
+    { ...bbSession, id: 'online', venue: 'Online room', cur: 'HKD', bb: 10, cashOut: 2150, endedAt: bbSession.startedAt + 3600000, playType: 'online' },
+  ] };
+  await installLedger(page, data); await stats(page, '+25.9', '+11.7');
+  await expect(page.getByRole('region', { name: 'Big-blind averages' })).toContainText('Estimated');
+  await settings(page); await page.getByRole('button', { name: /^Hands per hour/ }).click();
+  await page.getByLabel('Live hands per hour').fill('20');
+  await page.getByLabel('Online hands per hour').fill('100');
+  await page.getByRole('button', { name: 'Save estimates' }).click();
+  await stats(page, '+25.0', '+11.7');
+  await settings(page); await choose(page, /^Display currency/, 'EUR Euro');
+  await stats(page, '+25.0', '+11.7');
+  expect((await saved(page)).sessions).toEqual(data.sessions);
+  await page.getByRole('button', { name: 'Log', exact: true }).click();
+  await page.getByRole('button', { name: /Live room/ }).click();
+  await choose(page, /^Play type/, 'Online 100 hands/hour');
+  await expect(page.getByRole('button', { name: /^Play type/ })).toContainText('Online');
+  await stats(page, '+11.7', '+11.7');
+  await page.reload(); await stats(page, '+11.7', '+11.7');
+  const stored = await saved(page);
+  expect(stored.sessions).toEqual(data.sessions.map(s => ({ ...s, playType: 'online' })));
+  expect(stored.settings).toMatchObject({ liveHandsPerHour: 20, onlineHandsPerHour: 100 });
+});
+
+test('big-blind stats show empty and excluded states and migrate untagged sessions without FX', async ({ page }) => {
+  await stats(page, '—', '—');
+  const data = { version: 1, ...freshLedger(), sessions: [
+    { ...bbSession, cur: 'JPY' }, { ...bbSession, id: 'no-blind', bb: 0 }, { ...bbSession, id: 'no-time', endedAt: bbSession.startedAt },
+  ] };
+  delete data.settings.liveHandsPerHour; delete data.settings.onlineHandsPerHour; delete data.draft.playType;
+  await installLedger(page, data); await stats(page, '+33.3', '+10.0');
+  await expect(page.getByRole('region', { name: 'Big-blind averages' })).toContainText('1 completed session · all currencies');
+  await expect(page.getByRole('region', { name: 'Big-blind averages' })).toContainText('2 sessions excluded');
+  await settings(page); await expect(page.getByRole('button', { name: /^Hands per hour/ })).toContainText('30 live · 75 online');
+  await page.getByRole('button', { name: /^Hands per hour/ }).click();
+  await page.getByRole('button', { name: 'Save estimates' }).click();
+  expect((await saved(page)).sessions).toEqual(data.sessions);
+  data.sessions = data.sessions.slice(1);
+  await installLedger(page, data); await stats(page, '—', '—');
+});
+
+test('hand estimates validate both fields and preserve settings on cancel or invalid input', async ({ page }) => {
+  await settings(page); await page.getByRole('button', { name: /^Hands per hour/ }).click();
+  for (const value of ['0', '1.5', '10001', '']) {
+    await page.getByLabel('Live hands per hour').fill(value);
+    await page.getByRole('button', { name: 'Save estimates' }).click();
+    await expect(page.getByRole('alert')).toHaveText('Enter whole numbers from 1 to 10,000 for both estimates.');
+  }
+  await page.getByLabel('Live hands per hour').fill('60');
+  await page.getByLabel('Online hands per hour').fill('-1');
+  await page.getByRole('button', { name: 'Save estimates' }).click();
+  await expect(page.getByRole('dialog')).toBeVisible();
+  await page.getByRole('dialog').getByRole('button', { name: 'Cancel', exact: true }).click();
+  await expect(page.getByRole('button', { name: /^Hands per hour/ })).toContainText('30 live · 75 online');
+  await page.getByRole('button', { name: /^Hands per hour/ }).click();
+  await page.getByLabel('Live hands per hour').fill('60');
+  await page.getByLabel('Online hands per hour').fill('120');
+  await page.getByRole('button', { name: 'Save estimates' }).click();
+  await page.reload(); await settings(page);
+  await expect(page.getByRole('button', { name: /^Hands per hour/ })).toContainText('60 live · 120 online');
 });
 
 test('reports separate native stake groups and explicitly exclude unavailable exchange rates', async ({ page }) => {
@@ -467,7 +559,7 @@ test('reports separate native stake groups and explicitly exclude unavailable ex
   await page.evaluate(({key,data}) => localStorage.setItem(key, JSON.stringify(data)), {key,data});
   await page.reload();
   await expect(page.getByTestId('bankroll')).toHaveText('+$228');
-  await expect(screen(page, 'home')).toContainText('1 session in JPY excluded from totals');
+  await expect(screen(page, 'home')).toContainText('1 session in JPY excluded from currency totals');
   await page.getByRole('button', {name:'Stats',exact:true}).click();
   await expect(page.getByTestId('bankroll')).toHaveText('+$228');
   await expect(page.getByText('USD 2/5', {exact:true})).toBeVisible();
@@ -480,6 +572,6 @@ test('reports separate native stake groups and explicitly exclude unavailable ex
   await home(page); await expect(page.getByTestId('bankroll')).toHaveText('+HK$1,781');
   await settings(page); await choose(page, /^Display currency/, 'JPY');
   await home(page); await expect(page.getByTestId('bankroll')).toHaveText('+JPY 9,000');
-  await expect(screen(page, 'home')).toContainText('2 sessions in USD, HKD excluded from totals');
+  await expect(screen(page, 'home')).toContainText('2 sessions in USD, HKD excluded from currency totals');
   expect((await saved(page)).sessions).toEqual(data.sessions);
 });

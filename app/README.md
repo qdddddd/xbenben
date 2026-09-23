@@ -20,11 +20,19 @@ Open the printed localhost URL. First launch is empty. **Settings → Restore sa
 
 ## Session setup and currencies
 
-New session offers venue and stakes presets plus your imported and custom choices. The venue list includes Macau table, Home game and Las Vegas venues; stakes range from 0.5/1 to 500/1000. Your last-created session supplies the next venue, stakes, currency, game and table size. Before a session has been created, the latest logged setup or saved defaults are used. Enter the new buy-in explicitly, or choose a labelled one-tap shortcut.
+New session offers venue and stakes presets plus your imported and custom choices. The venue list includes Macau table, Home game and Las Vegas venues; stakes range from 0.5/1 to 500/1000. Your last-created session supplies the next venue, stakes, currency, live/online play type, game and table size. Before a session has been created, the latest logged setup or saved defaults are used. Enter the new buy-in explicitly, or choose a labelled one-tap shortcut.
 
 Choose **Session currency** before starting. All buy-ins, re-buys, tips and cash-out amounts belong to that session. Changing **Settings → Display currency** affects reporting, and starting, booking or importing never changes it automatically.
 
 Home and Stats convert all supported sessions to the display currency using the fixed rates shown in Settings. Calculations sum unrounded converted net; formatting rounds the displayed amount. Log entries and details retain original currencies, and stake groups keep USD 2/5 separate from HKD 2/5. Unavailable rates are identified and excluded from converted totals; those sessions remain accessible in the log. There are no live exchange rates.
+
+## Big-blind averages
+
+Stats shows **Avg bb / 100 hands** (estimated) and **Avg bb / hour**. Each completed session contributes its net divided by its own big blind. The averages are total big blinds won divided by total hours, or by total estimated hands and multiplied by 100. They weight sessions by time or hands rather than averaging session rates. All currencies contribute, without exchange conversion.
+
+In **Settings → Hands per hour**, set separate live and online estimates. Starting values are 30 live and 75 online; enter whole numbers from 1 to 10,000, counting online hands across all your tables. Each session's estimated hands are its duration times the matching estimate. Changing these settings recalculates historical bb/100 and leaves bb/hour unchanged.
+
+Choose **Play type → Live / Online** when creating a session. Untagged older sessions and analytics7 imports count as live; open a completed session and tap **Play type** to correct it. Running sessions and records with no positive duration or big blind are excluded from the averages. Stats explains exclusions and shows a dash when there is no eligible data.
 
 ## Verify and build
 
@@ -56,7 +64,7 @@ In Settings, choose **Back up to iCloud / file**. After preparation, choose **Sa
 
 **Restore backup** opens the Files picker. A preview lists the backup's date, currencies, session counts, running session and saved choices. **Replace ledger & restore** replaces the complete ledger after confirmation. It does not merge. The restored live clock continues from its original start time.
 
-The JSON format has a version, a SHA-256 checksum and a complete snapshot: every currency, active buy-ins, settings, venues, stakes, draft inputs, last-created setup and last-backup metadata. Validation and the checksum reject damaged or unrelated files before changing any data. Files are not encrypted; keep them private. CSV contains every session with its original currency and amounts; it is not a full backup. Older version-1 backups remain readable, including files created before session-currency defaults were added.
+The JSON format has a version, a SHA-256 checksum and a complete snapshot: every currency, active buy-ins, settings (including both hands/hour estimates), session play types, venues, stakes, draft inputs, last-created setup and last-backup metadata. Validation and the checksum reject damaged or unrelated files before changing any data. Files are not encrypted; keep them private. CSV contains every session with its original currency, amounts and play type; it is not a full backup. Older version-1 backups remain readable, including files created before session-currency and hand-estimate defaults were added.
 
 There is no background iCloud access, account or synchronization. The app requests persistent browser storage when the API is available and displays the result. The browser may decline; retain file backups before clearing site data or removing the app.
 

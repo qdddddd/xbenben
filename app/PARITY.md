@@ -1,6 +1,6 @@
 # xbenben parity and verification
 
-Initial verification: 2026-09-22. Rename and session-currency verification: 2026-09-23. Chrome, 402×874; primary tabs also checked at 320 pixels. Private financial figures are intentionally omitted from this public report.
+Initial verification: 2026-09-22. Rename, session-currency and big-blind stats verification: 2026-09-23. Chrome, 402×874; primary tabs also checked at 320 pixels. Private financial figures are intentionally omitted from this public report.
 
 ## Screens
 
@@ -10,12 +10,12 @@ The native React view is ported from the reference markup. The comparison uses i
 | --- | --- |
 | 01 Bankroll home | Passed: sample figures, combined-currency totals, converted recent results, empty state and resume state. The xbenben wordmark and conversion note are deliberate additions. |
 | 02 Session log | Passed: All / Wins / Losses, every original-currency row, converted summary, hours and navigation. Currency labels clarify the amounts. |
-| 03 Session detail | Passed: signed result, hourly/big-blind rate, buy-ins, tips, duration, city and notes. Amounts stay in the session currency; delete confirms. |
-| 04 New session | Passed: venue/stakes presets, session-currency picker, remembered last-created setup, explicit buy-in entry, repeat/default shortcuts and custom choices. Added controls keep the Industry layout. |
-| 05 Live session | Passed: timer, invested sum, prescribed re-buy options, reload and close/reopen. Added a return-to-home control. |
+| 03 Session detail | Passed: signed result, hourly/big-blind rate, buy-ins, tips, duration, city and notes. Live/online play type can be corrected. Amounts stay in the session currency; delete confirms. |
+| 04 New session | Passed: venue/stakes presets, session-currency and live/online pickers, remembered last-created setup, explicit buy-in entry, repeat/default shortcuts and custom choices. Added controls keep the Industry layout. |
+| 05 Live session | Passed: timer, invested sum, prescribed re-buy options, reload and close/reopen. Added a return-to-home control. The status now says In progress, distinguishing the running clock from live/online play type. |
 | 06 Cash out | Passed: cash/tips selection, keyboard, result equation, booking and currency. Valid zero-chip booking now looks enabled. |
-| 07 Stats | Passed: converted curve, native-currency stake groups and converted superlatives. Lifetime colour follows lifetime net; single-session curves and peaks render correctly. |
-| 08 Settings | Passed: defaults, all three tweaks, CSV, safe sample controls, display currency, fixed-rate notes, backup/restore and storage status. Added controls extend the scrollable screen. |
+| 07 Stats | Passed: weighted average bb/hour and estimated bb/100, converted curve, native-currency stake groups and converted superlatives. Lifetime colour follows lifetime net; single-session curves and peaks render correctly. |
+| 08 Settings | Passed: defaults, validated live/online hands/hour estimates, all three tweaks, CSV, safe sample controls, display currency, fixed-rate notes, backup/restore and storage status. Added controls extend the scrollable screen. |
 | 09 Import: pick | Passed: real file input, errors, mapping copy and a synthetic sample. Monospace mapping text now uses Industry's Barlow body token. |
 | 09 Import: map | Passed: date span, currencies, venues, fixed rate and skip switch. Filename uses Barlow. |
 | 09 Import: review | Passed: per-row data, included totals, skipped rows, back navigation and commit. Same data produces the reference layout. |
@@ -36,7 +36,9 @@ The baseline nine screens and all three import stages were captured in a real br
 | 8. Publishing | Passed: [HTTPS app](https://qdddddd.github.io/xbenben/) and [public source](https://github.com/qdddddd/xbenben), with a successful Actions deployment. Live Chrome checks verified the name/icons, manifest scope, two-currency synthetic imports, backup download, offline reload with a running session and local fonts. Private-file URLs return 404; the Git history/site privacy audit passes. |
 | 9. Physical iPhone | Not run on this machine. Installation, native share sheet, iCloud Drive/AirDrop and airplane-mode checks are specified in README. |
 
-The current suite passes 12 unit tests and 20 Chrome browser tests. It checks a real CSV/JSON download, offline fonts/sample/icons, storage-denial/corruption handling, keyboard focus, simulated share cancellation and a genuine service-worker script update. The update test verifies that a reload is offered and the stored ledger is retained. The share test mocks the OS API; it does not claim to verify iCloud delivery.
+The current suite passes 15 unit tests and 23 Chrome browser tests. It checks a real CSV/JSON download, offline fonts/sample/icons, storage-denial/corruption handling, keyboard focus, simulated share cancellation and a genuine service-worker script update. The update test verifies that a reload is offered and the stored ledger is retained. The share test mocks the OS API; it does not claim to verify iCloud delivery.
+
+Big-blind verification combines a two-hour live session winning 20 bb and a one-hour online session winning 15 bb. The starting 30/75 hands/hour estimates produce +25.9 bb/100 and +11.7 bb/hour. Changing the estimates to 20/100 yields +25.0 bb/100 with the hourly rate unchanged; correcting the live session to online yields +11.7 bb/100. Tests cover display-currency independence, unknown currencies, negative and zero results, zero-duration/zero-blind exclusions, running-session exclusion, invalid estimates, cancel/save/reload, legacy storage/backups and full backups containing online sessions and custom estimates. The six USD examples display +59.2 bb/100 and +17.8 bb/hour. Stats, New session and the estimate dialog were inspected at 402px and 320px; the smaller setup screen scrolls to its remaining controls. The Pages subdirectory/offline check also passes.
 
 The new reporting check combines six USD demos with the three fictional HKD records: nine sessions, 42.7 hours, +$3,456 displayed in USD or +HK$27,003 displayed in HKD. Tests also verify that a new HKD session books in HKD while reporting in USD/EUR, the last-created setup survives reload/discard/later imports, native stakes stay separate, unsupported rates are visible, CSV includes both currencies, and legacy saved records/backups migrate safely.
 
@@ -53,6 +55,8 @@ A real Pages update from `bf85ef4` to `15bedf3` was also verified in a retained 
 - Each session has its own currency. Starting, booking and importing leave the global display currency unchanged; active amounts and details retain the session currency. A second new-session action resumes the existing session.
 - Home and Stats convert original session net at the fixed pair rate, summing without per-session rounding. Only formatted values are rounded. Rate notes explain conversion; unavailable rates are explicitly excluded from totals while entries remain accessible. The log shows original values and a converted summary, and stake groups include their native currency.
 - Last-created setup and draft currency persist and are included in backups. Older saved data and version-1 backups gain these optional defaults without changing sessions or live timestamps.
+- Stats adds average bb/hour and estimated bb/100 in Industry blueprint cards. Each result is divided by its native big blind, then totals are weighted by hours or estimated hands. Currency conversion does not apply. Sessions lacking positive duration or blinds are excluded with an explanation; no eligible data shows a dash.
+- Hands/hour settings start at 30 live and 75 online, accept whole numbers from 1 to 10,000, and recalculate historical estimates. Online estimates include all tables. Live/online play type is chosen at setup, remembered, and editable on completed sessions; older untagged records and analytics7 imports count as live. Settings and play type are backed up, and CSV appends a `play_type` column.
 - Delete, discard and erase require a separate confirmation. Zero-chip cash-out is valid and visually enabled.
 - Stats uses lifetime net's sign and draws a correct single-session curve/peak. Zero big blinds do not produce infinite rates.
 - Imports use the owning result where supplied, validate dates/amounts, reject mixed-currency exports and omit unsupported conversion pairs. The displayed fixed rate is the one applied. Kept amounts are not rounded again.
