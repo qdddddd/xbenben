@@ -7,7 +7,7 @@
 </head>
 <body>
 <x-dc>
-<helmet data-dc-atomics=""><link rel="stylesheet" href="_ds/industry-3309bdcc-3d1d-444d-b606-aea82f920485/styles.css"><script src="_ds/industry-3309bdcc-3d1d-444d-b606-aea82f920485/_ds_bundle.js"></script><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700&amp;family=Barlow+Semi+Condensed:wght@500;600;700&amp;family=Barlow:wght@400;500;600&amp;family=Archivo+Narrow:wght@500;600;700&amp;family=Archivo:wght@400;500;600&amp;family=IBM+Plex+Sans+Condensed:wght@500;600;700&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;family=Oswald:wght@400;500;600&amp;family=Source+Sans+3:wght@400;500;600&amp;display=swap"><style>[style*="--font-heading"]{font-weight:var(--lg-hw,500)}body{font-weight:var(--lg-bw,400)}@keyframes lg-blink{50%{opacity:.25}}@keyframes lg-up{from{transform:translateY(100%)}to{transform:translateY(0)}}@keyframes lg-fade{from{opacity:0}to{opacity:1}}body{margin:0;background:var(--color-bg)}a{color:var(--color-accent-700)}a:hover{color:var(--color-accent)}</style></helmet>
+<helmet data-dc-atomics=""><link rel="stylesheet" href="_ds/industry-3309bdcc-3d1d-444d-b606-aea82f920485/styles.css"><script src="_ds/industry-3309bdcc-3d1d-444d-b606-aea82f920485/_ds_bundle.js"></script><style>@keyframes lg-blink{50%{opacity:.25}}@keyframes lg-up{from{transform:translateY(100%)}to{transform:translateY(0)}}@keyframes lg-fade{from{opacity:0}to{opacity:1}}body{margin:0;background:var(--color-bg)}a{color:var(--color-accent-700)}a:hover{color:var(--color-accent)}</style></helmet>
 <div style="min-height: 100vh; display: flex; flex-wrap: wrap; gap: 44px; justify-content: center; align-items: flex-start; padding: 40px 32px 64px; font-family: var(--font-body); font-weight: 400; font-size: 10px">
 
 <aside style="width:320px;max-width:100%;display:flex;flex-direction:column;gap:22px">
@@ -593,7 +593,7 @@ Start session
 </x-import>
 </div>
 </x-dc>
-<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:&quot;1060&quot;,&quot;height&quot;:&quot;1000&quot;},&quot;typeface&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Barlow Semi&quot;,&quot;options&quot;:[&quot;Industry (original)&quot;,&quot;Barlow Semi&quot;,&quot;Archivo&quot;,&quot;IBM Plex&quot;,&quot;Oswald + Source&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Type&quot;},&quot;heavier&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Type&quot;},&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#5980a6&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;options&quot;:[&quot;#5980a6&quot;,&quot;#7a6a55&quot;,&quot;#4f6b58&quot;,&quot;#6b5a7a&quot;],&quot;section&quot;:&quot;Theme&quot;},&quot;pnlColor&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Mono&quot;,&quot;options&quot;:[&quot;Mono&quot;,&quot;Signal&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Theme&quot;},&quot;showQuickStart&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Behavior&quot;}}">
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:&quot;1060&quot;,&quot;height&quot;:&quot;1000&quot;},&quot;accent&quot;:{&quot;editor&quot;:&quot;color&quot;,&quot;default&quot;:&quot;#5980a6&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;options&quot;:[&quot;#5980a6&quot;,&quot;#7a6a55&quot;,&quot;#4f6b58&quot;,&quot;#6b5a7a&quot;],&quot;section&quot;:&quot;Theme&quot;},&quot;pnlColor&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Mono&quot;,&quot;options&quot;:[&quot;Mono&quot;,&quot;Signal&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Theme&quot;},&quot;showQuickStart&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Behavior&quot;}}">
 class Component extends DCLogic {
   constructor(props) {
     super(props);
@@ -631,26 +631,14 @@ class Component extends DCLogic {
     this.applyAccent();
   }
   componentDidUpdate(prev) {
-    if (prev.accent !== this.props.accent || prev.typeface !== this.props.typeface || prev.heavier !== this.props.heavier) this.applyAccent();
+    if (prev.accent !== this.props.accent) this.applyAccent();
   }
   componentWillUnmount() { clearInterval(this.tick); if (this.toastT) clearTimeout(this.toastT); }
   applyAccent() {
     const a = this.props.accent;
     const root = document.documentElement.style;
     if (a) root.setProperty('--color-accent', a);
-    const faces = {
-      'Industry (original)': ['"Barlow Condensed"', '"Barlow"', 500, 400],
-      'Barlow Semi': ['"Barlow Semi Condensed"', '"Barlow"', 600, 500],
-      'Archivo': ['"Archivo Narrow"', '"Archivo"', 600, 500],
-      'IBM Plex': ['"IBM Plex Sans Condensed"', '"IBM Plex Sans"', 600, 500],
-      'Oswald + Source': ['"Oswald"', '"Source Sans 3"', 500, 500],
-    };
-    const f = faces[this.props.typeface] || faces['Barlow Semi'];
-    const bump = this.props.heavier ? 100 : 0;
-    root.setProperty('--font-heading', f[0] + ', system-ui, sans-serif');
-    root.setProperty('--font-body', f[1] + ', system-ui, sans-serif');
-    root.setProperty('--lg-hw', String(Math.min(700, f[2] + bump)));
-    root.setProperty('--lg-bw', String(Math.min(600, f[3] + bump)));
+    ['--font-heading', '--font-body', '--lg-hw', '--lg-bw'].forEach((k) => root.removeProperty(k));
   }
 
   // ── money + time ────────────────────────────────────────────
@@ -1002,7 +990,7 @@ class Component extends DCLogic {
       const on = onTab && st.tab === t.key;
       return {
         label: t.label, path: t.path,
-        color: on ? 'var(--color-accent)' : 'var(--color-neutral-600)',
+        color: on ? 'var(--color-accent-800)' : 'var(--color-neutral-600)',
         bg: 'transparent',
         bar: on ? 'var(--color-accent)' : 'transparent',
         stroke: on ? 2.5 : 1.5,
