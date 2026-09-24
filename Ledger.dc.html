@@ -448,9 +448,12 @@ Start session
 <sc-if value="{{ showTabs }}" hint-placeholder-val="{{ true }}">
 <div style="flex:none;display:flex;align-items:center;border-top:1px solid var(--color-divider);background:var(--color-bg);padding:7px 12px 30px">
 <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="5">
-<button onClick="{{ t.onClick }}" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;background:transparent;border:0;padding:4px 0;cursor:pointer;color:{{ t.color }}">
-<svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="{{ t.path }}"></path></svg>
-<span style="font-family:var(--font-heading);font-size:9px;letter-spacing:.14em;text-transform:uppercase">{{ t.label }}</span>
+<button onClick="{{ t.onClick }}" style="flex:1;position:relative;display:flex;flex-direction:column;align-items:center;gap:3px;background:transparent;border:0;padding:4px 0;cursor:pointer;color:{{ t.color }}">
+<span style="position:absolute;top:-8px;left:22%;right:22%;height:2px;background:{{ t.bar }}"></span>
+<span style="width:44px;height:30px;display:grid;place-items:center;background:{{ t.bg }}">
+<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="{{ t.stroke }}" stroke-linecap="round" stroke-linejoin="round"><path d="{{ t.path }}"></path></svg>
+</span>
+<span style="font-family:var(--font-heading);font-size:9px;letter-spacing:.14em;text-transform:uppercase;font-weight:{{ t.weight }}">{{ t.label }}</span>
 </button>
 </sc-for>
 <button onClick="{{ onPlus }}" style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;background:transparent;border:0;padding:4px 0;cursor:pointer;color:var(--color-accent-700)">
@@ -995,11 +998,18 @@ class Component extends DCLogic {
       { key: 'stats', label: 'Stats', path: 'M4 20h16M7 17V9M12 17V5M17 17v-6' },
       { key: 'settings', label: 'Set', path: 'M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6M19 12a7 7 0 0 0-.1-1.2l2-1.5-2-3.4-2.3 1a7 7 0 0 0-2-1.2L14.2 3H9.8l-.4 2.7a7 7 0 0 0-2 1.2l-2.3-1-2 3.4 2 1.5A7 7 0 0 0 5 12c0 .4 0 .8.1 1.2l-2 1.5 2 3.4 2.3-1a7 7 0 0 0 2 1.2l.4 2.7h4.4l.4-2.7a7 7 0 0 0 2-1.2l2.3 1 2-3.4-2-1.5c.1-.4.1-.8.1-1.2z' },
     ];
-    const mkTab = (t) => ({
-      label: t.label, path: t.path,
-      color: (onTab && st.tab === t.key) ? 'var(--color-accent)' : 'var(--color-neutral-600)',
-      onClick: () => this.go(t.key),
-    });
+    const mkTab = (t) => {
+      const on = onTab && st.tab === t.key;
+      return {
+        label: t.label, path: t.path,
+        color: on ? 'var(--color-accent)' : 'var(--color-neutral-600)',
+        bg: 'transparent',
+        bar: on ? 'var(--color-accent)' : 'transparent',
+        stroke: on ? 2.5 : 1.5,
+        weight: on ? 700 : 500,
+        onClick: () => this.go(t.key),
+      };
+    };
 
     const index = [
       { n: '01', label: 'Bankroll home', note: 'hero + curve', onClick: () => this.go('home') },
