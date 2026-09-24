@@ -4,6 +4,7 @@ import { chromium, expect } from '@playwright/test';
 import fs from 'node:fs/promises';
 import { PNG } from 'pngjs';
 import pixelmatch from 'pixelmatch';
+import { seedSample } from '../tests/fixtures/sample-ledger.js';
 
 const browser = await chromium.launch({ channel: process.env.PLAYWRIGHT_CHANNEL || (process.platform === 'darwin' ? 'chrome' : undefined) });
 const output = new URL('../evidence/', import.meta.url);
@@ -15,6 +16,7 @@ try {
   const date = new Date('2026-09-22T08:00:00Z');
   await Promise.all([app.clock.setFixedTime(date), ref.clock.setFixedTime(date)]);
   await Promise.all([app.goto('http://127.0.0.1:5173'), ref.goto('http://127.0.0.1:8765/Ledger.dc.html')]);
+  await seedSample(app);
   await ref.locator('[data-om-starter="ios-frame"]').waitFor();
   await Promise.all([app.evaluate(() => document.fonts.ready), ref.evaluate(() => document.fonts.ready)]);
   await app.addStyleTag({ content: ':root { --safe-top: 42px; --safe-bottom: 34px; } *, *::before, *::after { animation:none !important; }' });
@@ -23,7 +25,7 @@ try {
   const jump = async n => { await ref.locator('aside button').nth(n - 1).evaluate(el => el.click()); };
   const capture = async name => {
     await app.mouse.move(0, 0); await ref.mouse.move(1000, 990);
-    await expect(app.locator('[role="status"]')).toHaveCount(0, { timeout: 5000 });
+    await expect(app.locator('[role="status"]:not(.update-status)')).toHaveCount(0, { timeout: 5000 });
     const [a, r] = await Promise.all([
       app.screenshot({ path: new URL(name + '-app.png', output).pathname }),
       frame.screenshot({ path: new URL(name + '-reference.png', output).pathname }),
@@ -35,10 +37,6 @@ try {
       appText: await app.locator('.ledger-app').innerText(), referenceText: await frame.innerText() };
     results.push(result); console.log(name, result.percent + '% pixels differ');
   };
-  await app.getByRole('button', { name: 'Settings', exact: true }).click();
-  await app.getByRole('button', { name: 'Restore sample log', exact: true }).click();
-  await app.getByRole('dialog').getByRole('button', { name: 'Restore sample log', exact: true }).click();
-  await app.getByRole('button', { name: 'Home', exact: true }).click();
   await capture('01-home');
   await jump(2); await app.getByRole('button', { name: 'Log', exact: true }).click(); await capture('02-log');
   await jump(3); await app.getByRole('button', { name: /Bellagio/ }).click(); await capture('03-detail');

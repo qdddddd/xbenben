@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { freshLedger } from '../../src/storage.js';
+import { seedSample as sample } from '../fixtures/sample-ledger.js';
 
 const fixture = path.resolve('public/sample-analytics7.xml');
 const key = 'ledger:data:v1';
@@ -9,12 +10,6 @@ const screen = (page, name) => page.locator(`[data-screen="${name}"]`);
 const settings = page => page.getByRole('button', { name: 'Settings', exact: true }).click();
 const home = page => page.getByRole('button', { name: 'Home', exact: true }).click();
 const saved = page => page.evaluate(key => JSON.parse(localStorage.getItem(key)), key);
-async function sample(page) {
-  await settings(page);
-  await page.getByRole('button', { name: 'Restore sample log', exact: true }).click();
-  await page.getByRole('dialog').getByRole('button', { name: 'Restore sample log', exact: true }).click();
-  await home(page);
-}
 async function openImport(page) {
   await settings(page);
   await page.getByRole('button', { name: /Import from analytics7/ }).click();
@@ -36,6 +31,12 @@ test('empty first launch and the USD sample acceptance figures, log filters and 
   await expect(page.getByTestId('bankroll')).toHaveText('+$0');
   await expect(page.getByText('Nothing logged yet')).toBeVisible();
   await sample(page);
+  const existing = await saved(page);
+  await settings(page);
+  await expect(page.getByRole('button', { name: /^(Restore|Remove) sample log$/ })).toHaveCount(0);
+  await expect(page.getByLabel('Restore xbenben backup')).toHaveAttribute('type', 'file');
+  await page.reload();
+  expect(await saved(page)).toEqual(existing);
   await expect(page.getByTestId('bankroll')).toHaveText('+$3,085');
   for (const value of ['6 sessions', '30.7 h logged', '+$100', '67%', '+$514', '+$960', '−$180', '+$2,090', '+$465']) await expect(screen(page, 'home')).toContainText(value);
   await page.getByRole('button', { name: 'Log', exact: true }).click();
@@ -242,7 +243,7 @@ test('settings, quick presets, personal pickers and imported venues persist', as
   expect((await saved(page)).settings.accent).toBe('forest');
 });
 
-test('sample restore preserves real data; all destructive actions require confirmation', async ({ page }) => {
+test('normal session booking and destructive actions require the intended confirmation', async ({ page }) => {
   await page.getByRole('button', { name: 'Start session', exact: true }).click();
   await page.getByRole('button', { name: /Default NLHE/ }).click();
   await page.getByRole('button', { name: 'Discard', exact: true }).click();
@@ -251,12 +252,8 @@ test('sample restore preserves real data; all destructive actions require confir
   await page.getByRole('button', { name: 'Cash out', exact: true }).click();
   await expect(page.getByRole('button', { name: 'Book session' })).toBeEnabled();
   await page.getByRole('button', { name: 'Book session' }).click();
-  await sample(page);
-  expect((await saved(page)).sessions).toHaveLength(7);
-  await settings(page);
-  await page.getByRole('button', { name: 'Remove sample log', exact: true }).click();
-  await page.getByRole('dialog').getByRole('button', { name: 'Remove sample log', exact: true }).click();
   expect((await saved(page)).sessions).toHaveLength(1);
+  await settings(page);
   await page.getByRole('button', { name: 'Erase all sessions', exact: true }).click();
   await page.getByRole('dialog').getByRole('button', { name: 'Cancel', exact: true }).click();
   expect((await saved(page)).sessions).toHaveLength(1);
@@ -346,9 +343,11 @@ test('storage recovery preserves unreadable data and offers a real recovery down
 });
 
 test('a full storage volume visibly reports unsaved changes', async ({ page }) => {
-  await page.evaluate(() => { Storage.prototype.setItem = () => { throw new DOMException('Full', 'QuotaExceededError'); }; });
   await sample(page);
+  await page.evaluate(() => { Storage.prototype.setItem = () => { throw new DOMException('Full', 'QuotaExceededError'); }; });
+  await settings(page); await choose(page, /^Accent colour/, 'Forest');
   await expect(page.getByRole('alert')).toContainText('Changes could not be saved');
+  await home(page);
   await expect(page.getByTestId('bankroll')).toHaveText('+$3,085');
   await settings(page);
   await page.getByRole('button', { name: 'Update app', exact: true }).click();

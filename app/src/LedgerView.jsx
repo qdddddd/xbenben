@@ -261,8 +261,6 @@ return (<div className="ledger-app" style={{"height": "100%", "display": "flex",
 <div style={{"fontFamily": "var(--font-heading)", "fontSize": "var(--text-caption)", "letterSpacing": ".16em", "textTransform": "uppercase", "color": "var(--color-accent-700)", "marginTop": "var(--size-24)"}}>{"Data"}</div>
 <div style={{"marginTop": "var(--size-8)", "display": "flex", "flexDirection": "column", "gap": "var(--size-8)"}}>
 <button type="button" onClick={v.onExport} style={{"fontSize": "var(--text-label)", "letterSpacing": ".12em", "textTransform": "uppercase", "padding": "var(--size-12)"}} className="btn btn-secondary btn-block">{"Export CSV"}</button>
-<button type="button" onClick={v.onSeed} style={{"fontSize": "var(--text-label)", "letterSpacing": ".12em", "textTransform": "uppercase", "padding": "var(--size-12)"}} className="btn btn-secondary btn-block">{"Restore sample log"}</button>
-{v.hasSamples && <button className="btn btn-secondary btn-block data-button" onClick={v.removeSamples}>Remove sample log</button>}
 <button type="button" onClick={v.onReset} style={{"fontSize": "var(--text-label)", "letterSpacing": ".12em", "textTransform": "uppercase", "padding": "var(--size-12)", "color": "var(--color-neutral-900)"}} className="btn btn-secondary btn-block">{"Erase all sessions"}</button>
 </div>
 <BackupControls controller={v.controller} />

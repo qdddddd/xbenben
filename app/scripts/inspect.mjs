@@ -1,14 +1,12 @@
 import { chromium } from '@playwright/test';
+import { seedSample } from '../tests/fixtures/sample-ledger.js';
 const browser = await chromium.launch({ channel: 'chrome' });
 try {
   const app = await browser.newPage({ viewport: { width: 402, height: 874 }, timezoneId: 'Asia/Taipei' });
   const errors = [];
   app.on('pageerror', e => errors.push(e.message));
   await app.goto('http://127.0.0.1:5173/');
-  await app.getByRole('button', { name: 'Settings', exact: true }).click();
-  await app.getByRole('button', { name: 'Restore sample log', exact: true }).click();
-  await app.getByRole('dialog').getByRole('button', { name: 'Restore sample log', exact: true }).click();
-  await app.getByRole('button', { name: 'Home', exact: true }).click();
+  await seedSample(app);
   await app.evaluate(() => document.fonts.ready);
   await app.screenshot({ path: 'evidence/current-home.png' });
   console.log(JSON.stringify({ app: await app.locator('main').innerText(), errors }, null, 2));

@@ -16,7 +16,7 @@ npm ci
 npm run dev
 ```
 
-Open the printed localhost URL. First launch is empty. **Settings → Restore sample log** adds six fictional USD sessions without replacing personal data. **Use the sample export** imports a separate, entirely fictional three-session HKD example.
+Open the printed localhost URL. First launch is empty. Start a session, import your own log or restore your backup. The six-session design sample is loaded directly by tests and inspection scripts; Settings has no sample-log controls. The import screen's **Use the sample export** option loads a separate, entirely fictional three-session HKD example.
 
 ## Typography and icons
 
@@ -105,7 +105,7 @@ The private prompt, original analytics export, uploads, private tests and screen
 These steps require a real iPhone; desktop browser automation cannot verify the native share sheet or iCloud Drive.
 
 1. Open [xbenben](https://qdddddd.github.io/xbenben/) in Safari. Use **Share → Add to Home Screen**, verify the blue chip preview, keep the name **xbenben**, and open its icon. Check the status/home safe areas and keyboard layout.
-2. Load the fictional sample or import your own XML through **Settings → Import from analytics7 → Choose .xml file**. In Files, select iCloud Drive or the folder where AirDrop saved the export.
+2. Import your own XML through **Settings → Import from analytics7 → Choose .xml file**. In Files, select iCloud Drive or the folder where AirDrop saved the export. The import screen also offers a fictional sample export for testing.
 3. Start a session, add a re-buy, close and reopen the installed app, and check the clock and invested amount.
 4. Make a complete backup. In the share sheet choose **Save to Files → iCloud Drive**, then verify the saved JSON file in Files. If file sharing is unavailable, download it and move/save it using Files.
 5. With a verified backup available, erase the test ledger, choose **Restore backup**, select that file from iCloud Drive, inspect the preview, and confirm replacement. Check settings, both currencies, custom choices and the original live-session clock.

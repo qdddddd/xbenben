@@ -15,7 +15,7 @@ The native React view is ported from the reference markup. The comparison uses i
 | 05 Live session | Passed: timer, invested sum, prescribed re-buy options, reload and close/reopen. Added a return-to-home control. The status now says In progress, distinguishing the running clock from live/online play type. |
 | 06 Cash out | Passed: cash/tips selection, keyboard, result equation, booking and currency. Valid zero-chip booking now looks enabled. |
 | 07 Stats | Passed: weighted average bb/hour and estimated bb/100, converted curve, native-currency stake groups and converted superlatives. Lifetime colour follows lifetime net; single-session curves and peaks render correctly. |
-| 08 Settings | Passed: defaults, validated live/online hands/hour estimates, all three tweaks, CSV, safe sample controls, display currency, fixed-rate notes, backup/restore and storage status. Added controls extend the scrollable screen. |
+| 08 Settings | Passed: defaults, validated live/online hands/hour estimates, all three tweaks, CSV, display currency, fixed-rate notes, backup/restore, app updates and storage status. Sample-log controls are removed; existing records remain intact. Added controls extend the scrollable screen. |
 | 09 Import: pick | Passed: real file input, errors, mapping copy and a synthetic sample. Monospace mapping text now uses Industry's Barlow body token. |
 | 09 Import: map | Passed: date span, currencies, venues, fixed rate and skip switch. Filename uses Barlow. |
 | 09 Import: review | Passed: per-row data, included totals, skipped rows, back navigation and commit. Same data produces the reference layout. |
@@ -26,7 +26,7 @@ The baseline nine screens and all three import stages were captured in a real br
 
 | Check | Result and evidence |
 | --- | --- |
-| 1. USD sample | Passed in Chrome: six fictional sessions, all requested aggregates and four recent results. |
+| 1. USD sample | Passed in Chrome: six fictional sessions loaded by the test fixture, all requested aggregates and four recent results. No production sample-log action is needed. |
 | 2. Supplied private import | The baseline private-file import passed locally for parsing, venues, fixed conversion, figures and duplicates. The later user requirement supersedes currency isolation and parked-session totals: all supported currencies now contribute to reports. The private fixture and its tests are excluded from Git/CI. Public regression tests use a new synthetic export. |
 | 3. Bad XML | Passed: invalid XML, no cash sessions and unreadable dates retain step one and the specified messages. |
 | 4. Live session | Passed: start, re-buy, simulated elapsed time, reload, close/reopen, currency change, cash/tips entry and booking; original timestamp and buy-ins survive. |
@@ -59,7 +59,7 @@ A real Pages update from `bf85ef4` to `15bedf3` was also verified in a retained 
 - User-requested rename: xbenben replaces Ledger in the app name, wordmark, install metadata, messages and download filenames; the blueprint icon now uses an X. The reference files, stored-data key and backup format remain compatible.
 - The user's font-revert request supersedes the updated design's typography. Typeface/heavier exploration controls remain outside Settings. The latest icon clarification extends the chip artwork to home-screen and manifest icons as well as the favicon; app screens contain no icon artwork.
 - Real safe areas replace the design sheet, bezel, status bar and home indicator. Desktop width is capped; small viewports scroll within screens.
-- First launch is empty. Sample restoration is confirmed, tagged and idempotent, preserves personal records, switches to USD and offers separate sample removal.
+- First launch is empty. The latest user requirement removes Restore sample log and Remove sample log from Settings, along with their confirmations and generator. The six design examples live only in test fixtures; existing saved records, including legacy demo-tagged sessions, remain intact.
 - The shipped XML sample is entirely fictional. The user's export is accepted through the file picker but never included in public assets, tests or screenshots.
 - Accent and P&L colour settings are added; quick-start toggles immediately. Other accent presets change the related ramp as well as the base accent.
 - Venue/stake pickers include the log, imported and user-added choices. Defaults include Macau table, Home game and Las Vegas venues, with stakes from 0.5/1 to 500/1000. Choices persist independently of log deletion. New setup prefers the last session created; before one exists, it uses the latest logged session or saved defaults. Buy-in entry stays explicit.
@@ -86,7 +86,7 @@ A real Pages update from `bf85ef4` to `15bedf3` was also verified in a retained 
 | --- | --- |
 | Empty first launch | Personal results must not be confused with demo records. |
 | Bankroll remains lifetime net | Preserves the prototype's model; imported starting balances are not session profit. |
-| Keep an explicit sample-log action | Supports learning and parity checks while preserving personal data and allowing separate demo removal. |
+| Keep sample-log creation in test fixtures | The user removed this demo feature from production Settings; direct fixture loading retains calculation and design checks. |
 | Publish a synthetic XML sample | Makes the importer demonstrable without exposing the user's financial history. |
 | Full replacement on restore | Produces a faithful snapshot round trip without ambiguous cross-currency merges or duplicated live sessions. |
 | File-based iCloud workflow | Web apps cannot silently access or synchronize iCloud Drive; the user chooses the Files destination. |

@@ -17,18 +17,6 @@ export default class Ledger extends React.Component {
 
   rate(from, to) { return domain.rate(from, to); }
 
-  seed(N, D, H) {
-    return this.tagUSD([
-      { id: 's1', startedAt: N - 1 * D - 5 * H, endedAt: N - 1 * D, venue: 'Bellagio', city: 'Las Vegas', sb: 2, bb: 5, game: 'NLHE', seats: 9, buyIns: [{ amount: 500, at: N - 1 * D - 5 * H }, { amount: 500, at: N - 1 * D - 3.5 * H }], cashOut: 1980, tips: 20, notes: 'Table broke twice; ran good in the last hour.' },
-      { id: 's2', startedAt: N - 2 * D - 3 * H, endedAt: N - 2 * D, venue: 'Wynn', city: 'Las Vegas', sb: 1, bb: 3, game: 'NLHE', seats: 8, buyIns: [{ amount: 300, at: N - 2 * D - 3 * H }], cashOut: 130, tips: 10, notes: 'Tough table. Two regs on my left.' },
-      { id: 's3', startedAt: N - 4 * D - 6 * H, endedAt: N - 4 * D, venue: 'Aria', city: 'Las Vegas', sb: 5, bb: 10, game: 'NLHE', seats: 9, buyIns: [{ amount: 1000, at: N - 4 * D - 6 * H }, { amount: 1000, at: N - 4 * D - 4 * H }], cashOut: 4120, tips: 30, notes: 'Hero called river with second pair.' },
-      { id: 's4', startedAt: N - 6 * D - 4.2 * H, endedAt: N - 6 * D, venue: 'Encore', city: 'Las Vegas', sb: 2, bb: 5, game: 'NLHE', seats: 9, buyIns: [{ amount: 500, at: N - 6 * D - 4.2 * H }], cashOut: 980, tips: 15, notes: '' },
-      { id: 's5', startedAt: N - 8 * D - 5.5 * H, endedAt: N - 8 * D, venue: "Mike's home game", city: 'Henderson', sb: 1, bb: 2, game: 'NLHE', seats: 6, buyIns: [{ amount: 200, at: N - 8 * D - 5.5 * H }], cashOut: 540, tips: 0, notes: '' },
-      { id: 's6', startedAt: N - 11 * D - 7 * H, endedAt: N - 11 * D, venue: 'Aria', city: 'Las Vegas', sb: 5, bb: 10, game: 'NLHE', seats: 9, buyIns: [{ amount: 1000, at: N - 11 * D - 7 * H }, { amount: 1000, at: N - 11 * D - 5 * H }, { amount: 1000, at: N - 11 * D - 2 * H }], cashOut: 2450, tips: 40, notes: 'Three bullets. Stop-loss ignored — do not repeat.' },
-    ]);
-  }
-  tagUSD(list) { return list.map((s) => Object.assign({ cur: 'USD' }, s)); }
-
   componentDidMount() {
     this.tick = setInterval(() => { if (this.state.active && !document.hidden) this.setState({ now: Date.now() }); }, 1000);
     this.wake = () => { if (this.state.active) this.setState({ now: Date.now() }); };
@@ -497,7 +485,6 @@ export default class Ledger extends React.Component {
         { label: 'Accent colour', value: S.accent[0].toUpperCase() + S.accent.slice(1), onClick: () => this.setState({ sheet: 'accent' }) },
         { label: 'Profit & loss colours', value: S.pnlColor, onClick: () => this.setState({ sheet: 'pnl' }) },
       ],
-      hasSamples: st.sessions.some(s => s.demo), removeSamples: () => this.ask('removeSamples'),
       backHome: () => this.go('home'),
       hasSessions: sessions.length > 0, noSessions: sessions.length === 0,
       emptyTitle: st.sessions.length ? 'No convertible sessions' : 'Nothing logged yet',
@@ -510,7 +497,6 @@ export default class Ledger extends React.Component {
         ? 'Import or start a session to fill your log.'
         : 'Your sessions are in one of the other two filters.',
       onExport: () => this.exportCsv(),
-      onSeed: () => this.ask('sample'),
       onReset: () => this.ask('erase'),
 
       isImport: flow === 'import',
@@ -610,11 +596,6 @@ export default class Ledger extends React.Component {
     if (action === 'delete') this.setState(st => ({ sessions: st.sessions.filter(s => s.id !== st.detailId), detailId: null }));
     if (action === 'discard') this.setState({ active: null, out: { cash: '', tips: '' }, flow: null, tab: 'home' });
     if (action === 'erase') this.setState({ sessions: [], active: null, out: { cash: '', tips: '' }, flow: null, detailId: null });
-    if (action === 'removeSamples') this.setState(st => ({ sessions: st.sessions.filter(s => !s.demo) }));
-    if (action === 'sample') {
-      const sample = this.seed(Date.now(), 86400000, 3600000).map(s => ({ ...s, id: 'demo-' + s.id, demo: true }));
-      this.setState(st => ({ sessions: [...sample, ...st.sessions.filter(s => !s.demo)], settings: { ...st.settings, currency: 'USD' }, draft: st.lastSetup ? st.draft : { ...this.setupFrom(sample[0]), buyIn: '' } }));
-    }
     if (action === 'resetStorage') {
       if (this.state.recoveryRaw && !this.state.recoveryDownloaded) return;
       try { localStorage.removeItem(STORAGE_KEY); }
@@ -622,7 +603,7 @@ export default class Ledger extends React.Component {
       this.setState({ ...freshLedger(), recoveryRaw: null, storageError: null, flow: null, detailId: null, tab: 'home' });
     }
     this.setState({ modal: null });
-    this.say({ delete: 'Session deleted', discard: 'Live session discarded', erase: 'All sessions erased', sample: 'Sample log restored', removeSamples: 'Sample log removed', resetStorage: 'Storage reset' }[action]);
+    this.say({ delete: 'Session deleted', discard: 'Live session discarded', erase: 'All sessions erased', resetStorage: 'Storage reset' }[action]);
   }
   exportCsv() {
     const list = this.state.sessions.slice().sort((a, b) => b.startedAt - a.startedAt);

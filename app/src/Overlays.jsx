@@ -45,8 +45,6 @@ const confirmations = {
   delete: ['Delete session?', 'This permanently removes this session from your log and recalculates your totals.', 'Delete session'],
   discard: ['Discard live session?', 'The running session and its buy-ins will be removed. It will not be booked in your log.', 'Discard session'],
   erase: ['Erase all sessions?', 'This permanently removes every session in every currency, including the running session. Export any log you want to keep first.', 'Erase all sessions'],
-  sample: ['Restore sample log?', 'Add or refresh six example USD sessions and switch the ledger to USD. Your personal sessions, imports and running session stay intact. Remove the examples separately when you are done.', 'Restore sample log'],
-  removeSamples: ['Remove sample log?', 'Remove only the six example sessions. Your personal sessions and imports stay in your log.', 'Remove sample log'],
   resetStorage: ['Reset local storage?', 'Start with an empty ledger after saving your recovery copy. This only resets xbenben’s data in this browser.', 'Reset storage'],
 };
 
