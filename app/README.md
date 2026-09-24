@@ -24,6 +24,8 @@ The original typography is restored: Barlow Condensed headings and Home/Log meta
 
 The default size is tuned for reading on a phone: 17px body text, 17–18px primary rows and controls, 16px help text and labels, and at least 14px captions. Secondary text is darker. Type sizes have their own scale so increasing text does not enlarge all spacing. Screens and pickers scroll vertically, and wide stake tables scroll within their own area.
 
+The active bottom tab has a 2px accent bar, a thicker icon stroke and a bold label, alongside its accent colour and `aria-current` state. All four tab icons are 22px inside unfilled 44×30px boxes. Inactive labels use medium weight; both medium and bold Barlow Condensed fonts are bundled for offline use. The New/Live action keeps its existing blueprint button.
+
 The browser favicon and home-screen icons share direction 1C's simplified chip on a fixed steel field. The favicon has SVG and 16/32 px PNG versions; installation uses an opaque 180px Apple touch icon plus 192/512px manifest icons and a 512px maskable icon. The OS supplies the corner shape, and the chip stays inside the maskable safe area. No icon artwork is added to app screens. Regenerate from the shared `public/icons/favicon.svg` with `node scripts/favicon.mjs` and `node scripts/icons.mjs` after installing Playwright's browser.
 
 Safari gives the HTML `apple-touch-icon` priority over manifest icons ([WebKit documentation](https://webkit.org/blog/12445/new-webkit-features-in-safari-15-4/)). The chip assets have fresh filenames to replace the earlier X icon. Close an already-open Add to Home Screen sheet, reload the site and apply its update prompt, then reopen **Share → Add to Home Screen** to check the blue chip preview.

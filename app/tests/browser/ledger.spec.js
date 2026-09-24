@@ -291,9 +291,12 @@ test('offline production reload, fonts, icons and sample import work after insta
   await expect(page.getByTestId('bankroll')).toHaveText('+$3,085');
   await page.evaluate(() => document.fonts.ready);
   const loadedFonts = await page.evaluate(async () => {
-    const heading = await document.fonts.load('400 26px "Barlow Condensed"');
+    const headings = await Promise.all([400, 500, 700].map(async weight => {
+      const faces = await document.fonts.load(`${weight} 14px "Barlow Condensed"`);
+      return faces.some(face => face.weight === String(weight) && face.status === 'loaded');
+    }));
     const body = await document.fonts.load('400 16px "Barlow"');
-    return heading.length > 0 && body.length > 0 && [...heading, ...body].every(font => font.status === 'loaded');
+    return headings.every(Boolean) && body.length > 0 && body.every(font => font.status === 'loaded');
   });
   expect(loadedFonts).toBeTruthy();
   await openImport(page); await page.getByRole('button', { name: 'Use the sample export' }).click();

@@ -36,7 +36,10 @@ try {
       const result = { path: new URL(src, location.href).pathname, width: bitmap.width, height: bitmap.height };
       bitmap.close(); return result;
     })),
-    fonts: (await Promise.all([document.fonts.load('400 26px "Barlow Condensed"'), document.fonts.load('400 14px "Barlow"')])).every(faces => faces.length > 0 && faces.every(face => face.status === 'loaded')),
+    fonts: (await Promise.all([
+      ...[400, 500, 700].map(async weight => (await document.fonts.load(`${weight} 14px "Barlow Condensed"`)).some(face => face.weight === String(weight) && face.status === 'loaded')),
+      document.fonts.load('400 14px "Barlow"').then(faces => faces.length > 0 && faces.every(face => face.status === 'loaded')),
+    ])).every(Boolean),
   }));
   if (assets.icons.length !== 3 || assets.icons.some(icon => !icon.path.startsWith(base + 'icons/favicon') || !icon.ok) || !assets.fonts) throw new Error('Offline fonts or favicon paths failed under the Pages base.');
   expect(assets.apple).toBe(base + 'icons/apple-touch-icon-chip.png');

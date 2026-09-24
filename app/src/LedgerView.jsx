@@ -455,12 +455,15 @@ return (<div className="ledger-app" style={{"height": "100%", "display": "flex",
 </>}
 {v.showTabs && <>
 
-<div style={{"flex": "none", "display": "flex", "alignItems": "center", "borderTop": "var(--size-1) solid var(--color-divider)", "background": "var(--color-bg)", "padding": "var(--size-7) var(--size-12) max(var(--size-7), calc(var(--safe-bottom) - var(--size-4)))"}}>
+<nav aria-label="Main navigation" style={{"flex": "none", "display": "flex", "alignItems": "center", "borderTop": "var(--size-1) solid var(--color-divider)", "background": "var(--color-bg)", "padding": "var(--size-7) var(--size-12) max(var(--size-7), calc(var(--safe-bottom) - var(--size-4)))"}}>
 {v.tabs.map((t, index) => <Fragment key={t.id ?? index}>
 
-<button aria-current={t.active ? "page" : undefined} aria-label={t.label === "Set" ? "Settings" : t.label} type="button" onClick={t.onClick} style={{"flex": "1", "display": "flex", "flexDirection": "column", "alignItems": "center", "gap": "var(--size-3)", "background": "transparent", "border": "0", "padding": "var(--size-4) 0", "cursor": "pointer", "color": t.color}}>
-<svg aria-hidden="true" focusable="false" width={"21"} height={"21"} viewBox={"0 0 24 24"} fill={"none"} stroke={"currentColor"} strokeWidth={"1.5"} strokeLinecap={"round"} strokeLinejoin={"round"}><path d={t.path}></path></svg>
-<span style={{"fontFamily": "var(--font-heading)", "fontSize": "var(--text-caption)", "letterSpacing": ".14em", "textTransform": "uppercase"}}>{t.label}</span>
+<button aria-current={t.active ? "page" : undefined} aria-label={t.label === "Set" ? "Settings" : t.label} type="button" onClick={t.onClick} style={{"flex": "1", "position": "relative", "display": "flex", "flexDirection": "column", "alignItems": "center", "gap": "var(--size-3)", "background": "transparent", "border": "0", "padding": "var(--size-4) 0", "cursor": "pointer", "color": t.color}}>
+<span aria-hidden="true" style={{"position": "absolute", "top": "calc(-1 * var(--size-8))", "left": "22%", "right": "22%", "height": "var(--size-2)", "background": t.active ? "var(--color-accent)" : "transparent"}}></span>
+<span aria-hidden="true" style={{"width": "var(--size-44)", "height": "var(--size-30)", "display": "grid", "placeItems": "center", "background": "transparent"}}>
+<svg aria-hidden="true" focusable="false" width={"22"} height={"22"} viewBox={"0 0 24 24"} fill={"none"} stroke={"currentColor"} strokeWidth={t.active ? "2.5" : "1.5"} strokeLinecap={"round"} strokeLinejoin={"round"}><path d={t.path}></path></svg>
+</span>
+<span style={{"fontFamily": "var(--font-heading)", "fontSize": "var(--text-caption)", "fontWeight": t.active ? "700" : "500", "letterSpacing": ".14em", "textTransform": "uppercase"}}>{t.label}</span>
 </button>
 
 </Fragment>)}
@@ -470,7 +473,7 @@ return (<div className="ledger-app" style={{"height": "100%", "display": "flex",
 </span>
 <span style={{"fontFamily": "var(--font-heading)", "fontSize": "var(--text-caption)", "letterSpacing": ".14em", "textTransform": "uppercase"}}>{v.plusLabel}</span>
 </button>
-</div>
+</nav>
 
 </>}
 {v.isImport && <>
