@@ -2,6 +2,11 @@ import { Fragment } from "react";
 import FittedValue from "./FittedValue.jsx";
 import { Sheet, BackupControls, ConversionNote, BigBlindStats } from "./Overlays.jsx";
 
+function StakeBadge({ stakes }) {
+  const [small, big] = stakes.split('/');
+  return <span className="stake-badge"><span>{small}/<wbr />{big}</span></span>;
+}
+
 // Native React markup ported from the read-only Ledger design. No template runtime.
 export default function LedgerView(v) {
 return (<div className="ledger-app" style={{"height": "100%", "display": "flex", "flexDirection": "column", "overflow": "hidden", "background": "var(--color-bg)", "fontFamily": "var(--font-body)", "color": "var(--color-text)"}}>
@@ -77,7 +82,7 @@ return (<div className="ledger-app" style={{"height": "100%", "display": "flex",
 {v.recent.map((r, index) => <Fragment key={r.id ?? index}>
 
 <button type="button" onClick={r.onClick} style={{"width": "100%", "display": "flex", "alignItems": "center", "gap": "var(--size-12)", "textAlign": "left", "background": "transparent", "border": "0", "borderBottom": "var(--size-1) solid var(--color-divider)", "padding": "var(--size-11) var(--size-2)", "cursor": "pointer", "fontFamily": "var(--font-body)"}} className="interaction-1">
-<span style={{"width": "var(--size-40)", "height": "var(--size-40)", "flex": "none", "border": "var(--size-1) solid var(--color-divider)", "display": "grid", "placeItems": "center", "fontFamily": "var(--font-heading)", "fontSize": "var(--text-label)", "letterSpacing": ".02em", "color": "var(--color-accent-700)"}}>{r.stakes}</span>
+<StakeBadge stakes={r.stakes} />
 <span style={{"flex": "1", "minWidth": "0"}}>
 <span style={{"display": "block", "fontSize": "var(--text-body)", "fontWeight": "500", "whiteSpace": "nowrap", "overflow": "hidden", "textOverflow": "ellipsis"}}>{r.venue}</span>
 <span style={{"display": "block", "fontSize": "var(--text-caption)", "color": "var(--color-neutral-700)", "fontFamily": "var(--font-heading)", "letterSpacing": ".08em", "textTransform": "uppercase", "marginTop": "var(--size-1)"}}>{r.meta}</span>
@@ -132,7 +137,7 @@ return (<div className="ledger-app" style={{"height": "100%", "display": "flex",
 {v.logRows.map((r, index) => <Fragment key={r.id ?? index}>
 
 <button type="button" onClick={r.onClick} style={{"width": "100%", "display": "flex", "alignItems": "center", "gap": "var(--size-12)", "textAlign": "left", "background": "transparent", "border": "0", "borderBottom": "var(--size-1) solid var(--color-divider)", "padding": "var(--size-11) var(--size-2)", "cursor": "pointer", "fontFamily": "var(--font-body)"}} className="interaction-2">
-<span style={{"width": "var(--size-40)", "height": "var(--size-40)", "flex": "none", "border": "var(--size-1) solid var(--color-divider)", "display": "grid", "placeItems": "center", "fontFamily": "var(--font-heading)", "fontSize": "var(--text-label)", "color": "var(--color-accent-700)"}}>{r.stakes}</span>
+<StakeBadge stakes={r.stakes} />
 <span style={{"flex": "1", "minWidth": "0"}}>
 <span style={{"display": "block", "fontSize": "var(--text-body)", "fontWeight": "500", "whiteSpace": "nowrap", "overflow": "hidden", "textOverflow": "ellipsis"}}>{r.venue}</span>
 <span style={{"display": "block", "fontSize": "var(--text-caption)", "color": "var(--color-neutral-700)", "fontFamily": "var(--font-heading)", "letterSpacing": ".08em", "textTransform": "uppercase", "marginTop": "var(--size-1)"}}>{r.meta}</span>

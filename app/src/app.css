@@ -105,3 +105,11 @@ label:has(.file-input:focus-visible) { outline: var(--size-2) solid var(--color-
 .play-type-row span:last-child { font-family: var(--font-heading); text-transform: uppercase; color: var(--color-accent-700); letter-spacing: .08em; }
 .stat-label { font-family: var(--font-heading); font-size: var(--text-caption); letter-spacing: .1em; text-transform: uppercase; color: var(--color-neutral-700); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
 .fitted-value { min-width: 0; white-space: nowrap; }
+.stake-badge {
+  flex: none; width: fit-content; min-width: var(--size-40); max-width: 30%; min-height: var(--size-40);
+  padding: var(--size-6) var(--size-8); border: var(--size-1) solid var(--color-divider);
+  display: grid; place-items: center; text-align: center;
+  font-family: var(--font-heading); font-size: var(--text-label); font-variant-numeric: tabular-nums;
+  line-height: 1.2; letter-spacing: .02em; color: var(--color-accent-700);
+}
+.stake-badge > span { min-width: 0; overflow-wrap: anywhere; }

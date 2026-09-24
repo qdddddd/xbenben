@@ -374,6 +374,44 @@ test('larger text and session controls stay usable at phone widths and short scr
   expect(errors).toEqual([]);
 });
 
+test('full stakes stay inside padded badges without shrinking on narrow session lists', async ({ page }) => {
+  const pairs = [[2, 5], [12.5, 25], [100, 200], [500, 1000], [5000, 10000], [500000000000, 1000000000000]];
+  const data = { version: 1, ...freshLedger(), sessions: pairs.map(([sb, bb], index) => ({
+    ...bbSession, id: `stakes-${index}`, venue: 'Example card room', cur: 'HKD', sb, bb,
+    startedAt: bbSession.startedAt + index * 86400000, endedAt: bbSession.endedAt + index * 86400000,
+    cashOut: 14200,
+  })) };
+  await installLedger(page, data);
+  for (const width of [402, 390, 320]) {
+    await page.setViewportSize({ width, height: 844 });
+    for (const tab of ['Home', 'Log']) {
+      await page.getByRole('button', { name: tab, exact: true }).click();
+      await page.evaluate(() => document.fonts.ready);
+      const badges = page.locator('.stake-badge');
+      const expected = pairs.slice(tab === 'Home' ? -4 : 0).reverse().map(([sb, bb]) => `${sb}/${bb}`);
+      await expect(badges).toHaveText(expected);
+      const issues = await badges.evaluateAll(elements => elements.flatMap(badge => {
+        const box = badge.getBoundingClientRect();
+        const content = badge.firstElementChild;
+        const range = document.createRange(); range.selectNodeContents(content);
+        const textFits = [...range.getClientRects()].every(rect =>
+          rect.left >= box.left + 7 && rect.right <= box.right - 7 &&
+          rect.top >= box.top && rect.bottom <= box.bottom
+        );
+        const next = badge.nextElementSibling.getBoundingClientRect();
+        return textFits && next.left >= box.right + 10 && parseFloat(getComputedStyle(content).fontSize) >= 16
+          ? [] : [{ text: badge.textContent, textFits, boxWidth: box.width, nextLeft: next.left }];
+      }));
+      expect(issues, `Readable, padded stakes on ${tab} at ${width}px`).toEqual([]);
+      expect(await page.locator('[data-screen]').evaluate(el => el.scrollWidth <= el.clientWidth)).toBeTruthy();
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBeTruthy();
+    }
+  }
+  await page.getByRole('button', { name: /^100\/200 Example card room/ }).click();
+  await expect(screen(page, 'detail')).toContainText('100/200');
+  expect((await saved(page)).sessions).toEqual(data.sessions);
+});
+
 test('design typography and chip favicon stay local, readable and outside app content', async ({ page }) => {
   await page.evaluate(() => document.fonts.ready);
   const heading = screen(page, 'home').getByText('xbenben', { exact: true });
