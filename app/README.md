@@ -22,6 +22,8 @@ Open the printed localhost URL. First launch is empty. **Settings → Restore sa
 
 The original typography is restored: Barlow Condensed headings and Home/Log metadata over Barlow body text, with regular 400 text, medium venue names and the Industry system's semibold components. The fonts are bundled locally and cached for offline use. Their SIL Open Font Licenses are included in `public/licenses/`. Typeface exploration controls from the design are not app settings.
 
+The default size is tuned for reading on a phone: 17px body text, 17–18px primary rows and controls, 16px help text and labels, and at least 14px captions. Secondary text is darker. Type sizes have their own scale so increasing text does not enlarge all spacing. Screens and pickers scroll vertically, and wide stake tables scroll within their own area.
+
 The browser favicon uses direction 1C's simplified chip on a fixed steel field, with SVG and 16/32 px PNG versions. This artwork appears only as the favicon; installed-app icons retain the existing X design. Regenerate the PNG fallbacks from `public/icons/favicon.svg` with `node scripts/favicon.mjs` after installing Playwright's browser. Stat labels stay on one line with an ellipsis, and long currency summaries shrink to fit their cards without dropping digits.
 
 ## Session setup and currencies

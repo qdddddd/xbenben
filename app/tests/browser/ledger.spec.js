@@ -327,18 +327,50 @@ test('a full storage volume visibly reports unsaved changes', async ({ page }) =
   await expect(page.getByTestId('bankroll')).toHaveText('+$3,085');
 });
 
-test('main tabs have no browser errors or horizontal overflow at 402 and 320 pixels', async ({ page }) => {
+test('larger text and session controls stay usable at phone widths and short screen heights', async ({ page }) => {
   const errors = []; page.on('pageerror', e => errors.push(e.message));
   await sample(page);
-  for (const width of [402, 320]) {
-    await page.setViewportSize({ width, height: 874 });
+  const readable = async () => {
+    await page.evaluate(() => document.fonts.ready);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBeTruthy();
+    expect(await page.locator('[data-screen]').evaluate(el => el.scrollWidth <= el.clientWidth)).toBeTruthy();
+    const small = await page.locator('.ledger-shell *, dialog[open] *').evaluateAll(elements => elements.filter(el =>
+      el.getClientRects().length && [...el.childNodes].some(node => node.nodeType === 3 && node.textContent.trim()) &&
+      parseFloat(getComputedStyle(el).fontSize) < 13.9
+    ).map(el => ({ text: el.textContent.slice(0, 60), size: getComputedStyle(el).fontSize })));
+    expect(small, 'Readable captions and full amounts throughout the visible screen').toEqual([]);
+  };
+  for (const [width, height] of [[402, 874], [390, 844], [320, 568]]) {
+    await page.setViewportSize({ width, height });
     for (const tab of ['Home', 'Log', 'Stats', 'Settings']) {
       await page.getByRole('button', { name: tab, exact: true }).click();
-      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBeTruthy();
-      const overflow = await page.locator('[data-screen]').evaluate(el => el.scrollWidth > el.clientWidth);
-      expect(overflow, tab + ' at ' + width).toBeFalsy();
+      await readable();
     }
   }
+  await home(page);
+  await page.getByRole('button', { name: 'Start session', exact: true }).click();
+  await digits(page, '500');
+  await page.getByRole('button', { name: /^Venue/ }).click();
+  await readable();
+  await page.getByRole('dialog').getByRole('button', { name: 'Home game', exact: true }).click();
+  await readable();
+  await page.getByRole('button', { name: 'Start · clock runs', exact: true }).click();
+  await readable();
+  await page.getByRole('button', { name: 'Cash out', exact: true }).click();
+  await digits(page, '750');
+  await readable();
+  await page.getByRole('button', { name: 'Book session', exact: true }).click();
+  await expect(screen(page, 'home')).toBeVisible();
+  await screen(page, 'home').getByRole('button', { name: /Home game/ }).click();
+  await expect(screen(page, 'detail')).toBeVisible();
+  await readable();
+  await page.getByRole('button', { name: 'Home', exact: true }).click();
+  await importFile(page);
+  await readable();
+  await page.getByRole('button', { name: 'Review 3 rows', exact: true }).click();
+  await readable();
+  await page.getByRole('button', { name: 'Import 3 sessions', exact: true }).click();
+  await expect(page.getByTestId('bankroll')).toBeVisible();
   expect(errors).toEqual([]);
 });
 

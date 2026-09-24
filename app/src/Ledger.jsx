@@ -226,7 +226,7 @@ export default class Ledger extends React.Component {
       return {
         id: s.id, stakes: this.stakeLabel(s), venue: s.venue,
         meta: this.when(s.startedAt) + ' · ' + this.shortDur((s.endedAt || Date.now()) - s.startedAt) + ' · ' + s.seats + '-max · ' + source,
-        pnl: value === null ? '—' : this.moneyIn(value, cur, true), color: value === null ? 'var(--color-neutral-600)' : this.col(value),
+        pnl: value === null ? '—' : this.moneyIn(value, cur, true), color: value === null ? 'var(--color-neutral-700)' : this.col(value),
         rate: value === null ? '—' : this.moneyIn(this.hours(s) > 0 ? value / this.hours(s) : 0, cur, true),
         onClick: () => this.openDetail(s.id),
       };
@@ -388,7 +388,7 @@ export default class Ledger extends React.Component {
         meta: new Date(r.startedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ' \u00b7 ' + this.shortDur(r.endedAt - r.startedAt) + ' \u00b7 ' + sc.buyIns.length + (sc.buyIns.length > 1 ? ' bullets' : ' bullet'),
         net: this.moneyIn(p, impCurCode, true), color: this.col(p),
         tag: skipped ? 'Skip' : dupe ? 'Dupe' : 'New',
-        tagColor: dupe ? 'var(--color-neutral-600)' : 'var(--color-accent-700)',
+        tagColor: dupe ? 'var(--color-neutral-700)' : 'var(--color-accent-700)',
         opacity: skipped ? 0.42 : 1,
       };
     });
@@ -403,7 +403,7 @@ export default class Ledger extends React.Component {
     ];
     const mkTab = (t) => ({
       label: t.label, path: t.path,
-      color: (onTab && st.tab === t.key) ? 'var(--color-accent)' : 'var(--color-neutral-600)',
+      color: (onTab && st.tab === t.key) ? 'var(--color-accent)' : 'var(--color-neutral-700)',
       onClick: () => this.go(t.key), active: onTab && st.tab === t.key,
     });
 
@@ -548,7 +548,7 @@ export default class Ledger extends React.Component {
         { from: 'result @chipcount', to: 'Chips off table', color: 'var(--color-text)' },
         { from: 'result @tips', to: 'Tips & rake', color: 'var(--color-text)' },
         { from: 'cash @comments', to: 'Notes', color: 'var(--color-text)' },
-        { from: 'handHistories, notes', to: 'Not imported', color: 'var(--color-neutral-600)' },
+        { from: 'handHistories, notes', to: 'Not imported', color: 'var(--color-neutral-700)' },
       ],
       impName: imp ? imp.name : '', impCount: impRows.length,
       impSpan: impSpan, impBank: imp ? imp.bank : '', impCode: imp ? imp.code : '',
