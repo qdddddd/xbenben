@@ -392,7 +392,7 @@ export default class Ledger extends React.Component {
     ];
     const mkTab = (t) => ({
       label: t.label, path: t.path,
-      color: (onTab && st.tab === t.key) ? 'var(--color-accent)' : 'var(--color-neutral-600)',
+      color: (onTab && st.tab === t.key) ? 'var(--color-accent-800)' : 'var(--color-neutral-600)',
       onClick: () => this.go(t.key), active: onTab && st.tab === t.key,
     });
 
