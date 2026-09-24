@@ -18,13 +18,17 @@ npm run dev
 
 Open the printed localhost URL. First launch is empty. **Settings → Restore sample log** adds six fictional USD sessions without replacing personal data. **Use the sample export** imports a separate, entirely fictional three-session HKD example.
 
-## Typography and favicon
+## Typography and icons
 
 The original typography is restored: Barlow Condensed headings and Home/Log metadata over Barlow body text, with regular 400 text, medium venue names and the Industry system's semibold components. The fonts are bundled locally and cached for offline use. Their SIL Open Font Licenses are included in `public/licenses/`. Typeface exploration controls from the design are not app settings.
 
 The default size is tuned for reading on a phone: 17px body text, 17–18px primary rows and controls, 16px help text and labels, and at least 14px captions. Secondary text is darker. Type sizes have their own scale so increasing text does not enlarge all spacing. Screens and pickers scroll vertically, and wide stake tables scroll within their own area.
 
-The browser favicon uses direction 1C's simplified chip on a fixed steel field, with SVG and 16/32 px PNG versions. This artwork appears only as the favicon; installed-app icons retain the existing X design. Regenerate the PNG fallbacks from `public/icons/favicon.svg` with `node scripts/favicon.mjs` after installing Playwright's browser. Stat labels stay on one line with an ellipsis, and long currency summaries shrink to fit their cards without dropping digits.
+The browser favicon and home-screen icons share direction 1C's simplified chip on a fixed steel field. The favicon has SVG and 16/32 px PNG versions; installation uses an opaque 180px Apple touch icon plus 192/512px manifest icons and a 512px maskable icon. The OS supplies the corner shape, and the chip stays inside the maskable safe area. No icon artwork is added to app screens. Regenerate from the shared `public/icons/favicon.svg` with `node scripts/favicon.mjs` and `node scripts/icons.mjs` after installing Playwright's browser.
+
+Safari gives the HTML `apple-touch-icon` priority over manifest icons ([WebKit documentation](https://webkit.org/blog/12445/new-webkit-features-in-safari-15-4/)). The chip assets have fresh filenames to replace the earlier X icon. Close an already-open Add to Home Screen sheet, reload the site and apply its update prompt, then reopen **Share → Add to Home Screen** to check the blue chip preview.
+
+Stat labels stay on one line with an ellipsis, and long currency summaries shrink to fit their cards without dropping digits.
 
 ## Session setup and currencies
 
@@ -98,7 +102,7 @@ The private prompt, original analytics export, uploads, private tests and screen
 
 These steps require a real iPhone; desktop browser automation cannot verify the native share sheet or iCloud Drive.
 
-1. Open [xbenben](https://qdddddd.github.io/xbenben/) in Safari. Use **Share → Add to Home Screen**, keep the name **xbenben**, and open its icon. Check the status/home safe areas and keyboard layout.
+1. Open [xbenben](https://qdddddd.github.io/xbenben/) in Safari. Use **Share → Add to Home Screen**, verify the blue chip preview, keep the name **xbenben**, and open its icon. Check the status/home safe areas and keyboard layout.
 2. Load the fictional sample or import your own XML through **Settings → Import from analytics7 → Choose .xml file**. In Files, select iCloud Drive or the folder where AirDrop saved the export.
 3. Start a session, add a re-buy, close and reopen the installed app, and check the clock and invested amount.
 4. Make a complete backup. In the share sheet choose **Save to Files → iCloud Drive**, then verify the saved JSON file in Files. If file sharing is unavailable, download it and move/save it using Files.

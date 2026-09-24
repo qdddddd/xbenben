@@ -301,8 +301,33 @@ test('offline production reload, fonts, icons and sample import work after insta
   expect(loadedFonts).toBeTruthy();
   await openImport(page); await page.getByRole('button', { name: 'Use the sample export' }).click();
   await expect(screen(page, 'import')).toContainText('3');
-  const iconLoaded = await page.evaluate(async () => (await fetch('/icons/icon-192.png')).ok);
-  expect(iconLoaded).toBeTruthy();
+  const installIcons = await page.evaluate(async () => {
+    const apple = document.querySelector('link[rel="apple-touch-icon"]');
+    const manifest = await (await fetch(document.querySelector('link[rel="manifest"]').href)).json();
+    return Promise.all([{ src: apple.href, sizes: apple.sizes.value }, ...manifest.icons].map(async icon => {
+      const response = await fetch(icon.src);
+      const bitmap = await createImageBitmap(await response.blob());
+      const canvas = document.createElement('canvas'); canvas.width = bitmap.width; canvas.height = bitmap.height;
+      const ctx = canvas.getContext('2d'); ctx.drawImage(bitmap, 0, 0);
+      const pixel = (x, y) => [...ctx.getImageData(Math.floor(x * bitmap.width), Math.floor(y * bitmap.height), 1, 1).data];
+      const data = ctx.getImageData(0, 0, bitmap.width, bitmap.height).data;
+      const result = { src: new URL(icon.src, location.href).pathname, sizes: icon.sizes, width: bitmap.width, height: bitmap.height,
+        corner: pixel(0, 0), center: pixel(.5, .5), chip: pixel(.81, .5), opaque: true, safe: true };
+      for (let i = 0; i < data.length; i += 4) {
+        if (data[i + 3] !== 255) result.opaque = false;
+        if (data[i] !== 89 || data[i + 1] !== 128 || data[i + 2] !== 166) {
+          const x = (i / 4) % bitmap.width, y = Math.floor(i / 4 / bitmap.width);
+          if (Math.hypot(x + .5 - bitmap.width / 2, y + .5 - bitmap.height / 2) > bitmap.width * .4) result.safe = false;
+        }
+      }
+      bitmap.close(); return result;
+    }));
+  });
+  expect(installIcons.map(icon => icon.src)).toEqual(['/icons/apple-touch-icon-chip.png', '/icons/chip-192.png', '/icons/chip-512.png', '/icons/chip-maskable-512.png']);
+  for (const icon of installIcons) {
+    expect(`${icon.width}x${icon.height}`).toBe(icon.sizes);
+    expect(icon).toMatchObject({ corner: [89, 128, 166, 255], center: [89, 128, 166, 255], chip: [242, 242, 243, 255], opaque: true, safe: true });
+  }
   const favicons = await page.evaluate(async () => Promise.all([...document.querySelectorAll('link[rel="icon"]')].map(async icon => (await fetch(icon.href)).ok)));
   expect(favicons).toEqual([true, true, true]);
 });
@@ -448,8 +473,12 @@ test('design typography and chip favicon stay local, readable and outside app co
     favicon: await (await fetch(document.querySelector('link[rel="icon"][type="image/svg+xml"]').href)).text(),
     externalFonts: performance.getEntriesByType('resource').filter(r => /fonts\.(googleapis|gstatic)\.com/.test(r.name)).length,
   }));
-  expect(metadata.apple).toBe('/icons/apple-touch-icon.png');
-  expect(metadata.manifest.icons.every(icon => !icon.src.includes('favicon'))).toBeTruthy();
+  expect(metadata.apple).toBe('/icons/apple-touch-icon-chip.png');
+  expect(metadata.manifest.icons).toEqual([
+    { src: '/icons/chip-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+    { src: '/icons/chip-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+    { src: '/icons/chip-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+  ]);
   expect(metadata.favicon).toContain('fill="#5980a6"');
   expect(metadata.favicon).toContain('stroke-dasharray="11 13.35"');
   expect(metadata.externalFonts).toBe(0);
