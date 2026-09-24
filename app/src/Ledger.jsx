@@ -4,6 +4,7 @@ import { Dialogs, StorageNotice } from "./Overlays.jsx";
 import * as domain from "./domain.js";
 import { loadLedger, saveLedger, STORAGE_KEY, persistedKeys, freshLedger, normalizeSaved } from "./storage.js";
 import { createBackup, parseBackup } from './backup.js';
+import { AppUpdates } from './AppUpdates.jsx';
 
 export default class Ledger extends React.Component {
   constructor(props) {
@@ -681,11 +682,11 @@ export default class Ledger extends React.Component {
     const v = this.renderVals();
     v.controller = this;
     if (!v.impCanConvert) v.impModes = v.impModes.filter(m => !m.label.startsWith('Convert'));
-    return <main className="ledger-shell">
+    return <AppUpdates canReload={() => !this.state.storageError}><main className="ledger-shell">
       <StorageNotice controller={this} />
       <LedgerView {...v} />
       <Dialogs controller={this} />
-    </main>;
+    </main></AppUpdates>;
   }
 
 }

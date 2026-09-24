@@ -113,3 +113,5 @@ label:has(.file-input:focus-visible) { outline: var(--size-2) solid var(--color-
   line-height: 1.2; letter-spacing: .02em; color: var(--color-accent-700);
 }
 .stake-badge > span { min-width: 0; overflow-wrap: anywhere; }
+.app-updates { margin-top: var(--size-24); }
+.update-status { margin: var(--size-10) 0 0; font-size: var(--text-label); line-height: 1.45; color: var(--color-neutral-700); }

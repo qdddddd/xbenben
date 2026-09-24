@@ -350,6 +350,10 @@ test('a full storage volume visibly reports unsaved changes', async ({ page }) =
   await sample(page);
   await expect(page.getByRole('alert')).toContainText('Changes could not be saved');
   await expect(page.getByTestId('bankroll')).toHaveText('+$3,085');
+  await settings(page);
+  await page.getByRole('button', { name: 'Update app', exact: true }).click();
+  await expect(page.getByRole('region', { name: 'App updates' })).toContainText('Your latest changes aren’t saved');
+  await home(page); await expect(page.getByTestId('bankroll')).toHaveText('+$3,085');
 });
 
 test('larger text and session controls stay usable at phone widths and short screen heights', async ({ page }) => {
@@ -618,6 +622,91 @@ test('a service-worker update waits for reload and keeps the saved ledger', asyn
     await expect(page.getByTestId('bankroll')).toHaveText('+$3,085');
     expect((await saved(page)).sessions).toEqual(before.sessions);
   } finally { await fs.writeFile(workerPath, original); }
+});
+
+async function withNewRelease(run) {
+  const workerPath = path.resolve('dist/sw.js'), htmlPath = path.resolve('dist/index.html');
+  const [worker, html] = await Promise.all([fs.readFile(workerPath, 'utf8'), fs.readFile(htmlPath, 'utf8')]);
+  const publish = async release => {
+    const updated = worker.replace(/(url:"index\.html",revision:")[^"]+(")/, `$1${release}$2`);
+    expect(updated).not.toBe(worker);
+    await fs.writeFile(htmlPath, html.replace('</head>', `<meta name="test-release" content="${release}"></head>`));
+    await fs.writeFile(workerPath, updated);
+  };
+  try {
+    await publish('settings-update-check');
+    await run(publish);
+  } finally {
+    await fs.writeFile(htmlPath, html);
+    await fs.writeFile(workerPath, worker);
+  }
+}
+
+test('Settings checks for a new release and reloads its new page with the complete live ledger intact', async ({ page }) => {
+  await page.evaluate(() => navigator.serviceWorker.ready); await page.reload(); await sample(page);
+  await page.getByRole('button', { name: 'Start session', exact: true }).click();
+  await page.getByRole('button', { name: /Default NLHE/ }).click();
+  await page.getByRole('button', { name: '← Back to xbenben', exact: true }).click();
+  await settings(page); await page.setViewportSize({ width: 320, height: 568 });
+  const before = await saved(page);
+  await withNewRelease(async publish => {
+    await Promise.all([
+      page.waitForEvent('load'),
+      page.getByRole('button', { name: 'Update app', exact: true }).click(),
+    ]);
+    await expect(page.locator('meta[name="test-release"]')).toHaveAttribute('content', 'settings-update-check');
+    await expect(page.getByTestId('timer')).toBeVisible();
+    expect(await saved(page)).toEqual(before);
+    await page.getByRole('button', { name: '← Back to xbenben', exact: true }).click(); await settings(page);
+    await publish('deferred-release');
+    await page.evaluate(async () => (await navigator.serviceWorker.getRegistration()).update());
+    await expect(page.locator('.update-notice')).toBeVisible();
+    await page.locator('.update-notice').getByRole('button', { name: 'Later', exact: true }).click();
+    await publish('newest-release');
+    await Promise.all([page.waitForEvent('load'), page.getByRole('button', { name: 'Update app', exact: true }).click()]);
+    await expect(page.locator('meta[name="test-release"]')).toHaveAttribute('content', 'newest-release');
+    await expect(page.getByTestId('timer')).toBeVisible();
+    expect(await saved(page)).toEqual(before);
+  });
+});
+
+test('Settings applies a previously deferred downloaded update even while offline', async ({ page, context }) => {
+  await page.evaluate(() => navigator.serviceWorker.ready); await page.reload(); await sample(page); await settings(page);
+  const before = await saved(page);
+  await withNewRelease(async () => {
+    await page.evaluate(async () => (await navigator.serviceWorker.getRegistration()).update());
+    await expect(page.locator('.update-notice')).toBeVisible();
+    await page.locator('.update-notice').getByRole('button', { name: 'Later', exact: true }).click();
+    await expect(page.locator('.update-notice')).toHaveCount(0);
+    await expect(page.getByRole('region', { name: 'App updates' })).toContainText('An update is ready to install.');
+    await context.setOffline(true);
+    await Promise.all([page.waitForEvent('load'), page.getByRole('button', { name: 'Update app', exact: true }).click()]);
+    await expect(page.locator('meta[name="test-release"]')).toHaveAttribute('content', 'settings-update-check');
+    await expect(page.getByTestId('bankroll')).toHaveText('+$3,085');
+    expect(await saved(page)).toEqual(before);
+  });
+});
+
+test('Settings reports current, offline and failed update checks without reloading or changing data', async ({ page, context }) => {
+  await page.evaluate(() => navigator.serviceWorker.ready); await page.reload(); await sample(page); await settings(page);
+  const before = await saved(page), updates = page.getByRole('region', { name: 'App updates' });
+  await page.evaluate(() => { window.updateProbe = 'same document'; });
+  await updates.getByRole('button', { name: 'Update app', exact: true }).click();
+  await expect(updates).toContainText('You’re up to date.');
+  await context.setOffline(true);
+  await updates.getByRole('button', { name: 'Update app', exact: true }).click();
+  await expect(updates).toContainText('You’re offline.');
+  await context.setOffline(false);
+  const workerPath = path.resolve('dist/sw.js'), original = await fs.readFile(workerPath, 'utf8');
+  try {
+    await fs.writeFile(workerPath, 'Invalid JavaScript simulating an unsuccessful deployment.');
+    await updates.getByRole('button', { name: 'Update app', exact: true }).click();
+    await expect(updates).toContainText('Couldn’t update the app. Please try again.');
+  } finally { await fs.writeFile(workerPath, original); }
+  await updates.getByRole('button', { name: 'Update app', exact: true }).click();
+  await expect(updates).toContainText('You’re up to date.');
+  expect(await page.evaluate(() => window.updateProbe)).toBe('same document');
+  expect(await saved(page)).toEqual(before);
 });
 
 test('new sessions offer presets, keep their own currency and repeat the last created setup', async ({ page }) => {

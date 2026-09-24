@@ -96,6 +96,8 @@ XBENBEN_BASE=/xbenben/ npm run build
 
 For an account root site, use `/`. The former `LEDGER_BASE` variable is also accepted. Keep the published origin and repository path stable across releases. The storage key remains `ledger:data:v1`; service-worker updates never erase it or automatically interrupt a running session. A visible reload action applies an available update.
 
+**Settings → App updates → Update app** checks for a newly deployed release. When available, it downloads the update, activates it and reloads in one action, preserving saved sessions and the running clock. If no release is available, it reports **You’re up to date** without reloading. Offline and failed checks show a retry message. An update that was already downloaded can be installed offline, even after dismissing the background prompt with **Later**. Updates do not reload while the app reports unsaved local changes.
+
 The private prompt, original analytics export, uploads, private tests and screenshot evidence are ignored and excluded from history. `check:privacy` enforces private-path exclusion, checks locally available private session identifiers, and verifies that the deployed sample is synthetic. No analytics, external fonts or user-data service is included.
 
 ## Install and check on iPhone
@@ -108,7 +110,7 @@ These steps require a real iPhone; desktop browser automation cannot verify the 
 4. Make a complete backup. In the share sheet choose **Save to Files → iCloud Drive**, then verify the saved JSON file in Files. If file sharing is unavailable, download it and move/save it using Files.
 5. With a verified backup available, erase the test ledger, choose **Restore backup**, select that file from iCloud Drive, inspect the preview, and confirm replacement. Check settings, both currencies, custom choices and the original live-session clock.
 6. After an online launch, enable airplane mode. Reopen xbenben, check the log and fonts, start or resume a session, add a re-buy and cash out. Reconnect before expecting a new file to sync to iCloud.
-7. After a new release, check that the saved log remains present and apply the update using its reload button. A fresh home-screen installation may have a separate browser storage context; restore a backup there if needed.
+7. After a new release, use **Settings → Update app**, or the background prompt's **Reload** button. Check that the saved log and any running clock remain present. A fresh home-screen installation may have a separate browser storage context; restore a backup there if needed.
 
 ## Code map
 

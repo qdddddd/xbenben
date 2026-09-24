@@ -1,6 +1,7 @@
 import { Fragment } from "react";
 import FittedValue from "./FittedValue.jsx";
 import { Sheet, BackupControls, ConversionNote, BigBlindStats } from "./Overlays.jsx";
+import { UpdateSettings } from "./AppUpdates.jsx";
 
 function StakeBadge({ stakes }) {
   const [small, big] = stakes.split('/');
@@ -265,6 +266,7 @@ return (<div className="ledger-app" style={{"height": "100%", "display": "flex",
 <button type="button" onClick={v.onReset} style={{"fontSize": "var(--text-label)", "letterSpacing": ".12em", "textTransform": "uppercase", "padding": "var(--size-12)", "color": "var(--color-neutral-900)"}} className="btn btn-secondary btn-block">{"Erase all sessions"}</button>
 </div>
 <BackupControls controller={v.controller} />
+<UpdateSettings />
 <div style={{"fontSize": "var(--text-caption)", "color": "var(--color-neutral-700)", "marginTop": "var(--size-14)", "fontFamily": "var(--font-heading)", "letterSpacing": ".1em", "textTransform": "uppercase"}}>{"xbenben 1.0 · sheet 01 · " + (v.sessionCount) + " records"}</div>
 </div>
 

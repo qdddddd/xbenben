@@ -21,6 +21,9 @@ try {
   if (manifest.start_url !== base || manifest.scope !== base || manifest.icons.some(i => !i.src.startsWith(base))) throw new Error('Manifest paths escaped the Pages base.');
   await page.evaluate(() => navigator.serviceWorker.ready); await page.reload();
   if (!(await page.evaluate(() => navigator.serviceWorker.controller?.scriptURL)).includes(base)) throw new Error('Worker scope is wrong.');
+  await page.getByRole('button', { name: 'Settings', exact: true }).click();
+  await page.getByRole('button', { name: 'Update app', exact: true }).click();
+  await expect(page.getByRole('region', { name: 'App updates' })).toContainText('You’re up to date.');
   await context.setOffline(true); await page.reload();
   const assets = await page.evaluate(async () => ({
     icons: await Promise.all([...document.querySelectorAll('link[rel="icon"]')].map(async icon => ({ path: new URL(icon.href).pathname, ok: (await fetch(icon.href)).ok }))),
@@ -44,9 +47,11 @@ try {
     { path: base + 'icons/chip-maskable-512.png', width: 512, height: 512 },
   ]);
   await page.getByRole('button', { name: 'Settings', exact: true }).click();
+  await page.getByRole('button', { name: 'Update app', exact: true }).click();
+  await expect(page.getByRole('region', { name: 'App updates' })).toContainText('You’re offline.');
   await page.getByRole('button', { name: /Import from analytics7/ }).click();
   await page.getByRole('button', { name: 'Use the sample export' }).click();
   await expect(page.getByRole('button', { name: 'Review 3 rows' })).toBeVisible();
   if (errors.length) throw new Error(errors.join('\n'));
-  console.log('Pages path check passed: app, manifest, Apple/install icons, worker, offline fonts/favicons and sample work under ' + base);
+  console.log('Pages path check passed: app, update checks, manifest, Apple/install icons, worker, offline fonts/favicons and sample work under ' + base);
 } finally { if (browser) await browser.close(); server.kill('SIGTERM'); }
