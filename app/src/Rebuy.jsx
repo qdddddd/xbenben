@@ -33,7 +33,10 @@ function CustomRebuy({ session, onConfirm, onBack }) {
           <button type="button" key={key} aria-label={key === 'del' ? 'Delete digit' : key} onClick={() => enter(key)}>{key === 'del' ? '⌫' : key}</button>)}
       </div>
     </div>
-    <button type="submit" className="btn btn-primary btn-block rebuy-confirm" disabled={amount === null}>Log re-buy</button>
+    <button type="submit" className="blueprint rebuy-confirm" disabled={amount === null}>
+      {['tl', 'tr', 'bl', 'br'].map(corner => <i key={corner} aria-hidden="true" className={'corner ' + corner} />)}
+      Log re-buy
+    </button>
   </form>;
 }
 
@@ -41,6 +44,6 @@ export default function Rebuy({ session, onConfirm, children }) {
   const [custom, setCustom] = useState(false);
   return custom ? <CustomRebuy session={session} onConfirm={onConfirm} onBack={() => setCustom(false)} /> : <>
     {children}
-    <button type="button" className="btn btn-secondary btn-block rebuy-custom" onClick={() => setCustom(true)}>Custom amount</button>
+    <button type="button" className="btn btn-secondary btn-block data-button rebuy-custom" onClick={() => setCustom(true)}>Custom amount</button>
   </>;
 }

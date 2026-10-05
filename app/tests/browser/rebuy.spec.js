@@ -37,6 +37,7 @@ for (const width of [402, 320]) test(`custom re-buy entry, limits and cancellati
   for (const label of ['HK$12,000 60 bb', 'HK$20,000 100 bb', 'HK$40,000 200 bb', 'HK$80,000 400 bb']) {
     await expect(dialog.getByRole('button', { name: label, exact: true })).toBeVisible();
   }
+  await page.screenshot({ path: `evidence/custom-rebuy/presets-${width}.png`, animations: 'disabled' });
   await dialog.getByRole('button', { name: 'Custom amount', exact: true }).click();
   const confirm = dialog.getByRole('button', { name: 'Log re-buy', exact: true });
   await expect(confirm).toBeDisabled();

@@ -84,7 +84,11 @@ label:has(.file-input:focus-visible) { outline: var(--size-2) solid var(--color-
 .rebuy-keypad button { height: var(--size-48); padding: 0; border: var(--size-1) solid var(--color-divider); border-radius: 0; background: var(--color-bg); color: var(--color-text); cursor: pointer; font-family: var(--font-heading); font-size: var(--text-title); }
 .rebuy-keypad button:hover { background: var(--color-accent-100); }
 .rebuy-keypad button:active { background: var(--color-accent); color: var(--color-bg); }
-.rebuy-confirm { flex-shrink: 0; min-height: var(--size-48); margin-top: var(--size-10); }
+.rebuy-confirm {
+  flex-shrink: 0; width: 100%; min-height: var(--size-48); margin: var(--size-10) 0 var(--size-6); padding: var(--size-14);
+  background: var(--color-accent); color: var(--color-bg); border-color: var(--color-accent); cursor: pointer;
+  font-family: var(--font-heading); font-size: var(--text-control); letter-spacing: .14em; text-transform: uppercase;
+}
 .add-option { font-family: var(--font-heading); text-transform: uppercase; color: var(--color-accent-700); letter-spacing: .08em; }
 .confirm-copy { margin: var(--size-16) 0; font-size: var(--text-body); }
 .dialog-actions { display: flex; justify-content: flex-end; gap: var(--size-8); flex-wrap: wrap; margin-top: var(--size-16); }
