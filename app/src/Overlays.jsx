@@ -1,8 +1,9 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import { backupSummary } from './backup.js';
 import { validHandsPerHour } from './domain.js';
+import Rebuy from './Rebuy.jsx';
 
-function Modal({ title, onClose, children, sheet = false }) {
+function Modal({ title, onClose, children, sheet = false, className = '' }) {
   const ref = useRef(null), titleId = useId();
   useEffect(() => {
     const el = ref.current;
@@ -10,7 +11,7 @@ function Modal({ title, onClose, children, sheet = false }) {
     el.showModal();
     return () => { if (el.open) el.close(); if (trigger?.isConnected) trigger.focus(); };
   }, []);
-  return <dialog ref={ref} className={sheet ? 'ledger-dialog sheet' : 'ledger-dialog'} aria-labelledby={titleId}
+  return <dialog ref={ref} className={(sheet ? 'ledger-dialog sheet' : 'ledger-dialog') + ' ' + className} aria-labelledby={titleId}
     onKeyDown={e => {
       if (e.key !== 'Tab') return;
       const controls = Array.from(e.currentTarget.querySelectorAll('button:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled), a[href], [tabindex="0"]'))
@@ -30,14 +31,15 @@ function Modal({ title, onClose, children, sheet = false }) {
 
 export function Sheet({ v }) {
   if (!v.sheetOpen) return null;
-  return <Modal title={v.sheetTitle} sheet onClose={v.closeSheet}>
-    <div className="sheet-options">
+  const options = <div className="sheet-options">
       {v.sheetItems.map((it, i) => <button type="button" key={it.label + i} className="sheet-option"
         style={{ background: it.bg, color: it.fg }} onClick={it.onClick}>
         <span>{it.label}</span><small>{it.sub}</small>
       </button>)}
       {v.sheetAdd && <button type="button" className="sheet-option add-option" onClick={v.addPickerItem}>+ Add {v.sheetTitle.toLowerCase().includes('stake') ? 'stakes' : 'venue'}</button>}
-    </div>
+    </div>;
+  return <Modal title={v.sheetTitle} sheet onClose={v.closeSheet} className={v.rebuySession ? 'rebuy-sheet' : ''}>
+    {v.rebuySession ? <Rebuy key={v.rebuySession.id} session={v.rebuySession} onConfirm={v.onRebuy}>{options}</Rebuy> : options}
   </Modal>;
 }
 

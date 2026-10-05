@@ -70,6 +70,21 @@ label:has(.file-input:focus-visible) { outline: var(--size-2) solid var(--color-
 .sheet-option > span { flex: 1; font-family: var(--font-heading); font-size: var(--text-control); letter-spacing: .04em; }
 .sheet-option small { font-family: var(--font-heading); font-size: var(--text-caption); text-transform: uppercase; color: var(--color-neutral-700); letter-spacing: .1em; }
 .sheet-option:hover { background: color-mix(in srgb, var(--color-accent) 10%, transparent) !important; }
+.ledger-dialog.sheet.rebuy-sheet { max-height: calc(100dvh - max(var(--size-20), var(--safe-top))); }
+.rebuy-custom { margin-top: var(--size-12); min-height: var(--size-48); flex-shrink: 0; }
+.rebuy-form { display: flex; flex-direction: column; min-height: 0; }
+.rebuy-editor { min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
+.rebuy-back { min-height: var(--size-44); }
+.rebuy-value { padding: var(--size-4) 0 var(--size-10); text-align: right; }
+.rebuy-value .section-label { margin-bottom: var(--size-4); }
+.rebuy-value output { display: block; font-family: var(--font-heading); font-size: var(--text-display); line-height: 1.1; font-variant-numeric: tabular-nums; }
+.rebuy-value output:focus-visible { outline: var(--size-2) solid var(--color-accent); outline-offset: var(--size-2); }
+.rebuy-bbs { font-family: var(--font-heading); font-size: var(--text-label); color: var(--color-neutral-700); }
+.rebuy-keypad { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--size-1); }
+.rebuy-keypad button { height: var(--size-48); padding: 0; border: var(--size-1) solid var(--color-divider); border-radius: 0; background: var(--color-bg); color: var(--color-text); cursor: pointer; font-family: var(--font-heading); font-size: var(--text-title); }
+.rebuy-keypad button:hover { background: var(--color-accent-100); }
+.rebuy-keypad button:active { background: var(--color-accent); color: var(--color-bg); }
+.rebuy-confirm { flex-shrink: 0; min-height: var(--size-48); margin-top: var(--size-10); }
 .add-option { font-family: var(--font-heading); text-transform: uppercase; color: var(--color-accent-700); letter-spacing: .08em; }
 .confirm-copy { margin: var(--size-16) 0; font-size: var(--text-body); }
 .dialog-actions { display: flex; justify-content: flex-end; gap: var(--size-8); flex-wrap: wrap; margin-top: var(--size-16); }

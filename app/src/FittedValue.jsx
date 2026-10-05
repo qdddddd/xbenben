@@ -1,7 +1,7 @@
 import { useLayoutEffect, useRef } from 'react';
 
 // Preserve every digit when a currency prefix makes a summary too wide.
-export default function FittedValue({ children, ...props }) {
+export default function FittedValue({ children, as: Element = 'div', ...props }) {
   const container = useRef(null);
   const text = useRef(null);
   useLayoutEffect(() => {
@@ -33,5 +33,5 @@ export default function FittedValue({ children, ...props }) {
     document.fonts.ready.then(fit);
     return () => { disposed = true; observer.disconnect(); };
   }, [children]);
-  return <div {...props} ref={container} className="fitted-value"><span ref={text}>{children}</span></div>;
+  return <Element {...props} ref={container} className="fitted-value"><span ref={text}>{children}</span></Element>;
 }

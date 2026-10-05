@@ -5,6 +5,7 @@ import * as domain from "./domain.js";
 import { loadLedger, saveLedger, STORAGE_KEY, persistedKeys, freshLedger, normalizeSaved } from "./storage.js";
 import { createBackup, parseBackup } from './backup.js';
 import { AppUpdates } from './AppUpdates.jsx';
+import { editAmount, MAX_MANUAL_AMOUNT } from './amount-entry.js';
 
 export default class Ledger extends React.Component {
   constructor(props) {
@@ -139,9 +140,7 @@ export default class Ledger extends React.Component {
   pad(key) {
     this.setState(st => {
       const t = st.padTarget;
-      let v = t === 'buyIn' ? st.draft.buyIn : st.out[t];
-      if (key === 'del') v = v.slice(0, -1);
-      else if (/^\d{1,2}$/.test(key) && !(key === '00' && v === '')) v = ((v === '0' ? '' : v) + key).slice(0, 9);
+      const v = editAmount(t === 'buyIn' ? st.draft.buyIn : st.out[t], key);
       return t === 'buyIn' ? { draft: { ...st.draft, buyIn: v } } : { out: { ...st.out, [t]: v } };
     });
   }
@@ -150,7 +149,7 @@ export default class Ledger extends React.Component {
     this.setState(st => {
       if (st.active) return { flow: 'active', detailId: null };
       const d = { ...st.draft, ...over }, amount = Number(d.buyIn);
-      if (!Number.isFinite(amount) || amount <= 0 || amount > 999999999 || d.bb <= 0) return null;
+      if (!Number.isFinite(amount) || amount <= 0 || amount > MAX_MANUAL_AMOUNT || d.bb <= 0) return null;
       const at = Date.now(), cur = d.cur || 'USD', playType = domain.playType(d);
       return { active: { id: domain.newId(), cur, playType, startedAt: at, endedAt: null, venue: d.venue, city: d.city,
         sb: d.sb, bb: d.bb, game: d.game, seats: d.seats, buyIns: [{ amount, at }], cashOut: 0, tips: 0, notes: '' },
@@ -561,6 +560,7 @@ export default class Ledger extends React.Component {
       sheetAdd: ['venue', 'stakes', 'defStakes'].includes(st.sheet),
       addPickerItem: () => this.setState({ modal: st.sheet === 'venue' ? 'venue' : 'stakes', returnSheet: st.sheet, sheet: null }),
       sheetOpen: !!sheet, sheetTitle: sheet ? sheet.title : '', sheetItems: sheet ? sheet.items : [],
+      rebuySession: st.sheet === 'rebuy' ? A : null, onRebuy: amount => this.rebuy(amount),
       closeSheet: () => this.setState({ sheet: null }), stop: (e) => e.stopPropagation(),
       toastOpen: !!st.toast, toast: st.toast || '',
     };

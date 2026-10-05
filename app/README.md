@@ -40,6 +40,12 @@ Choose **Session currency** before starting. All buy-ins, re-buys, tips and cash
 
 Home and Stats convert all supported sessions to the display currency using the fixed rates shown in Settings. Calculations sum unrounded converted net; formatting rounds the displayed amount. Log entries and details retain original currencies, and stake groups keep USD 2/5 separate from HKD 2/5. Unavailable rates are identified and excluded from converted totals; those sessions remain accessible in the log. There are no live exchange rates.
 
+## Re-buys
+
+During a running session, choose **+ Re-buy → Custom amount**, enter an amount on the app's numeric keypad, then tap **Log re-buy**. The usual preset amounts remain available on the same sheet. The preview uses the session's currency and the same rounded whole-bb equivalent as the presets. Amounts are whole currency units from 1 to 999,999,999, matching manual buy-in entry; blank and zero amounts cannot be confirmed.
+
+Closing the sheet or returning to presets discards unconfirmed input. The confirmation stays below the keypad and outside its scroll area, above the device's bottom safe area. No system keyboard opens; physical digit/backspace keys also work. A confirmed re-buy uses the existing buy-in event format, including its timestamp, so it contributes to invested totals, cash-out net, session details, backups and completed-session CSV exports.
+
 ## Big-blind averages
 
 Stats shows **Avg bb / 100 hands** (estimated) and **Avg bb / hour**. Each completed session contributes its net divided by its own big blind. The averages are total big blinds won divided by total hours, or by total estimated hands and multiplied by 100. They weight sessions by time or hands rather than averaging session rates. All currencies contribute, without exchange conversion.
@@ -108,7 +114,7 @@ These steps require a real iPhone; desktop browser automation cannot verify the 
 
 1. Open [xbenben](https://qdddddd.github.io/xbenben/) in Safari. Use **Share → Add to Home Screen**, verify the blue chip preview, keep the name **xbenben**, and open its icon. Check the status/home safe areas and keyboard layout.
 2. Import your own XML through **Settings → Import from analytics7 → Choose .xml file**. In Files, select iCloud Drive or the folder where AirDrop saved the export. The import screen also offers a fictional sample export for testing.
-3. Start a session, add a re-buy, close and reopen the installed app, and check the clock and invested amount.
+3. Start a session, open **+ Re-buy → Custom amount**, and check the session currency and bb preview. Verify zero cannot be confirmed and closing leaves the amount unrecorded. Enter and confirm a custom amount; check that Log re-buy stays reachable above the home indicator. Close and reopen the installed app, then check the clock, re-buy time and invested amount.
 4. Make a complete backup. In the share sheet choose **Save to Files → iCloud Drive**, then verify the saved JSON file in Files. If file sharing is unavailable, download it and move/save it using Files.
 5. With a verified backup available, erase the test ledger, choose **Restore backup**, select that file from iCloud Drive, inspect the preview, and confirm replacement. Check settings, both currencies, custom choices and the original live-session clock.
 6. After an online launch, enable airplane mode. Reopen xbenben, check the log and fonts, start or resume a session, add a re-buy and cash out. Reconnect before expecting a new file to sync to iCloud.
