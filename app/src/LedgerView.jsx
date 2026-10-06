@@ -52,10 +52,10 @@ return (<div className="ledger-app" style={{"height": "100%", "display": "flex",
 </div>
 {v.hasActive && <>
 
-<button type="button" onClick={v.goActive} style={{"width": "100%", "marginTop": "var(--size-26)", "padding": "var(--size-13) var(--size-14)", "background": "var(--color-accent)", "color": "var(--color-bg)", "borderColor": "var(--color-accent)", "display": "flex", "alignItems": "center", "gap": "var(--size-10)", "cursor": "pointer", "fontFamily": "var(--font-heading)", "fontSize": "var(--text-control)", "letterSpacing": ".12em", "textTransform": "uppercase"}} className="blueprint"><i aria-hidden="true" className="corner tl"></i><i aria-hidden="true" className="corner tr"></i><i aria-hidden="true" className="corner bl"></i><i aria-hidden="true" className="corner br"></i>
-<span style={{"width": "var(--size-8)", "height": "var(--size-8)", "background": "var(--color-bg)", "animation": "lg-blink 1.2s infinite"}}></span>
-<span style={{"flex": "1", "textAlign": "left"}}>{"Session running · " + (v.timerText)}</span>
-<span style={{"fontSize": "var(--text-label)"}}>{"RESUME →"}</span>
+<button type="button" data-testid="active-banner" onClick={v.goActive} style={{"width": "100%", "marginTop": "var(--size-26)", "padding": "var(--size-13) var(--size-14)", "background": "var(--color-accent)", "color": "var(--color-bg)", "borderColor": "var(--color-accent)", "display": "flex", "alignItems": "center", "gap": "var(--size-10)", "cursor": "pointer", "fontFamily": "var(--font-heading)", "fontSize": "var(--text-control)", "letterSpacing": ".12em", "textTransform": "uppercase"}} className="blueprint"><i aria-hidden="true" className="corner tl"></i><i aria-hidden="true" className="corner tr"></i><i aria-hidden="true" className="corner bl"></i><i aria-hidden="true" className="corner br"></i>
+<span style={{"width": "var(--size-8)", "height": "var(--size-8)", "background": "var(--color-bg)", "animation": v.paused ? "none" : "lg-blink 1.2s infinite"}}></span>
+<span style={{"flex": "1", "textAlign": "left"}}>{(v.paused ? "Session paused · " : "Session running · ") + v.timerText}</span>
+<span style={{"fontSize": "var(--text-label)"}}>{"OPEN →"}</span>
 </button>
 
 </>}
@@ -303,6 +303,7 @@ return (<div className="ledger-app" style={{"height": "100%", "display": "flex",
 
 </Fragment>)}
 </div>
+{v.d.pauseTime !== null && <p className="session-pause-note" data-testid="paused-time">Paused time · {v.d.pauseTime}<br />Excluded from duration and hourly rates.</p>}
 {v.d.hasNotes && <>
 
 <div style={{"marginTop": "var(--size-18)", "padding": "var(--size-12) var(--size-14)"}} className="blueprint"><i aria-hidden="true" className="corner tl"></i><i aria-hidden="true" className="corner tr"></i><i aria-hidden="true" className="corner bl"></i><i aria-hidden="true" className="corner br"></i>
@@ -374,16 +375,18 @@ return (<div className="ledger-app" style={{"height": "100%", "display": "flex",
 <div aria-label="active" style={{"flex": "1", "overflowY": "auto", "padding": "calc(var(--safe-top) + var(--size-10)) var(--size-20) var(--size-20)"}} data-screen={"active"}>
 <div style={{"display": "flex", "alignItems": "center", "justifyContent": "space-between"}}>
 <div style={{"display": "flex", "alignItems": "center", "gap": "var(--size-7)"}}>
-<span style={{"width": "var(--size-8)", "height": "var(--size-8)", "background": "var(--color-accent)", "animation": "lg-blink 1.2s infinite"}}></span>
-<span style={{"fontFamily": "var(--font-heading)", "fontSize": "var(--text-label)", "letterSpacing": ".18em", "textTransform": "uppercase", "color": "var(--color-accent-700)"}}>{"In progress"}</span>
+<span style={{"width": "var(--size-8)", "height": "var(--size-8)", "background": "var(--color-accent)", "animation": v.paused ? "none" : "lg-blink 1.2s infinite"}}></span>
+<span style={{"fontFamily": "var(--font-heading)", "fontSize": "var(--text-label)", "letterSpacing": ".18em", "textTransform": "uppercase", "color": "var(--color-accent-700)"}}>{v.paused ? "Paused" : "In progress"}</span>
 </div>
 <button type="button" onClick={v.onAbandon} style={{"background": "transparent", "border": "0", "padding": "var(--size-6) 0", "cursor": "pointer", "color": "var(--color-neutral-700)", "fontFamily": "var(--font-heading)", "fontSize": "var(--text-caption)", "letterSpacing": ".14em", "textTransform": "uppercase"}}>{"Discard"}</button>
 </div>
 <div style={{"fontFamily": "var(--font-heading)", "fontSize": "var(--text-title)", "letterSpacing": ".01em", "marginTop": "var(--size-10)"}}>{v.a.venue}</div>
 <div style={{"fontFamily": "var(--font-heading)", "fontSize": "var(--text-caption)", "letterSpacing": ".14em", "textTransform": "uppercase", "color": "var(--color-neutral-700)"}}>{(v.a.playType) + " · " + (v.a.cur) + " · " + (v.a.game) + " " + (v.a.stakes) + " · " + (v.a.seats) + "-max · started " + (v.a.startedAt)}</div>
 <div style={{"marginTop": "var(--size-18)", "padding": "var(--size-16)", "textAlign": "center"}} className="blueprint"><i aria-hidden="true" className="corner tl"></i><i aria-hidden="true" className="corner tr"></i><i aria-hidden="true" className="corner bl"></i><i aria-hidden="true" className="corner br"></i>
-<div style={{"fontFamily": "var(--font-heading)", "fontSize": "var(--text-caption)", "letterSpacing": ".18em", "textTransform": "uppercase", "color": "var(--color-accent-700)"}}>{"Elapsed"}</div>
+<div style={{"fontFamily": "var(--font-heading)", "fontSize": "var(--text-caption)", "letterSpacing": ".18em", "textTransform": "uppercase", "color": "var(--color-accent-700)"}}>{"Playing time"}</div>
 <div style={{"fontFamily": "var(--font-heading)", "fontSize": "var(--text-timer)", "lineHeight": "1", "fontVariantNumeric": "tabular-nums", "letterSpacing": ".01em"}}><span data-testid="timer">{v.timerText}</span></div>
+<button type="button" className="btn btn-secondary btn-block data-button pause-control" onClick={v.paused ? v.onResume : v.onPause}>{v.paused ? "Resume session" : "Pause session"}</button>
+{v.a.pauseNote && <p className="session-pause-note" aria-live="polite">{v.a.pauseNote}</p>}
 </div>
 <div style={{"display": "grid", "gridTemplateColumns": "repeat(2, minmax(0, 1fr))", "gap": "var(--size-10)", "marginTop": "var(--size-12)"}}>
 <div style={{"padding": "var(--size-10) var(--size-12)"}} className="blueprint"><i aria-hidden="true" className="corner tl"></i><i aria-hidden="true" className="corner tr"></i><i aria-hidden="true" className="corner bl"></i><i aria-hidden="true" className="corner br"></i>
@@ -423,6 +426,7 @@ return (<div className="ledger-app" style={{"height": "100%", "display": "flex",
 <div style={{"width": "var(--size-38)"}}></div>
 </div>
 <div style={{"flex": "1", "overflowY": "auto", "padding": "0 var(--size-20)"}}>
+{v.paused && <p className="session-pause-note">Session paused · this break ends when you book.</p>}
 <button aria-pressed={v.cashFocused} type="button" onClick={v.focusCash} style={{"width": "100%", "display": "flex", "alignItems": "flex-end", "justifyContent": "space-between", "background": "transparent", "border": "0", "borderBottom": "var(--size-2) solid " + (v.cashBorder), "padding": "var(--size-14) 0 var(--size-6)", "cursor": "pointer", "textAlign": "left"}}>
 <span style={{"fontFamily": "var(--font-heading)", "fontSize": "var(--text-caption)", "letterSpacing": ".16em", "textTransform": "uppercase", "color": "var(--color-accent-700)", "paddingBottom": "var(--size-6)"}}>{"Chips off table"}</span>
 <span style={{"fontFamily": "var(--font-heading)", "fontSize": "var(--text-amount)", "lineHeight": "1", "fontVariantNumeric": "tabular-nums"}}><output aria-label="Chips off table amount">{v.cashText}</output></span>

@@ -1,3 +1,6 @@
+import { playingMs, pausedMs } from './session-time.js';
+export { playingMs, pausedMs, isPaused, pauseSession, resumeSession, finishSession } from './session-time.js';
+
 // Money stays in the currency of its session. Exchange rates match the design.
 export const USD_RATES = Object.freeze({ USD: 1, HKD: 0.128, EUR: 1.08, GBP: 1.27, CAD: 0.74, AUD: 0.66 });
 export const SYMBOLS = Object.freeze({ USD: '$', HKD: 'HK$', EUR: '€', GBP: '£', CAD: 'C$', AUD: 'A$' });
@@ -13,7 +16,7 @@ export const DEFAULT_VENUES = [
 export const DEFAULT_STAKES = ['0.5/1', '1/2', '1/3', '2/5', '5/10', '10/20', '20/40', '25/50', '50/100', '100/200', '200/400', '500/1000'];
 export const buyIn = s => s.buyIns.reduce((n, b) => n + b.amount, 0);
 export const pnl = s => s.cashOut - buyIn(s) - s.tips;
-export const hours = s => Math.max(0, ((s.endedAt ?? Date.now()) - s.startedAt) / 3600000);
+export const hours = (s, now = Date.now()) => playingMs(s, now) / 3600000;
 export const symbol = code => Object.hasOwn(SYMBOLS, code) ? SYMBOLS[code] : code + ' ';
 export const money = (n, code, signed = false) => (n < 0 ? '−' : signed ? '+' : '') + symbol(code) + Math.round(Math.abs(n)).toLocaleString('en-US');
 export const rate = (from, to) => from === to ? 1 : Object.hasOwn(USD_RATES, from) && Object.hasOwn(USD_RATES, to) ? Math.round(USD_RATES[from] / USD_RATES[to] * 1000) / 1000 : null;
@@ -123,7 +126,7 @@ export function parseA7(text, name, Parser = DOMParser) {
 }
 
 export function csv(sessions) {
-  const header = ['id', 'currency', 'started_at', 'ended_at', 'venue', 'city', 'game', 'small_blind', 'big_blind', 'seats', 'buy_ins', 'cash_out', 'tips', 'net', 'hours', 'notes', 'buy_in_events', 'play_type'];
+  const header = ['id', 'currency', 'started_at', 'ended_at', 'venue', 'city', 'game', 'small_blind', 'big_blind', 'seats', 'buy_ins', 'cash_out', 'tips', 'net', 'hours', 'notes', 'buy_in_events', 'play_type', 'paused_hours', 'pause_events'];
   // Quote every field; prevent user-controlled text from becoming spreadsheet formulas.
   const cell = (v, untrusted = false) => {
     let s = String(v ?? '');
@@ -134,7 +137,7 @@ export function csv(sessions) {
     cell(s.id, true), cell(s.cur, true), cell(new Date(s.startedAt).toISOString()), cell(new Date(s.endedAt).toISOString()),
     cell(s.venue, true), cell(s.city, true), cell(s.game, true), cell(s.sb), cell(s.bb), cell(s.seats),
     cell(buyIn(s)), cell(s.cashOut), cell(s.tips), cell(pnl(s)), cell(hours(s).toFixed(4)),
-    cell(s.notes, true), cell(JSON.stringify(s.buyIns)), cell(playType(s)),
+    cell(s.notes, true), cell(JSON.stringify(s.buyIns)), cell(playType(s)), cell((pausedMs(s) / 3600000).toFixed(4)), cell(JSON.stringify(s.pauses ?? [])),
   ].join(','))].join('\r\n') + '\r\n';
 }
 

@@ -46,6 +46,16 @@ During a running session, choose **+ Re-buy → Custom amount**, enter an amount
 
 Closing the sheet or returning to presets discards unconfirmed input. The confirmation stays below the keypad and outside its scroll area, above the device's bottom safe area. No system keyboard opens; physical digit/backspace keys also work. A confirmed re-buy uses the existing buy-in event format, including its timestamp, so it contributes to invested totals, cash-out net, session details, backups and completed-session CSV exports.
 
+## Pause and resume
+
+Tap **Pause session** below the live clock when taking a break, and **Resume session** when play resumes. The live screen and Home banner clearly mark a paused session. Opening its Home banner only opens the session; it never resumes play automatically. The control stays in the clock panel, separate from Cash out and Discard.
+
+Every duration uses the same playing-time calculation: start to end (or now), minus all pauses. This includes the clock, cash-out preview, log, details, hourly and big-blind stats, estimated hands, Longest, CSV and import summaries. Session details show the excluded paused time. Re-buys remain available while paused. Booking while paused records the actual booking time as the session end and closes the open break there; none of that final break becomes playing time.
+
+Pause intervals persist in the existing `ledger:data:v1` storage and version-1 backups. Records without pause data are treated as never paused. CSV retains its existing columns, with `hours` now meaning playing hours, and appends `paused_hours` and `pause_events` (exact millisecond timestamps).
+
+Analytics7 import behavior is unchanged: `pauseDuration` is still ignored. Its units and representation have not been verified from a nonempty export or a schema, so imported durations continue to use start/end times. Import summaries use the shared calculation, ready for pause data once that format is verified.
+
 ## Big-blind averages
 
 Stats shows **Avg bb / 100 hands** (estimated) and **Avg bb / hour**. Each completed session contributes its net divided by its own big blind. The averages are total big blinds won divided by total hours, or by total estimated hands and multiplied by 100. They weight sessions by time or hands rather than averaging session rates. All currencies contribute, without exchange conversion.
@@ -114,7 +124,7 @@ These steps require a real iPhone; desktop browser automation cannot verify the 
 
 1. Open [xbenben](https://qdddddd.github.io/xbenben/) in Safari. Use **Share → Add to Home Screen**, verify the blue chip preview, keep the name **xbenben**, and open its icon. Check the status/home safe areas and keyboard layout.
 2. Import your own XML through **Settings → Import from analytics7 → Choose .xml file**. In Files, select iCloud Drive or the folder where AirDrop saved the export. The import screen also offers a fictional sample export for testing.
-3. Start a session, open **+ Re-buy → Custom amount**, and check the session currency and bb preview. Verify zero cannot be confirmed and closing leaves the amount unrecorded. Enter and confirm a custom amount; check that Log re-buy stays reachable above the home indicator. Close and reopen the installed app, then check the clock, re-buy time and invested amount.
+3. Start a session, open **+ Re-buy → Custom amount**, and check the session currency and bb preview. Verify zero cannot be confirmed and closing leaves the amount unrecorded. Enter and confirm a custom amount; check that Log re-buy stays reachable above the home indicator. Pause the session, check the stopped clock and Home banner, then close and reopen the installed app. Check the pause state, re-buy time and invested amount; resume and verify that the break does not count as playing time.
 4. Make a complete backup. In the share sheet choose **Save to Files → iCloud Drive**, then verify the saved JSON file in Files. If file sharing is unavailable, download it and move/save it using Files.
 5. With a verified backup available, erase the test ledger, choose **Restore backup**, select that file from iCloud Drive, inspect the preview, and confirm replacement. Check settings, both currencies, custom choices and the original live-session clock.
 6. After an online launch, enable airplane mode. Reopen xbenben, check the log and fonts, start or resume a session, add a re-buy and cash out. Reconnect before expecting a new file to sync to iCloud.
@@ -125,6 +135,7 @@ These steps require a real iPhone; desktop browser automation cannot verify the 
 - `src/LedgerView.jsx`: native React translation of the reference markup.
 - `src/Ledger.jsx`: navigation, actions and derived screen values.
 - `src/domain.js`: money, fixed rates, XML import, duplicate detection and CSV.
+- `src/session-time.js`: shared playing/paused time, explicit transitions and interval validation.
 - `src/storage.js` / `src/backup.js`: versioned local persistence and complete backup files.
 - `src/Overlays.jsx`: pickers, safe confirmations and backup/restore dialogs.
 - `src/industry.css` / `design-measures.css`: Industry tokens and exact dimensions from the prototype; fonts are bundled locally.

@@ -1,4 +1,5 @@
 import { persistedKeys, validateSaved } from './storage.js';
+import { isPaused } from './session-time.js';
 
 const digest = async text => Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text))), b => b.toString(16).padStart(2, '0')).join('');
 
@@ -24,5 +25,5 @@ export function backupSummary(ledger) {
   const currencies = {};
   ledger.sessions.forEach(s => { currencies[s.cur] = (currencies[s.cur] || 0) + 1; });
   return { sessions: ledger.sessions.length, currencies: Object.entries(currencies).map(([code, count]) => `${count} ${code}`).join(' · ') || 'No completed sessions',
-    live: ledger.active ? `${ledger.active.venue} · ${ledger.active.cur}` : 'No running session', venues: ledger.venues.length, stakes: ledger.stakes.length };
+    live: ledger.active ? `${ledger.active.venue} · ${ledger.active.cur}${isPaused(ledger.active) ? ' · Paused' : ''}` : 'No running session', venues: ledger.venues.length, stakes: ledger.stakes.length };
 }

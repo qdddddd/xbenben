@@ -1,4 +1,5 @@
 import { DEFAULT_SETTINGS, ACCENTS, setupFrom, latestSession, playType, validHandsPerHour } from './domain.js';
+import { validPauses } from './session-time.js';
 
 export const STORAGE_KEY = 'ledger:data:v1';
 export const persistedKeys = ['sessions', 'settings', 'active', 'draft', 'out', 'venues', 'stakes', 'lastBackupAt', 'lastSetup'];
@@ -11,7 +12,7 @@ export function validSession(s, live = false) {
   return s && text(s.id) && text(s.cur) && text(s.venue) && text(s.city) && text(s.game) && text(s.notes) &&
     Number.isFinite(s.startedAt) && (live ? s.endedAt === null : Number.isFinite(s.endedAt) && s.endedAt >= s.startedAt) &&
     [s.sb, s.bb, s.cashOut, s.tips].every(amount) && Number.isInteger(s.seats) && s.seats > 0 && s.seats <= 100 &&
-    Array.isArray(s.buyIns) && s.buyIns.length > 0 && s.buyIns.every(b => amount(b.amount) && Number.isFinite(b.at)) && validPlayType(s.playType);
+    Array.isArray(s.buyIns) && s.buyIns.length > 0 && s.buyIns.every(b => amount(b.amount) && Number.isFinite(b.at)) && validPlayType(s.playType) && validPauses(s);
 }
 export function validateSaved(data) {
   const s = data?.settings, d = data?.draft;

@@ -165,11 +165,20 @@ export default class Ledger extends React.Component {
     this.say('Re-buy ' + this.moneyIn(amount, cur) + ' logged');
   }
 
+  setPaused(paused) {
+    this.setState(st => {
+      if (!st.active) return null;
+      const now = Date.now();
+      const active = (paused ? domain.pauseSession : domain.resumeSession)(st.active, now);
+      return active === st.active ? null : { active, now };
+    });
+  }
+
   book() {
     let done;
     this.setState(st => {
       if (!st.active) return null;
-      done = { ...st.active, endedAt: Date.now(), cashOut: Number(st.out.cash) || 0, tips: Number(st.out.tips) || 0 };
+      done = { ...domain.finishSession(st.active), cashOut: Number(st.out.cash) || 0, tips: Number(st.out.tips) || 0 };
       return { sessions: [done, ...st.sessions], active: null, out: { cash: '', tips: '' },
         flow: null, tab: 'home' };
     }, () => { if (done) this.say('Session booked · ' + this.moneyIn(this.pnl(done), done.cur, true)); });
@@ -213,7 +222,7 @@ export default class Ledger extends React.Component {
       const source = converted && s.cur !== S.currency ? s.cur + ' → ' + S.currency : s.cur;
       return {
         id: s.id, stakes: this.stakeLabel(s), venue: s.venue,
-        meta: this.when(s.startedAt) + ' · ' + this.shortDur((s.endedAt || Date.now()) - s.startedAt) + ' · ' + s.seats + '-max · ' + source,
+        meta: this.when(s.startedAt) + ' · ' + this.shortDur(domain.playingMs(s, st.now)) + ' · ' + s.seats + '-max · ' + source,
         pnl: value === null ? '—' : this.moneyIn(value, cur, true), color: value === null ? 'var(--color-neutral-700)' : this.col(value),
         rate: value === null ? '—' : this.moneyIn(this.hours(s) > 0 ? value / this.hours(s) : 0, cur, true),
         onClick: () => this.openDetail(s.id),
@@ -247,7 +256,7 @@ export default class Ledger extends React.Component {
     const supers = best ? [
       { label: 'Best session', value: best.venue + ' · ' + this.when(best.startedAt), figure: this.money(reporting(best), true), color: this.col(reporting(best)) },
       { label: 'Worst session', value: worst.venue + ' · ' + this.when(worst.startedAt), figure: this.money(reporting(worst), true), color: this.col(reporting(worst)) },
-      { label: 'Longest', value: longest.venue + ' · ' + longest.cur + ' ' + this.stakeLabel(longest), figure: this.shortDur(longest.endedAt - longest.startedAt), color: 'var(--color-text)' },
+      { label: 'Longest', value: longest.venue + ' · ' + longest.cur + ' ' + this.stakeLabel(longest), figure: this.shortDur(domain.playingMs(longest)), color: 'var(--color-text)' },
       { label: 'Top venue', value: topVenue, figure: this.money(venues[topVenue], true), color: this.col(venues[topVenue]) },
     ] : [];
 
@@ -267,32 +276,35 @@ export default class Ledger extends React.Component {
         rate: nativeMoney(h > 0 ? p / h : 0, true), bbRate: domain.formatBB(domain.bigBlindStats([ds], S).perHour),
         lines,
         tiles: [
-          { label: 'Duration', value: this.shortDur(ds.endedAt - ds.startedAt) },
+          { label: 'Duration', value: this.shortDur(domain.playingMs(ds)) },
           { label: 'Invested', value: nativeMoney(this.buyIn(ds)) },
           { label: 'Bullets', value: ds.buyIns.length },
           { label: 'City', value: ds.city },
         ],
+        pauseTime: ds.pauses?.length ? this.clock(domain.pausedMs(ds)) : null,
         hasNotes: !!ds.notes, notes: ds.notes,
       };
     }
 
     // active
     const A = st.active;
+    const paused = domain.isPaused(A);
     let a = null;
     if (A) {
       const inv = this.buyIn(A);
       a = {
         venue: A.venue, cur: A.cur, game: A.game, stakes: this.stakeLabel(A), seats: A.seats, startedAt: this.hm(A.startedAt), playType: domain.playLabel(A),
         invested: this.moneyIn(inv, A.cur), bbs: A.bb > 0 ? Math.round(inv / A.bb) : '—',
+        pauseNote: paused ? 'Paused since ' + this.hm(A.pauses.at(-1).startedAt) : A.pauses?.length ? this.clock(domain.pausedMs(A, st.now)) + ' paused · excluded' : '',
         buyIns: A.buyIns.map((b, i) => ({ label: i === 0 ? 'Buy-in' : 'Re-buy ' + i, at: this.hm(b.at), amount: this.moneyIn(b.amount, A.cur) })),
       };
     }
     const liveMoney = (n, sign) => this.moneyIn(n, A ? A.cur : S.currency, sign);
     const liveSymbol = this.symOf(A ? A.cur : S.currency);
-    const elapsed = A ? st.now - A.startedAt : 0;
+    const elapsed = A ? domain.playingMs(A, st.now) : 0;
     const cashN = Number(st.out.cash) || 0, tipsN = Number(st.out.tips) || 0;
     const outNet = A ? cashN - this.buyIn(A) - tipsN : 0;
-    const outH = A ? Math.max(elapsed / 3600000, 0.01) : 1;
+    const outH = A ? domain.hours(A, st.now) : 0;
 
     const pk = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '00', '0', 'del'];
     const padKeys = pk.map((k) => ({ label: k === 'del' ? '\u232b' : k, onClick: () => this.pad(k) }));
@@ -373,7 +385,7 @@ export default class Ledger extends React.Component {
       const dupe = dupeFlags[i], skipped = dupe && imp && imp.skip;
       return {
         stakes: sc.sb + '/' + sc.bb, venue: r.venue,
-        meta: new Date(r.startedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ' \u00b7 ' + this.shortDur(r.endedAt - r.startedAt) + ' \u00b7 ' + sc.buyIns.length + (sc.buyIns.length > 1 ? ' bullets' : ' bullet'),
+        meta: new Date(r.startedAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ' \u00b7 ' + this.shortDur(domain.playingMs(r)) + ' \u00b7 ' + sc.buyIns.length + (sc.buyIns.length > 1 ? ' bullets' : ' bullet'),
         net: this.moneyIn(p, impCurCode, true), color: this.col(p),
         tag: skipped ? 'Skip' : dupe ? 'Dupe' : 'New',
         tagColor: dupe ? 'var(--color-neutral-700)' : 'var(--color-accent-700)',
@@ -416,6 +428,7 @@ export default class Ledger extends React.Component {
       avgText: this.money(sessions.length ? net / sessions.length : 0, true), avgColor: this.col(net),
       sparkLine: spark.line, sparkArea: spark.area, sparkZero: spark.zero,
       hasActive: !!A, noActive: !A, timerText: this.clock(elapsed),
+      paused, onPause: () => this.setPaused(true), onResume: () => this.setPaused(false),
       recent: sorted.slice(0, 4).map(s => row(s, true)),
       goNew: () => this.openNew(),
       goActive: () => this.setState({ flow: 'active', detailId: null }),

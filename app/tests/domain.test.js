@@ -52,8 +52,8 @@ test('CSV contains exact session currency, numeric results, quoted multiline tex
   assert.ok(file.includes('"One, two\n""three"""'));
   assert.ok(file.includes('"1750"'));
   assert.ok(file.includes('"play_type"'));
-  assert.ok(file.endsWith(',"live"\r\n'));
-  assert.ok(csv([{ ...row, playType: 'online' }]).endsWith(',"online"\r\n'));
+  assert.ok(file.endsWith(',"live","0.0000","[]"\r\n'));
+  assert.ok(csv([{ ...row, playType: 'online' }]).endsWith(',"online","0.0000","[]"\r\n'));
 });
 test('one versioned save round-trips completed sessions, settings and live buy-ins', () => {
   const storage = new Map();
