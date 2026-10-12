@@ -10,10 +10,11 @@ import { squareArtwork } from '../scripts/icon-art.mjs';
 const pixel = (image, x, y) => [...image.data.subarray((y * image.width + x) * 4, (y * image.width + x) * 4 + 4)];
 const rgba = ground => [...ground.match(/[a-f0-9]{2}/gi).map(hex => parseInt(hex, 16)), 255];
 
-test('all nine explicit choices round-trip local storage and version-one backups; missing or unknown choices default to Deep steel', async () => {
+test('all ten explicit choices round-trip local storage and version-one backups; missing or unknown choices default to Deep steel', async () => {
   const storage = new Map(); storage.setItem = storage.set.bind(storage); storage.getItem = storage.get.bind(storage);
   assert.equal(freshLedger().settings.appIcon, 'deep');
-  assert.deepEqual(APP_ICONS.map(icon => icon.variant), ['4B', '4C', '4D', '4E', '4F', '4G', '4H', '4I', '4J']);
+  assert.deepEqual(APP_ICONS.map(icon => icon.variant), ['4A', '4B', '4C', '4D', '4E', '4F', '4G', '4H', '4I', '4J']);
+  assert.equal(APP_ICONS[0].label, 'Green');
   for (const { id } of APP_ICONS) {
     const state = freshLedger(); state.settings.appIcon = id; state.settings.appIconExplicit = true;
     saveLedger(state, storage);
@@ -57,20 +58,22 @@ test('implicit Paper migrates without changing the ledger, while known choices a
 test('cleanup retains the supplied bills pixel-for-pixel and rejects artwork reaching its crop boundary', async () => {
   for (const icon of APP_ICONS) {
     const source = PNG.sync.read(await fs.readFile(new URL('../../' + icon.source, import.meta.url)));
-    const clean = squareArtwork(source, icon.ground), field = rgba(icon.ground);
+    const clean = squareArtwork(source, icon.ground, icon.textureTolerance), field = rgba(icon.ground), scale = source.width / 1024;
+    assert.equal(source.width, icon.id === 'green' ? 512 : 1024);
+    assert.equal(clean.width, source.width);
     assert.notDeepEqual(pixel(source, 0, 0), field, 'The source really has off-colour corners.');
     assert.deepEqual(pixel(clean, 0, 0), field);
     // The bill glyph bounds were measured independently in the supplied artwork.
     let ink = 0;
-    for (let y = 120; y < 920; y++) for (let x = 110; x < 920; x++) {
+    for (let y = 120 * scale; y < 920 * scale; y++) for (let x = 110 * scale; x < 920 * scale; x++) {
       const offset = (y * source.width + x) * 4;
       assert.equal(clean.data.readUInt32BE(offset), source.data.readUInt32BE(offset));
       if (pixel(source, x, y).some((v, i) => v !== field[i])) ink++;
     }
-    assert.ok(ink > 240000, 'Cleanup must retain the bills, not produce a blank tile.');
+    assert.ok(ink > 240000 * scale * scale, 'Cleanup must retain the bills, not produce a blank tile.');
     const damaged = PNG.sync.read(PNG.sync.write(source));
-    damaged.data[(500 * 1024 + 80) * 4] ^= 1;
-    assert.throws(() => squareArtwork(damaged, icon.ground), /cleanup boundary/);
+    damaged.data[(500 * scale * source.width + 80 * scale) * 4] = 255;
+    assert.throws(() => squareArtwork(damaged, icon.ground, icon.textureTolerance), /cleanup boundary/);
   }
 });
 
@@ -83,6 +86,7 @@ test('every shipped icon is opaque, with clean edges, corners and iOS mask margi
     const icon = APP_ICONS.find(icon => file.startsWith(`bankroll-${icon.id}-`));
     const image = PNG.sync.read(await fs.readFile(new URL('../public/icons/' + file, import.meta.url)));
     const size = image.width, field = rgba(icon.ground), packed = Buffer.from(field).readUInt32BE(0);
+    if (icon.id === 'green') assert.ok(size <= 180, 'The supplied 512px Green artwork is only used for favicons and the Apple/preview icon.');
     assert.equal(image.height, size);
     assert.equal(size, Number(file.match(/-(\d+)\.png$/)[1]));
     let ink = 0;

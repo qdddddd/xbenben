@@ -48,7 +48,7 @@ for (const width of [402, 320]) test(`Muted pink stays readable in Mono, Signal 
   await choose(page, /^Accent colour/, 'Muted pink');
   await expect(page.locator('html')).toHaveAttribute('data-accent', 'mutedpink');
   expect(await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--color-accent').trim())).toBe('#a8667a');
-  await page.getByRole('button', { name: /^App icon/ }).click(); await button(page, '4J Muted pink').click();
+  await page.getByRole('button', { name: /^App icon/ }).click(); await button(page, 'Muted pink').click();
   await readableAccent(page); await button(page, 'Close').click();
   for (const mode of ['Mono', 'Signal']) {
     await button(page, 'Settings').click();

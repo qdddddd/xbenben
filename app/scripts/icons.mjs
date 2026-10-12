@@ -9,9 +9,10 @@ try {
   const page = await browser.newPage();
   for (const icon of APP_ICONS) {
     const source = PNG.sync.read(await fs.readFile(new URL('../../' + icon.source, import.meta.url)));
-    const clean = PNG.sync.write(squareArtwork(source, icon.ground)).toString('base64');
+    const clean = PNG.sync.write(squareArtwork(source, icon.ground, icon.textureTolerance)).toString('base64');
     const sizes = icon.id === DEFAULT_APP_ICON ? [16, 32, 180, 192, 512, 'maskable-1024'] : [16, 32, 180];
     for (const size of sizes) {
+      if ((typeof size === 'string' ? 1024 : size) > source.width) throw new Error(`${icon.label}: cannot upscale the supplied artwork.`);
       const data = await page.evaluate(async ({ clean, ground, size }) => {
         const maskable = typeof size === 'string', pixels = maskable ? 1024 : size;
         const image = new Image(); image.src = 'data:image/png;base64,' + clean; await image.decode();

@@ -1,5 +1,6 @@
 // Turn 4 artwork. Add a variant only once its original PNG and ground are available.
 export const APP_ICONS = Object.freeze([
+  { id: 'green', variant: '4A', label: 'Green', ground: '#226655', textureTolerance: 17, source: 'icon-bankroll-512.png' },
   { id: 'deep', variant: '4B', label: 'Deep steel', ground: '#1d2d3d', source: 'icon-bankroll-deep-1024.png' },
   { id: 'paper', variant: '4C', label: 'Paper', ground: '#f2f2f3', source: 'icon-bankroll-paper-1024.png' },
   { id: 'ink', variant: '4D', label: 'Ink', ground: '#1d1f20', source: 'icon-bankroll-ink-1024.png' },

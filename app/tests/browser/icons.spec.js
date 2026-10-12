@@ -27,13 +27,16 @@ for (const width of [402, 320]) test(`icon chooser previews, selected state and 
   await page.addStyleTag({ content: ':root { --safe-top: 44px; --safe-bottom: 34px; }' });
   await openPicker(page);
   const dialog = page.getByRole('dialog', { name: 'App icon', exact: true });
-  await expect(dialog.getByRole('button', { name: '4B Deep steel', exact: true })).toHaveAttribute('aria-pressed', 'true');
+  await expect(dialog.getByRole('button', { name: 'Deep steel', exact: true })).toHaveAttribute('aria-pressed', 'true');
   for (const text of ['Changes this browser’s tab icon now.', 'choose in Safari before adding', 'Existing Home Screen icons stay unchanged.', 'keep separate data', 'Other platforms install Deep steel.']) await expect(dialog).toContainText(text);
-  await expect(dialog.locator('img')).toHaveCount(9);
+  await expect(dialog.locator('img')).toHaveCount(10);
+  await expect(dialog.getByRole('group', { name: 'App icon choices' }).getByRole('button').first()).toHaveAccessibleName('Green');
   await expect.poll(() => dialog.locator('img').evaluateAll(images => images.every(img => img.complete && img.naturalWidth === 180))).toBe(true);
   await page.screenshot({ path: `evidence/icons/picker-${width}.png`, animations: 'disabled' });
   for (const icon of APP_ICONS) {
-    const option = dialog.getByRole('button', { name: `${icon.variant} ${icon.label}`, exact: true });
+    const option = dialog.getByRole('button', { name: icon.label, exact: true });
+    await expect(option).toHaveText(icon.label);
+    await expect(option).toHaveAccessibleName(icon.label);
     await option.evaluate(el => el.scrollIntoView({ block: 'center' }));
     const bounds = await option.boundingBox(), close = await button(page, 'Close').boundingBox();
     expect(bounds.height).toBeGreaterThanOrEqual(44);
@@ -42,6 +45,12 @@ for (const width of [402, 320]) test(`icon chooser previews, selected state and 
     expect(bounds.y + bounds.height).toBeLessThanOrEqual(page.viewportSize().height - 34);
     expect(await option.locator('span').evaluateAll(labels => labels.every(el => el.scrollWidth <= el.clientWidth))).toBe(true);
     await option.click(); await expect(option).toHaveAttribute('aria-pressed', 'true');
+    await expect(dialog.getByRole('button', { pressed: true })).toHaveCount(1);
+    await expect(option).toHaveText(icon.label);
+    expect(await option.locator('.icon-name').evaluate(el => el.scrollWidth <= el.clientWidth)).toBe(true);
+    const selectedBounds = await option.boundingBox();
+    expect(selectedBounds.height).toBe(bounds.height);
+    expect(selectedBounds.y + selectedBounds.height).toBeLessThanOrEqual(page.viewportSize().height - 34);
     await iconsMatch(page, icon.id);
   }
   await page.screenshot({ path: `evidence/icons/picker-bottom-${width}.png`, animations: 'disabled' });
@@ -55,7 +64,7 @@ test('all icons switch immediately, stay independent of accent and manifest, and
   await page.goto('/'); await page.evaluate(() => navigator.serviceWorker.ready); await page.reload();
   await openPicker(page);
   for (const icon of APP_ICONS) {
-    await button(page, `${icon.variant} ${icon.label}`).click();
+    await button(page, icon.label).click();
     await iconsMatch(page, icon.id);
     expect((await saved(page)).settings.appIcon).toBe(icon.id);
     expect((await saved(page)).settings.appIconExplicit).toBe(true);
@@ -81,7 +90,7 @@ test('all icons switch immediately, stay independent of accent and manifest, and
   await iconsMatch(reopened, 'mutedpink'); expect(await saved(reopened)).toEqual(before);
   await openPicker(reopened);
   // Every alternative is precached too, so an offline choice still displays real artwork.
-  await button(reopened, '4E HK$1000').click(); await iconsMatch(reopened, 'hkd');
+  await button(reopened, 'HK$1000').click(); await iconsMatch(reopened, 'hkd');
   expect(await reopened.getByRole('dialog').locator('img').evaluateAll(images => images.every(img => img.complete && img.naturalWidth === 180))).toBe(true);
   expect(await reopened.evaluate(async () => (await fetch(document.querySelector('link[rel="apple-touch-icon"]').href)).ok)).toBe(true);
 });
@@ -94,14 +103,15 @@ test('downloaded backup restores the icon with a paused ledger; older backup res
   await page.goto('/');
   await page.evaluate(({ key, ledger }) => localStorage.setItem(key, JSON.stringify({ version: 1, ...ledger })), { key, ledger });
   await page.reload(); await button(page, '← Back to xbenben').click();
-  await openPicker(page); await button(page, '4E HK$1000').click(); await button(page, 'Close').click();
+  await openPicker(page); await button(page, 'Green').click(); await button(page, 'Close').click();
   await button(page, 'Back up to iCloud / file').click();
   const download = page.waitForEvent('download'); await button(page, 'Download backup').click();
   const content = await fs.readFile(await (await download).path(), 'utf8'), backedUp = JSON.parse(content).ledger;
-  expect(backedUp.settings.appIcon).toBe('hkd'); expect(backedUp.active).toEqual(ledger.active);
-  await page.getByRole('button', { name: /^App icon/ }).click(); await button(page, '4G Forest').click(); await button(page, 'Close').click();
-  await restore(page, content); await iconsMatch(page, 'hkd');
+  expect(backedUp.settings.appIcon).toBe('green'); expect(backedUp.active).toEqual(ledger.active);
+  await page.getByRole('button', { name: /^App icon/ }).click(); await button(page, 'Forest').click(); await button(page, 'Close').click();
+  await restore(page, content); await iconsMatch(page, 'green');
   expect((await saved(page)).active).toEqual(ledger.active);
+  await page.reload(); await iconsMatch(page, 'green');
   await button(page, '← Back to xbenben').click(); await button(page, 'Settings').click();
   delete backedUp.settings.appIcon; delete backedUp.settings.appIconExplicit;
   const legacy = await createBackup(backedUp);
@@ -112,7 +122,7 @@ test('downloaded backup restores the icon with a paused ledger; older backup res
 
 test('Settings update keeps a chosen icon and all running session data', async ({ page }) => {
   await page.goto('/'); await openPicker(page);
-  await button(page, '4F Bronze').click(); await button(page, 'Close').click(); await button(page, 'Home').click();
+  await button(page, 'Green').click(); await button(page, 'Close').click(); await button(page, 'Home').click();
   await button(page, 'Start session').click(); await page.keyboard.type('500'); await button(page, 'Start · clock runs').click();
   await button(page, 'Pause session').click();
   await page.evaluate(() => navigator.serviceWorker.ready); await page.reload();
@@ -125,7 +135,7 @@ test('Settings update keeps a chosen icon and all running session data', async (
     await button(page, '← Back to xbenben').click(); await button(page, 'Settings').click();
     await Promise.all([page.waitForEvent('load'), button(page, 'Update app').click()]);
     await expect(button(page, 'Resume session')).toBeVisible();
-    await iconsMatch(page, 'bronze'); expect(await saved(page)).toEqual(before);
+    await iconsMatch(page, 'green'); expect(await saved(page)).toEqual(before);
   } finally { await fs.writeFile(worker, original); }
 });
 
@@ -136,8 +146,8 @@ test('implicit Paper follows Deep steel, while an explicit Paper selection survi
   await page.goto('/');
   await page.evaluate(({ key, old }) => localStorage.setItem(key, JSON.stringify({ version: 1, ...old })), { key, old });
   await page.reload(); await iconsMatch(page, 'deep');
-  await openPicker(page); await expect(button(page, '4B Deep steel')).toHaveAttribute('aria-pressed', 'true');
-  await button(page, '4C Paper').click(); await iconsMatch(page, 'paper'); await button(page, 'Close').click();
+  await openPicker(page); await expect(button(page, 'Deep steel')).toHaveAttribute('aria-pressed', 'true');
+  await button(page, 'Paper').click(); await iconsMatch(page, 'paper'); await button(page, 'Close').click();
   expect((await saved(page)).settings).toMatchObject({ appIcon: 'paper', appIconExplicit: true });
   const chosen = await createBackup(await saved(page));
   await page.reload(); await iconsMatch(page, 'paper');
