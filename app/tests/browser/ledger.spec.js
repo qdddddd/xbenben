@@ -312,10 +312,10 @@ test('offline production reload, fonts, icons and sample import work after insta
       const pixel = (x, y) => [...ctx.getImageData(Math.floor(x * bitmap.width), Math.floor(y * bitmap.height), 1, 1).data];
       const data = ctx.getImageData(0, 0, bitmap.width, bitmap.height).data;
       const result = { src: new URL(icon.src, location.href).pathname, sizes: icon.sizes, width: bitmap.width, height: bitmap.height,
-        corner: pixel(0, 0), center: pixel(.5, .5), chip: pixel(.81, .5), opaque: true, safe: true };
+        corner: pixel(0, 0), edge: pixel(.5, .04), center: pixel(.5, .5), opaque: true, safe: true };
       for (let i = 0; i < data.length; i += 4) {
         if (data[i + 3] !== 255) result.opaque = false;
-        if (data[i] !== 89 || data[i + 1] !== 128 || data[i + 2] !== 166) {
+        if (data[i] !== 255 || data[i + 1] !== 255 || data[i + 2] !== 255) {
           const x = (i / 4) % bitmap.width, y = Math.floor(i / 4 / bitmap.width);
           if (Math.hypot(x + .5 - bitmap.width / 2, y + .5 - bitmap.height / 2) > bitmap.width * .4) result.safe = false;
         }
@@ -323,11 +323,13 @@ test('offline production reload, fonts, icons and sample import work after insta
       bitmap.close(); return result;
     }));
   });
-  expect(installIcons.map(icon => icon.src)).toEqual(['/icons/apple-touch-icon-chip.png', '/icons/chip-192.png', '/icons/chip-512.png', '/icons/chip-maskable-512.png']);
+  expect(installIcons.map(icon => icon.src)).toEqual(['/icons/apple-touch-icon.png', '/icons/icon-192.png', '/icons/icon-512.png', '/icons/icon-maskable-512.png']);
   for (const icon of installIcons) {
     expect(`${icon.width}x${icon.height}`).toBe(icon.sizes);
-    expect(icon).toMatchObject({ corner: [89, 128, 166, 255], center: [89, 128, 166, 255], chip: [242, 242, 243, 255], opaque: true, safe: true });
+    expect(icon).toMatchObject({ corner: [255, 255, 255, 255], edge: [255, 255, 255, 255], center: [29, 45, 61, 255], opaque: true });
   }
+  // Only the maskable icon must keep the glyph inside the 40% safe circle; the others fill the tile as drawn.
+  expect(installIcons.find(icon => icon.src.endsWith('/icon-maskable-512.png')).safe).toBe(true);
   const favicons = await page.evaluate(async () => Promise.all([...document.querySelectorAll('link[rel="icon"]')].map(async icon => (await fetch(icon.href)).ok)));
   expect(favicons).toEqual([true, true, true]);
 });
@@ -479,14 +481,14 @@ test('design typography and chip favicon stay local, readable and outside app co
     favicon: await (await fetch(document.querySelector('link[rel="icon"][type="image/svg+xml"]').href)).text(),
     externalFonts: performance.getEntriesByType('resource').filter(r => /fonts\.(googleapis|gstatic)\.com/.test(r.name)).length,
   }));
-  expect(metadata.apple).toBe('/icons/apple-touch-icon-chip.png');
+  expect(metadata.apple).toBe('/icons/apple-touch-icon.png');
   expect(metadata.manifest.icons).toEqual([
-    { src: '/icons/chip-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
-    { src: '/icons/chip-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
-    { src: '/icons/chip-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+    { src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+    { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+    { src: '/icons/icon-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
   ]);
-  expect(metadata.favicon).toContain('fill="#5980a6"');
-  expect(metadata.favicon).toContain('stroke-dasharray="11 13.35"');
+  expect(metadata.favicon).toContain('fill="#1d2d3d"');
+  expect(metadata.favicon).toContain('transform="rotate(20 50 50)" fill="none" stroke="#fff" stroke-width="4"');
   expect(metadata.externalFonts).toBe(0);
 });
 

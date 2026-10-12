@@ -42,12 +42,12 @@ try {
     ])).every(Boolean),
   }));
   if (assets.icons.length !== 3 || assets.icons.some(icon => !icon.path.startsWith(base + 'icons/favicon') || !icon.ok) || !assets.fonts) throw new Error('Offline fonts or favicon paths failed under the Pages base.');
-  expect(assets.apple).toBe(base + 'icons/apple-touch-icon-chip.png');
+  expect(assets.apple).toBe(base + 'icons/apple-touch-icon.png');
   expect(assets.install).toEqual([
-    { path: base + 'icons/apple-touch-icon-chip.png', width: 180, height: 180 },
-    { path: base + 'icons/chip-192.png', width: 192, height: 192 },
-    { path: base + 'icons/chip-512.png', width: 512, height: 512 },
-    { path: base + 'icons/chip-maskable-512.png', width: 512, height: 512 },
+    { path: base + 'icons/apple-touch-icon.png', width: 180, height: 180 },
+    { path: base + 'icons/icon-192.png', width: 192, height: 192 },
+    { path: base + 'icons/icon-512.png', width: 512, height: 512 },
+    { path: base + 'icons/icon-maskable-512.png', width: 512, height: 512 },
   ]);
   await page.getByRole('button', { name: 'Settings', exact: true }).click();
   await page.getByRole('button', { name: 'Update app', exact: true }).click();
