@@ -237,6 +237,7 @@ return (<div className="ledger-app" style={{"height": "100%", "display": "flex",
 
 <button type="button" onClick={s.onClick} style={{"width": "100%", "display": "flex", "alignItems": "center", "gap": "var(--size-10)", "textAlign": "left", "background": "transparent", "border": "0", "borderBottom": "var(--size-1) solid var(--color-divider)", "padding": "var(--size-13) var(--size-2)", "cursor": "pointer", "fontFamily": "var(--font-body)", "fontSize": "var(--text-body)", "color": "var(--color-text)"}} className="interaction-3">
 <span style={{"flex": "1"}}>{s.label}</span>
+{s.preview && <img className="settings-icon-preview" src={s.preview} width="32" height="32" alt="" />}
 <span style={{"fontFamily": "var(--font-heading)", "fontSize": "var(--text-control)", "color": "var(--color-accent-700)"}}>{s.value}</span>
 <svg aria-hidden="true" focusable="false" width={"14"} height={"14"} viewBox={"0 0 24 24"} fill={"none"} stroke={"var(--color-neutral-500)"} strokeWidth={"1.5"}><path d={"M9 6l6 6-6 6"}></path></svg>
 </button>

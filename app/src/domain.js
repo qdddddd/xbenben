@@ -1,10 +1,11 @@
+import { DEFAULT_APP_ICON } from './app-icons.js';
 import { playingMs, pausedMs } from './session-time.js';
 export { playingMs, pausedMs, isPaused, pauseSession, resumeSession, finishSession } from './session-time.js';
 
 // Money stays in the currency of its session. Exchange rates match the design.
 export const USD_RATES = Object.freeze({ USD: 1, HKD: 0.128, EUR: 1.08, GBP: 1.27, CAD: 0.74, AUD: 0.66 });
 export const SYMBOLS = Object.freeze({ USD: '$', HKD: 'HK$', EUR: '€', GBP: '£', CAD: 'C$', AUD: 'A$' });
-export const DEFAULT_SETTINGS = Object.freeze({ currency: 'USD', game: 'NLHE', stakes: '2/5', seats: 9, accent: 'steel', pnlColor: 'Mono', showQuickStart: true, liveHandsPerHour: 30, onlineHandsPerHour: 75 });
+export const DEFAULT_SETTINGS = Object.freeze({ currency: 'USD', game: 'NLHE', stakes: '2/5', seats: 9, accent: 'steel', pnlColor: 'Mono', showQuickStart: true, liveHandsPerHour: 30, onlineHandsPerHour: 75, appIcon: DEFAULT_APP_ICON });
 export const playType = session => session?.playType === 'online' ? 'online' : 'live';
 export const playLabel = session => playType(session) === 'online' ? 'Online' : 'Live';
 export const validHandsPerHour = n => Number.isInteger(n) && n >= 1 && n <= 10000;

@@ -315,7 +315,7 @@ test('offline production reload, fonts, icons and sample import work after insta
         corner: pixel(0, 0), edge: pixel(.5, .04), center: pixel(.5, .5), opaque: true, safe: true };
       for (let i = 0; i < data.length; i += 4) {
         if (data[i + 3] !== 255) result.opaque = false;
-        if (data[i] !== 255 || data[i + 1] !== 255 || data[i + 2] !== 255) {
+        if (data[i] !== 242 || data[i + 1] !== 242 || data[i + 2] !== 243) {
           const x = (i / 4) % bitmap.width, y = Math.floor(i / 4 / bitmap.width);
           if (Math.hypot(x + .5 - bitmap.width / 2, y + .5 - bitmap.height / 2) > bitmap.width * .4) result.safe = false;
         }
@@ -323,15 +323,15 @@ test('offline production reload, fonts, icons and sample import work after insta
       bitmap.close(); return result;
     }));
   });
-  expect(installIcons.map(icon => icon.src)).toEqual(['/icons/apple-touch-icon.png', '/icons/icon-192.png', '/icons/icon-512.png', '/icons/icon-maskable-512.png']);
+  expect(installIcons.map(icon => icon.src)).toEqual(['/icons/bankroll-paper-180.png', '/icons/bankroll-paper-192.png', '/icons/bankroll-paper-512.png', '/icons/bankroll-paper-maskable-1024.png']);
   for (const icon of installIcons) {
     expect(`${icon.width}x${icon.height}`).toBe(icon.sizes);
-    expect(icon).toMatchObject({ corner: [255, 255, 255, 255], edge: [255, 255, 255, 255], center: [29, 45, 61, 255], opaque: true });
+    expect(icon).toMatchObject({ corner: [242, 242, 243, 255], edge: [242, 242, 243, 255], opaque: true });
   }
   // Only the maskable icon must keep the glyph inside the 40% safe circle; the others fill the tile as drawn.
-  expect(installIcons.find(icon => icon.src.endsWith('/icon-maskable-512.png')).safe).toBe(true);
+  expect(installIcons.find(icon => icon.src.endsWith('/bankroll-paper-maskable-1024.png')).safe).toBe(true);
   const favicons = await page.evaluate(async () => Promise.all([...document.querySelectorAll('link[rel="icon"]')].map(async icon => (await fetch(icon.href)).ok)));
-  expect(favicons).toEqual([true, true, true]);
+  expect(favicons).toEqual([true, true]);
 });
 
 test('storage recovery preserves unreadable data and offers a real recovery download', async ({ page }) => {
@@ -445,7 +445,7 @@ test('full stakes stay inside padded badges without shrinking on narrow session 
   expect((await saved(page)).sessions).toEqual(data.sessions);
 });
 
-test('design typography and chip favicon stay local, readable and outside app content', async ({ page }) => {
+test('design typography stays readable and icon artwork is limited to Settings', async ({ page }) => {
   await page.evaluate(() => document.fonts.ready);
   const heading = screen(page, 'home').getByText('xbenben', { exact: true });
   await expect(heading).toHaveCSS('font-family', '"Barlow Condensed", system-ui, sans-serif');
@@ -470,25 +470,24 @@ test('design typography and chip favicon stay local, readable and outside app co
       })), { message: `Full amounts fit their cards on ${tab} at ${width}px` }).toEqual([]);
     }
   }
-  const before = await page.locator('link[rel="icon"][type="image/svg+xml"]').getAttribute('href');
-  expect(before).toBe('/icons/favicon.svg');
+  const before = await page.locator('link[rel="icon"][sizes="32x32"]').getAttribute('href');
+  expect(before).toBe('/icons/bankroll-paper-32.png');
   await settings(page); await choose(page, /^Accent colour/, 'Forest');
-  expect(await page.locator('link[rel="icon"][type="image/svg+xml"]').getAttribute('href')).toBe(before);
+  expect(await page.locator('link[rel="icon"][sizes="32x32"]').getAttribute('href')).toBe(before);
+  await expect(page.locator('#root img')).toHaveCount(1);
+  await page.getByRole('button', { name: 'Home', exact: true }).click();
   await expect(page.locator('#root img, #root image, #root object, #root iframe')).toHaveCount(0);
   const metadata = await page.evaluate(async () => ({
     apple: document.querySelector('link[rel="apple-touch-icon"]').getAttribute('href'),
     manifest: await (await fetch(document.querySelector('link[rel="manifest"]').href)).json(),
-    favicon: await (await fetch(document.querySelector('link[rel="icon"][type="image/svg+xml"]').href)).text(),
     externalFonts: performance.getEntriesByType('resource').filter(r => /fonts\.(googleapis|gstatic)\.com/.test(r.name)).length,
   }));
-  expect(metadata.apple).toBe('/icons/apple-touch-icon.png');
+  expect(metadata.apple).toBe('/icons/bankroll-paper-180.png');
   expect(metadata.manifest.icons).toEqual([
-    { src: '/icons/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
-    { src: '/icons/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
-    { src: '/icons/icon-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+    { src: '/icons/bankroll-paper-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+    { src: '/icons/bankroll-paper-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+    { src: '/icons/bankroll-paper-maskable-1024.png', sizes: '1024x1024', type: 'image/png', purpose: 'maskable' },
   ]);
-  expect(metadata.favicon).toContain('fill="#1d2d3d"');
-  expect(metadata.favicon).toContain('transform="rotate(20 50 50)" fill="none" stroke="#fff" stroke-width="4"');
   expect(metadata.externalFonts).toBe(0);
 });
 
@@ -509,7 +508,7 @@ test('single-session peak and lifetime colour remain correct when this month is 
   await settings(page); await choose(page, /^Profit & loss colours/, 'Signal Green / red');
   await page.getByRole('button', { name: 'Stats', exact: true }).click();
   await expect(page.getByTestId('bankroll')).toHaveText('+$500');
-  await expect(page.getByTestId('bankroll')).toHaveCSS('color', 'rgb(28, 122, 79)');
+  await expect(page.getByTestId('bankroll')).toHaveCSS('color', 'rgb(38, 110, 86)');
   await home(page);
   await expect(page.getByText('−$500 this month', { exact: true })).toHaveCSS('color', 'rgb(168, 50, 63)');
 });

@@ -2,6 +2,7 @@ import { useEffect, useId, useRef, useState } from 'react';
 import { backupSummary } from './backup.js';
 import { validHandsPerHour } from './domain.js';
 import Rebuy from './Rebuy.jsx';
+import IconPicker from './IconPicker.jsx';
 
 function Modal({ title, onClose, children, sheet = false, className = '' }) {
   const ref = useRef(null), titleId = useId();
@@ -39,7 +40,8 @@ export function Sheet({ v }) {
       {v.sheetAdd && <button type="button" className="sheet-option add-option" onClick={v.addPickerItem}>+ Add {v.sheetTitle.toLowerCase().includes('stake') ? 'stakes' : 'venue'}</button>}
     </div>;
   return <Modal title={v.sheetTitle} sheet onClose={v.closeSheet} className={v.rebuySession ? 'rebuy-sheet' : ''}>
-    {v.rebuySession ? <Rebuy key={v.rebuySession.id} session={v.rebuySession} onConfirm={v.onRebuy}>{options}</Rebuy> : options}
+    {v.iconPickerOpen ? <IconPicker selected={v.selectedIcon} onSelect={v.onSelectIcon} /> :
+      v.rebuySession ? <Rebuy key={v.rebuySession.id} session={v.rebuySession} onConfirm={v.onRebuy}>{options}</Rebuy> : options}
   </Modal>;
 }
 

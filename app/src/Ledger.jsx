@@ -6,6 +6,7 @@ import { loadLedger, saveLedger, STORAGE_KEY, persistedKeys, freshLedger, normal
 import { createBackup, parseBackup } from './backup.js';
 import { AppUpdates } from './AppUpdates.jsx';
 import { editAmount, MAX_MANUAL_AMOUNT } from './amount-entry.js';
+import { appIcon, applyAppIcon, iconPath } from './app-icons.js';
 
 export default class Ledger extends React.Component {
   constructor(props) {
@@ -40,11 +41,13 @@ export default class Ledger extends React.Component {
     window.addEventListener('storage', this.storageChanged);
     window.addEventListener('keydown', this.keydown);
     this.applyAccent();
+    this.applyIcon();
     this.requestStorage();
   }
 
   componentDidUpdate(prevProps, prev) {
     if (prev.settings.accent !== this.state.settings.accent) this.applyAccent();
+    if (prev.settings.appIcon !== this.state.settings.appIcon) this.applyIcon();
     if (this.externalChange) { this.externalChange = false; return; }
     if (persistedKeys.some(k => prev[k] !== this.state[k]) && !this.state.recoveryRaw) {
       try { saveLedger(this.state); if (this.state.storageError) this.setState({ storageError: null }); }
@@ -61,6 +64,7 @@ export default class Ledger extends React.Component {
   }
 
   applyAccent() { document.documentElement.dataset.accent = this.state.settings.accent; }
+  applyIcon() { applyAppIcon(this.state.settings.appIcon, import.meta.env.BASE_URL); }
 
   symOf(code) { return domain.symbol(code); }
 
@@ -330,6 +334,7 @@ export default class Ledger extends React.Component {
 
     [...new Set([...st.sessions.map(s => s.cur), st.draft.cur, st.active?.cur, S.currency].filter(Boolean))].forEach(code => { if (!curItems.some(x => x.value === code)) curItems.push({ label: code, value: code }); });
     const sheets = {
+      appIcon: { title: 'App icon', items: [] },
       venue: { title: 'Venue', items: sheetItems(venueItems, st.draft.venue, (v) => setDraft({ venue: v, city: (venueItems.filter((x) => x.value === v)[0] || {}).sub })) },
       stakes: { title: 'Stakes', items: sheetItems(stakeItems, this.stakeLabel(st.draft), (v) => setDraft({ sb: Number(v.split('/')[0]), bb: Number(v.split('/')[1]) })) },
       game: { title: 'Game', items: sheetItems(gameItems, st.draft.game, (v) => setDraft({ game: v })) },
@@ -496,6 +501,7 @@ export default class Ledger extends React.Component {
         { label: 'Quick-start presets', value: this.state.settings.showQuickStart === false ? 'Off' : 'On', onClick: () => this.setState({ settings: { ...S, showQuickStart: !S.showQuickStart } }) },
         { label: 'Accent colour', value: S.accent[0].toUpperCase() + S.accent.slice(1), onClick: () => this.setState({ sheet: 'accent' }) },
         { label: 'Profit & loss colours', value: S.pnlColor, onClick: () => this.setState({ sheet: 'pnl' }) },
+        { label: 'App icon', value: appIcon(S.appIcon).label, preview: import.meta.env.BASE_URL + iconPath(S.appIcon, 180), onClick: () => this.setState({ sheet: 'appIcon' }) },
       ],
       backHome: () => this.go('home'),
       hasSessions: sessions.length > 0, noSessions: sessions.length === 0,
@@ -573,6 +579,8 @@ export default class Ledger extends React.Component {
       sheetAdd: ['venue', 'stakes', 'defStakes'].includes(st.sheet),
       addPickerItem: () => this.setState({ modal: st.sheet === 'venue' ? 'venue' : 'stakes', returnSheet: st.sheet, sheet: null }),
       sheetOpen: !!sheet, sheetTitle: sheet ? sheet.title : '', sheetItems: sheet ? sheet.items : [],
+      iconPickerOpen: st.sheet === 'appIcon', selectedIcon: S.appIcon,
+      onSelectIcon: appIcon => this.setState(st => ({ settings: { ...st.settings, appIcon } })),
       rebuySession: st.sheet === 'rebuy' ? A : null, onRebuy: amount => this.rebuy(amount),
       closeSheet: () => this.setState({ sheet: null }), stop: (e) => e.stopPropagation(),
       toastOpen: !!st.toast, toast: st.toast || '',

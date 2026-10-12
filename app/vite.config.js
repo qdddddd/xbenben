@@ -17,9 +17,9 @@ export default defineConfig({
         id: base, start_url: base, scope: base, display: 'standalone',
         background_color: '#f2f2f3', theme_color: '#f2f2f3',
         icons: [
-          { src: base + 'icons/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
-          { src: base + 'icons/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
-          { src: base + 'icons/icon-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+          { src: base + 'icons/bankroll-paper-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+          { src: base + 'icons/bankroll-paper-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+          { src: base + 'icons/bankroll-paper-maskable-1024.png', sizes: '1024x1024', type: 'image/png', purpose: 'maskable' },
         ],
       },
       workbox: { globPatterns: ['**/*.{js,css,html,woff,woff2,png,svg,xml}'], navigateFallback: base + 'index.html' },

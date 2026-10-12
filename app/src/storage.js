@@ -1,5 +1,6 @@
 import { DEFAULT_SETTINGS, ACCENTS, setupFrom, latestSession, playType, validHandsPerHour } from './domain.js';
 import { validPauses } from './session-time.js';
+import { appIcon } from './app-icons.js';
 
 export const STORAGE_KEY = 'ledger:data:v1';
 export const persistedKeys = ['sessions', 'settings', 'active', 'draft', 'out', 'venues', 'stakes', 'lastBackupAt', 'lastSetup'];
@@ -35,7 +36,7 @@ export function normalizeSaved(data) {
   const last = data.active?.bb > 0 ? data.active : latestSession(data.sessions);
   const lastSetup = data.lastSetup === undefined ? (last ? setupFrom(last) : null) : data.lastSetup;
   return { ...Object.fromEntries(persistedKeys.map(k => [k, data[k]])),
-    settings: { ...DEFAULT_SETTINGS, ...data.settings },
+    settings: { ...DEFAULT_SETTINGS, ...data.settings, appIcon: appIcon(data.settings.appIcon).id },
     draft: { ...data.draft, cur: data.draft.cur || data.active?.cur || data.settings.currency, playType: playType(data.draft) },
     lastSetup: lastSetup ? { ...lastSetup, playType: playType(lastSetup) } : null,
     lastBackupAt: data.lastBackupAt ?? null };

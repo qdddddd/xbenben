@@ -746,7 +746,7 @@ class Component extends DCLogic {
     return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   }
   hm(ts) { return new Date(ts).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' }).replace(/\s/, ''); }
-  pos() { return this.props.pnlColor === 'Signal' ? '#1c7a4f' : 'var(--color-accent-700)'; }
+  pos() { return this.props.pnlColor === 'Signal' ? '#266e56' : 'var(--color-accent-700)'; }
   neg() { return this.props.pnlColor === 'Signal' ? '#a8323f' : 'var(--color-neutral-900)'; }
   col(n) { return n < 0 ? this.neg() : this.pos(); }
   stakeLabel(s) { return s.sb + '/' + s.bb; }
