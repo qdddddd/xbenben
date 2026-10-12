@@ -315,7 +315,7 @@ test('offline production reload, fonts, icons and sample import work after insta
         corner: pixel(0, 0), edge: pixel(.5, .04), center: pixel(.5, .5), opaque: true, safe: true };
       for (let i = 0; i < data.length; i += 4) {
         if (data[i + 3] !== 255) result.opaque = false;
-        if (data[i] !== 242 || data[i + 1] !== 242 || data[i + 2] !== 243) {
+        if (data[i] !== 29 || data[i + 1] !== 45 || data[i + 2] !== 61) {
           const x = (i / 4) % bitmap.width, y = Math.floor(i / 4 / bitmap.width);
           if (Math.hypot(x + .5 - bitmap.width / 2, y + .5 - bitmap.height / 2) > bitmap.width * .4) result.safe = false;
         }
@@ -323,13 +323,13 @@ test('offline production reload, fonts, icons and sample import work after insta
       bitmap.close(); return result;
     }));
   });
-  expect(installIcons.map(icon => icon.src)).toEqual(['/icons/bankroll-paper-180.png', '/icons/bankroll-paper-192.png', '/icons/bankroll-paper-512.png', '/icons/bankroll-paper-maskable-1024.png']);
+  expect(installIcons.map(icon => icon.src)).toEqual(['/icons/bankroll-deep-180.png', '/icons/bankroll-deep-192.png', '/icons/bankroll-deep-512.png', '/icons/bankroll-deep-maskable-1024.png']);
   for (const icon of installIcons) {
     expect(`${icon.width}x${icon.height}`).toBe(icon.sizes);
-    expect(icon).toMatchObject({ corner: [242, 242, 243, 255], edge: [242, 242, 243, 255], opaque: true });
+    expect(icon).toMatchObject({ corner: [29, 45, 61, 255], edge: [29, 45, 61, 255], opaque: true });
   }
   // Only the maskable icon must keep the glyph inside the 40% safe circle; the others fill the tile as drawn.
-  expect(installIcons.find(icon => icon.src.endsWith('/bankroll-paper-maskable-1024.png')).safe).toBe(true);
+  expect(installIcons.find(icon => icon.src.endsWith('/bankroll-deep-maskable-1024.png')).safe).toBe(true);
   const favicons = await page.evaluate(async () => Promise.all([...document.querySelectorAll('link[rel="icon"]')].map(async icon => (await fetch(icon.href)).ok)));
   expect(favicons).toEqual([true, true]);
 });
@@ -471,7 +471,7 @@ test('design typography stays readable and icon artwork is limited to Settings',
     }
   }
   const before = await page.locator('link[rel="icon"][sizes="32x32"]').getAttribute('href');
-  expect(before).toBe('/icons/bankroll-paper-32.png');
+  expect(before).toBe('/icons/bankroll-deep-32.png');
   await settings(page); await choose(page, /^Accent colour/, 'Forest');
   expect(await page.locator('link[rel="icon"][sizes="32x32"]').getAttribute('href')).toBe(before);
   await expect(page.locator('#root img')).toHaveCount(1);
@@ -482,11 +482,11 @@ test('design typography stays readable and icon artwork is limited to Settings',
     manifest: await (await fetch(document.querySelector('link[rel="manifest"]').href)).json(),
     externalFonts: performance.getEntriesByType('resource').filter(r => /fonts\.(googleapis|gstatic)\.com/.test(r.name)).length,
   }));
-  expect(metadata.apple).toBe('/icons/bankroll-paper-180.png');
+  expect(metadata.apple).toBe('/icons/bankroll-deep-180.png');
   expect(metadata.manifest.icons).toEqual([
-    { src: '/icons/bankroll-paper-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
-    { src: '/icons/bankroll-paper-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
-    { src: '/icons/bankroll-paper-maskable-1024.png', sizes: '1024x1024', type: 'image/png', purpose: 'maskable' },
+    { src: '/icons/bankroll-deep-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+    { src: '/icons/bankroll-deep-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+    { src: '/icons/bankroll-deep-maskable-1024.png', sizes: '1024x1024', type: 'image/png', purpose: 'maskable' },
   ]);
   expect(metadata.externalFonts).toBe(0);
 });

@@ -41,13 +41,13 @@ try {
       document.fonts.load('400 14px "Barlow"').then(faces => faces.length > 0 && faces.every(face => face.status === 'loaded')),
     ])).every(Boolean),
   }));
-  if (assets.icons.length !== 2 || assets.icons.some(icon => !icon.path.startsWith(base + 'icons/bankroll-paper-') || !icon.ok) || !assets.fonts) throw new Error('Offline fonts or favicon paths failed under the Pages base.');
-  expect(assets.apple).toBe(base + 'icons/bankroll-paper-180.png');
+  if (assets.icons.length !== 2 || assets.icons.some(icon => !icon.path.startsWith(base + 'icons/bankroll-deep-') || !icon.ok) || !assets.fonts) throw new Error('Offline fonts or favicon paths failed under the Pages base.');
+  expect(assets.apple).toBe(base + 'icons/bankroll-deep-180.png');
   expect(assets.install).toEqual([
-    { path: base + 'icons/bankroll-paper-180.png', width: 180, height: 180 },
-    { path: base + 'icons/bankroll-paper-192.png', width: 192, height: 192 },
-    { path: base + 'icons/bankroll-paper-512.png', width: 512, height: 512 },
-    { path: base + 'icons/bankroll-paper-maskable-1024.png', width: 1024, height: 1024 },
+    { path: base + 'icons/bankroll-deep-180.png', width: 180, height: 180 },
+    { path: base + 'icons/bankroll-deep-192.png', width: 192, height: 192 },
+    { path: base + 'icons/bankroll-deep-512.png', width: 512, height: 512 },
+    { path: base + 'icons/bankroll-deep-maskable-1024.png', width: 1024, height: 1024 },
   ]);
   await page.getByRole('button', { name: 'Settings', exact: true }).click();
   await page.getByRole('button', { name: 'Update app', exact: true }).click();

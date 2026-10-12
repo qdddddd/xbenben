@@ -5,11 +5,12 @@ export { playingMs, pausedMs, isPaused, pauseSession, resumeSession, finishSessi
 // Money stays in the currency of its session. Exchange rates match the design.
 export const USD_RATES = Object.freeze({ USD: 1, HKD: 0.128, EUR: 1.08, GBP: 1.27, CAD: 0.74, AUD: 0.66 });
 export const SYMBOLS = Object.freeze({ USD: '$', HKD: 'HK$', EUR: '€', GBP: '£', CAD: 'C$', AUD: 'A$' });
-export const DEFAULT_SETTINGS = Object.freeze({ currency: 'USD', game: 'NLHE', stakes: '2/5', seats: 9, accent: 'steel', pnlColor: 'Mono', showQuickStart: true, liveHandsPerHour: 30, onlineHandsPerHour: 75, appIcon: DEFAULT_APP_ICON });
+export const DEFAULT_SETTINGS = Object.freeze({ currency: 'USD', game: 'NLHE', stakes: '2/5', seats: 9, accent: 'steel', pnlColor: 'Mono', showQuickStart: true, liveHandsPerHour: 30, onlineHandsPerHour: 75, appIcon: DEFAULT_APP_ICON, appIconExplicit: false });
 export const playType = session => session?.playType === 'online' ? 'online' : 'live';
 export const playLabel = session => playType(session) === 'online' ? 'Online' : 'Live';
 export const validHandsPerHour = n => Number.isInteger(n) && n >= 1 && n <= 10000;
-export const ACCENTS = ['steel', 'bronze', 'forest', 'violet'];
+export const ACCENTS = ['steel', 'bronze', 'forest', 'violet', 'mutedpink'];
+export const accentLabel = accent => accent === 'mutedpink' ? 'Muted pink' : accent[0].toUpperCase() + accent.slice(1);
 export const DEFAULT_VENUES = [
   { name: 'Macau table', city: 'Macau' }, { name: 'Home game', city: '' },
   ...['Bellagio', 'Aria', 'Wynn', 'Encore', 'Resorts World'].map(name => ({ name, city: 'Las Vegas' })),

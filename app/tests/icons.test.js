@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs/promises';
 import { PNG } from 'pngjs';
-import { APP_ICONS, appIcon, iconPath } from '../src/app-icons.js';
+import { APP_ICONS, appIcon, iconPath, iconPreference } from '../src/app-icons.js';
 import { freshLedger, loadLedger, saveLedger, normalizeSaved } from '../src/storage.js';
 import { createBackup, parseBackup } from '../src/backup.js';
 import { squareArtwork } from '../scripts/icon-art.mjs';
@@ -10,12 +10,12 @@ import { squareArtwork } from '../scripts/icon-art.mjs';
 const pixel = (image, x, y) => [...image.data.subarray((y * image.width + x) * 4, (y * image.width + x) * 4 + 4)];
 const rgba = ground => [...ground.match(/[a-f0-9]{2}/gi).map(hex => parseInt(hex, 16)), 255];
 
-test('all seven choices round-trip local storage and version-one backups; old or unknown choices default to Paper', async () => {
+test('all nine explicit choices round-trip local storage and version-one backups; missing or unknown choices default to Deep steel', async () => {
   const storage = new Map(); storage.setItem = storage.set.bind(storage); storage.getItem = storage.get.bind(storage);
-  assert.equal(freshLedger().settings.appIcon, 'paper');
-  assert.deepEqual(APP_ICONS.map(icon => icon.variant), ['4B', '4C', '4D', '4E', '4F', '4G', '4H']);
+  assert.equal(freshLedger().settings.appIcon, 'deep');
+  assert.deepEqual(APP_ICONS.map(icon => icon.variant), ['4B', '4C', '4D', '4E', '4F', '4G', '4H', '4I', '4J']);
   for (const { id } of APP_ICONS) {
-    const state = freshLedger(); state.settings.appIcon = id;
+    const state = freshLedger(); state.settings.appIcon = id; state.settings.appIconExplicit = true;
     saveLedger(state, storage);
     assert.deepEqual(loadLedger(storage).data, state);
     const backup = await createBackup(state);
@@ -25,10 +25,32 @@ test('all seven choices round-trip local storage and version-one backups; old or
   for (const choice of [undefined, 'future-icon', null, '../outside', {}]) {
     const state = freshLedger(); state.settings.appIcon = choice;
     saveLedger(state, storage);
-    assert.equal(loadLedger(storage).data.settings.appIcon, 'paper');
+    assert.equal(loadLedger(storage).data.settings.appIcon, 'deep');
     const backup = await createBackup(state);
-    assert.equal(normalizeSaved((await parseBackup(backup.text)).ledger).settings.appIcon, 'paper');
-    assert.equal(appIcon(choice).id, 'paper');
+    assert.equal(normalizeSaved((await parseBackup(backup.text)).ledger).settings.appIcon, 'deep');
+    assert.equal(appIcon(choice).id, 'deep');
+  }
+});
+
+test('implicit Paper migrates without changing the ledger, while known choices and explicit Paper persist', async () => {
+  const storage = new Map(); storage.setItem = storage.set.bind(storage); storage.getItem = storage.get.bind(storage);
+  for (const [choice, marker, expected, explicit] of [
+    [undefined, undefined, 'deep', false], ['paper', undefined, 'deep', false],
+    ['paper', false, 'deep', false], ['paper', true, 'paper', true],
+    ['hkd', undefined, 'hkd', true], ['deep', undefined, 'deep', true],
+    ['deep', false, 'deep', false], ['mutedpink', true, 'mutedpink', true],
+  ]) {
+    const old = freshLedger(); old.settings.appIcon = choice; old.settings.appIconExplicit = marker;
+    saveLedger(old, storage);
+    const loaded = loadLedger(storage).data;
+    assert.deepEqual(loaded.settings, { ...old.settings, appIcon: expected, appIconExplicit: explicit });
+    const { settings, ...records } = loaded;
+    const { settings: oldSettings, ...oldRecords } = old;
+    assert.deepEqual(records, oldRecords);
+    assert.deepEqual(iconPreference(settings), iconPreference(iconPreference(settings)), 'Migration is idempotent.');
+    const backup = await createBackup(old);
+    assert.deepEqual(normalizeSaved((await parseBackup(backup.text)).ledger).settings, settings);
+    saveLedger(loaded, storage); assert.deepEqual(loadLedger(storage).data, loaded);
   }
 });
 
@@ -54,7 +76,7 @@ test('cleanup retains the supplied bills pixel-for-pixel and rejects artwork rea
 
 test('every shipped icon is opaque, with clean edges, corners and iOS mask margins; maskable art stays in the safe circle', async () => {
   const files = (await fs.readdir(new URL('../public/icons/', import.meta.url))).sort();
-  const expected = APP_ICONS.flatMap(icon => (icon.id === 'paper' ? [16, 32, 180, 192, 512, 'maskable-1024'] : [16, 32, 180])
+  const expected = APP_ICONS.flatMap(icon => (icon.id === 'deep' ? [16, 32, 180, 192, 512, 'maskable-1024'] : [16, 32, 180])
     .map(size => iconPath(icon.id, size).slice('icons/'.length))).sort();
   assert.deepEqual(files, expected, 'No old 3A or unclean source icons ship.');
   for (const file of files) {

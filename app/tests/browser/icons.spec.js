@@ -27,9 +27,9 @@ for (const width of [402, 320]) test(`icon chooser previews, selected state and 
   await page.addStyleTag({ content: ':root { --safe-top: 44px; --safe-bottom: 34px; }' });
   await openPicker(page);
   const dialog = page.getByRole('dialog', { name: 'App icon', exact: true });
-  await expect(dialog.getByRole('button', { name: '4C Paper', exact: true })).toHaveAttribute('aria-pressed', 'true');
-  for (const text of ['Changes this browser’s tab icon now.', 'choose in Safari before adding', 'Existing Home Screen icons stay unchanged.', 'keep separate data', 'Other platforms install Paper.']) await expect(dialog).toContainText(text);
-  await expect(dialog.locator('img')).toHaveCount(7);
+  await expect(dialog.getByRole('button', { name: '4B Deep steel', exact: true })).toHaveAttribute('aria-pressed', 'true');
+  for (const text of ['Changes this browser’s tab icon now.', 'choose in Safari before adding', 'Existing Home Screen icons stay unchanged.', 'keep separate data', 'Other platforms install Deep steel.']) await expect(dialog).toContainText(text);
+  await expect(dialog.locator('img')).toHaveCount(9);
   await expect.poll(() => dialog.locator('img').evaluateAll(images => images.every(img => img.complete && img.naturalWidth === 180))).toBe(true);
   await page.screenshot({ path: `evidence/icons/picker-${width}.png`, animations: 'disabled' });
   for (const icon of APP_ICONS) {
@@ -46,7 +46,7 @@ for (const width of [402, 320]) test(`icon chooser previews, selected state and 
   }
   await page.screenshot({ path: `evidence/icons/picker-bottom-${width}.png`, animations: 'disabled' });
   await button(page, 'Close').click();
-  await expect(page.getByRole('button', { name: /^App icon/ })).toContainText('Violet');
+  await expect(page.getByRole('button', { name: /^App icon/ })).toContainText('Muted pink');
   await page.screenshot({ path: `evidence/icons/settings-${width}.png`, animations: 'disabled' });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });
@@ -58,6 +58,7 @@ test('all icons switch immediately, stay independent of accent and manifest, and
     await button(page, `${icon.variant} ${icon.label}`).click();
     await iconsMatch(page, icon.id);
     expect((await saved(page)).settings.appIcon).toBe(icon.id);
+    expect((await saved(page)).settings.appIconExplicit).toBe(true);
     const images = await page.evaluate(async () => Promise.all([...document.querySelectorAll('link[rel="icon"], link[rel="apple-touch-icon"]')].map(async link => {
       const bitmap = await createImageBitmap(await (await fetch(link.href)).blob());
       const canvas = document.createElement('canvas'); canvas.width = canvas.height = bitmap.width;
@@ -70,14 +71,14 @@ test('all icons switch immediately, stay independent of accent and manifest, and
   }
   await button(page, 'Close').click();
   await page.getByRole('button', { name: /^Accent colour/ }).click(); await button(page, 'Forest').click();
-  await iconsMatch(page, 'violet');
+  await iconsMatch(page, 'mutedpink');
   const manifest = await page.evaluate(async () => (await (await fetch(document.querySelector('link[rel="manifest"]').href)).json()));
-  expect(manifest.icons.every(icon => icon.src.startsWith('/icons/bankroll-paper-'))).toBe(true);
+  expect(manifest.icons.every(icon => icon.src.startsWith('/icons/bankroll-deep-'))).toBe(true);
   const before = await saved(page);
-  await page.reload(); await iconsMatch(page, 'violet'); expect(await saved(page)).toEqual(before);
+  await page.reload(); await iconsMatch(page, 'mutedpink'); expect(await saved(page)).toEqual(before);
   await page.close(); await context.setOffline(true);
   const reopened = await context.newPage(); await reopened.goto('/');
-  await iconsMatch(reopened, 'violet'); expect(await saved(reopened)).toEqual(before);
+  await iconsMatch(reopened, 'mutedpink'); expect(await saved(reopened)).toEqual(before);
   await openPicker(reopened);
   // Every alternative is precached too, so an offline choice still displays real artwork.
   await button(reopened, '4E HK$1000').click(); await iconsMatch(reopened, 'hkd');
@@ -85,7 +86,7 @@ test('all icons switch immediately, stay independent of accent and manifest, and
   expect(await reopened.evaluate(async () => (await fetch(document.querySelector('link[rel="apple-touch-icon"]').href)).ok)).toBe(true);
 });
 
-test('downloaded backup restores the icon with a paused ledger; older backup resets a previous choice to Paper', async ({ page }) => {
+test('downloaded backup restores the icon with a paused ledger; older backup resets a previous choice to Deep steel', async ({ page }) => {
   const ledger = freshLedger(), start = Date.now() - 3600000;
   ledger.active = { id: 'paused', venue: 'Home game', city: '', cur: 'HKD', game: 'NLHE', seats: 9, sb: 100, bb: 200,
     startedAt: start, endedAt: null, buyIns: [{ at: start, amount: 12000 }, { at: start + 1200000, amount: 13750 }], cashOut: 0, tips: 0, notes: '',
@@ -102,11 +103,11 @@ test('downloaded backup restores the icon with a paused ledger; older backup res
   await restore(page, content); await iconsMatch(page, 'hkd');
   expect((await saved(page)).active).toEqual(ledger.active);
   await button(page, '← Back to xbenben').click(); await button(page, 'Settings').click();
-  delete backedUp.settings.appIcon;
+  delete backedUp.settings.appIcon; delete backedUp.settings.appIconExplicit;
   const legacy = await createBackup(backedUp);
-  await restore(page, legacy.text); await iconsMatch(page, 'paper');
-  expect((await saved(page)).settings.appIcon).toBe('paper'); expect((await saved(page)).active).toEqual(ledger.active);
-  await page.reload(); await iconsMatch(page, 'paper'); await expect(button(page, 'Resume session')).toBeVisible();
+  await restore(page, legacy.text); await iconsMatch(page, 'deep');
+  expect((await saved(page)).settings.appIcon).toBe('deep'); expect((await saved(page)).active).toEqual(ledger.active);
+  await page.reload(); await iconsMatch(page, 'deep'); await expect(button(page, 'Resume session')).toBeVisible();
 });
 
 test('Settings update keeps a chosen icon and all running session data', async ({ page }) => {
@@ -126,4 +127,22 @@ test('Settings update keeps a chosen icon and all running session data', async (
     await expect(button(page, 'Resume session')).toBeVisible();
     await iconsMatch(page, 'bronze'); expect(await saved(page)).toEqual(before);
   } finally { await fs.writeFile(worker, original); }
+});
+
+
+test('implicit Paper follows Deep steel, while an explicit Paper selection survives reload and backup restore', async ({ page }) => {
+  const old = freshLedger(); old.settings.appIcon = 'paper'; delete old.settings.appIconExplicit;
+  const legacy = await createBackup(old);
+  await page.goto('/');
+  await page.evaluate(({ key, old }) => localStorage.setItem(key, JSON.stringify({ version: 1, ...old })), { key, old });
+  await page.reload(); await iconsMatch(page, 'deep');
+  await openPicker(page); await expect(button(page, '4B Deep steel')).toHaveAttribute('aria-pressed', 'true');
+  await button(page, '4C Paper').click(); await iconsMatch(page, 'paper'); await button(page, 'Close').click();
+  expect((await saved(page)).settings).toMatchObject({ appIcon: 'paper', appIconExplicit: true });
+  const chosen = await createBackup(await saved(page));
+  await page.reload(); await iconsMatch(page, 'paper');
+  await button(page, 'Settings').click(); await restore(page, legacy.text); await iconsMatch(page, 'deep');
+  expect((await saved(page)).settings).toMatchObject({ appIcon: 'deep', appIconExplicit: false });
+  await button(page, 'Settings').click(); await restore(page, chosen.text); await iconsMatch(page, 'paper');
+  await page.reload(); await iconsMatch(page, 'paper');
 });

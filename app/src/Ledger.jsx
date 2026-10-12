@@ -350,8 +350,8 @@ export default class Ledger extends React.Component {
       defStakes: { title: 'Default stakes', items: sheetItems(stakeItems, S.stakes, (v) => this.updateDefault('stakes', v)) },
       defSeats: { title: 'Default table', items: sheetItems(seatItems, S.seats, (v) => this.updateDefault('seats', v)) },
     };
-    sheets.accent = { title: 'Accent colour', items: sheetItems(domain.ACCENTS.map(v => ({ label: v[0].toUpperCase() + v.slice(1), value: v })), S.accent, v => this.setState({ settings: { ...S, accent: v }, sheet: null })) };
-    sheets.pnl = { title: 'Profit & loss colours', items: sheetItems(['Mono', 'Signal'].map(v => ({ label: v, value: v, sub: v === 'Mono' ? 'Steel / ink' : 'Green / red' })), S.pnlColor, v => this.setState({ settings: { ...S, pnlColor: v }, sheet: null })) };
+    sheets.accent = { title: 'Accent colour', items: sheetItems(domain.ACCENTS.map(v => ({ label: domain.accentLabel(v), value: v })), S.accent, v => this.setState({ settings: { ...S, accent: v }, sheet: null })) };
+    sheets.pnl = { title: 'Profit & loss colours', items: sheetItems(['Mono', 'Signal'].map(v => ({ label: v, value: v, sub: v === 'Mono' ? 'Accent / ink' : 'Green / red' })), S.pnlColor, v => this.setState({ settings: { ...S, pnlColor: v }, sheet: null })) };
     const sheet = st.sheet ? sheets[st.sheet] : null;
 
     const last = this.recentSetup();
@@ -440,7 +440,7 @@ export default class Ledger extends React.Component {
       goLog: () => this.go('log'), goBack: () => this.setState({ detailId: null }),
 
       filters: ['All', 'Wins', 'Losses'].map((f) => ({
-        label: f, bg: st.filter === f ? 'var(--color-accent)' : 'transparent',
+        label: f, bg: st.filter === f ? 'var(--color-accent-fill)' : 'transparent',
         fg: st.filter === f ? 'var(--color-bg)' : 'var(--color-text)',
         onClick: () => this.setState({ filter: f }),
       })),
@@ -499,7 +499,7 @@ export default class Ledger extends React.Component {
         { label: 'Default stakes', value: S.stakes, onClick: () => this.setState({ sheet: 'defStakes' }) },
         { label: 'Default table', value: S.seats + '-max', onClick: () => this.setState({ sheet: 'defSeats' }) },
         { label: 'Quick-start presets', value: this.state.settings.showQuickStart === false ? 'Off' : 'On', onClick: () => this.setState({ settings: { ...S, showQuickStart: !S.showQuickStart } }) },
-        { label: 'Accent colour', value: S.accent[0].toUpperCase() + S.accent.slice(1), onClick: () => this.setState({ sheet: 'accent' }) },
+        { label: 'Accent colour', value: domain.accentLabel(S.accent), onClick: () => this.setState({ sheet: 'accent' }) },
         { label: 'Profit & loss colours', value: S.pnlColor, onClick: () => this.setState({ sheet: 'pnl' }) },
         { label: 'App icon', value: appIcon(S.appIcon).label, preview: import.meta.env.BASE_URL + iconPath(S.appIcon, 180), onClick: () => this.setState({ sheet: 'appIcon' }) },
       ],
@@ -568,7 +568,7 @@ export default class Ledger extends React.Component {
       impAdd, cashFocused: st.padTarget === 'cash',
       impDupeLine: impDupes + ' of ' + impRows.length + ' already in your log',
       skipLabel: imp && imp.skip ? 'Skipping' : 'Importing',
-      skipBg: imp && imp.skip ? 'var(--color-accent)' : 'transparent',
+      skipBg: imp && imp.skip ? 'var(--color-accent-fill)' : 'transparent',
       skipFg: imp && imp.skip ? 'var(--color-bg)' : 'var(--color-accent-700)',
       impRows: impList,
       impNet: this.moneyIn(impNet, impCurCode, true), impNetColor: this.col(impNet),
@@ -580,7 +580,7 @@ export default class Ledger extends React.Component {
       addPickerItem: () => this.setState({ modal: st.sheet === 'venue' ? 'venue' : 'stakes', returnSheet: st.sheet, sheet: null }),
       sheetOpen: !!sheet, sheetTitle: sheet ? sheet.title : '', sheetItems: sheet ? sheet.items : [],
       iconPickerOpen: st.sheet === 'appIcon', selectedIcon: S.appIcon,
-      onSelectIcon: appIcon => this.setState(st => ({ settings: { ...st.settings, appIcon } })),
+      onSelectIcon: appIcon => this.setState(st => ({ settings: { ...st.settings, appIcon, appIconExplicit: true } })),
       rebuySession: st.sheet === 'rebuy' ? A : null, onRebuy: amount => this.rebuy(amount),
       closeSheet: () => this.setState({ sheet: null }), stop: (e) => e.stopPropagation(),
       toastOpen: !!st.toast, toast: st.toast || '',
